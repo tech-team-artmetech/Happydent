@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const RegistrationScreen = () => {
-    const navigate = useNavigate();
+const RegistrationScreen = ({ onComplete, onTerms }) => {
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -41,7 +39,13 @@ const RegistrationScreen = () => {
 
     const handleGetStarted = () => {
         if (isFormValid()) {
-            navigate('/end');
+            onComplete(formData); // Only go to end screen
+        }
+    };
+
+    const handleTermsClick = () => {
+        if (onTerms) {
+            onTerms(); // Go to terms screen
         }
     };
 
@@ -141,12 +145,12 @@ const RegistrationScreen = () => {
                     <p className="text-white/80 text-sm italic mb-2">
                         Powered by advanced AR Technology
                     </p>
-                    <a
-                        href="/terms"
-                        className="text-white/60 text-xs underline hover:text-white/80 transition-colors"
+                    <button
+                        onClick={handleTermsClick}
+                        className="text-white/60 text-xs underline hover:text-white/80 transition-colors bg-transparent border-none cursor-pointer"
                     >
                         Terms & Conditions
-                    </a>
+                    </button>
                 </div>
 
             </div>

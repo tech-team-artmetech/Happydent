@@ -1,28 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const SplashScreen = () => {
-    const navigate = useNavigate();
+const SplashScreen = ({ onComplete }) => {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [showButton, setShowButton] = useState(false);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [preloadedImages, setPreloadedImages] = useState({});
 
+    // Preload all images
     useEffect(() => {
-        const interval = setInterval(() => {
-            setLoadingProgress(prev => {
-                if (prev >= 100) {
-                    setShowButton(true);
-                    clearInterval(interval);
-                    return 100;
-                }
-                return prev + 5;
-            });
-        }, 100);
+        const images = {};
+        let loadedCount = 0;
+        const totalImages = 41; // 0 to 40 = 41 images
 
-        return () => clearInterval(interval);
+        for (let i = 0; i <= 40; i++) {
+            const img = new Image();
+            const fileName = `Comp 1_${i.toString().padStart(5, '0')}.png`;
+            const src = `/assets/smile/${fileName}`;
+
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === totalImages) {
+                    setImagesLoaded(true);
+                }
+            };
+
+            img.src = src;
+            images[i] = src;
+        }
+
+        setPreloadedImages(images);
     }, []);
 
+    // Start progress animation after images are loaded
+    useEffect(() => {
+        if (!imagesLoaded) return;
+
+        let step = 0;
+        const totalSteps = 20; // Reduced from 40 to 20 for faster percentage
+
+        const interval = setInterval(() => {
+            if (step >= totalSteps) {
+                setLoadingProgress(100);
+                setShowButton(true);
+                clearInterval(interval);
+                return;
+            }
+
+            const progress = (step / totalSteps) * 100;
+            setLoadingProgress(progress);
+            step++;
+        }, 50);
+
+        return () => clearInterval(interval);
+    }, [imagesLoaded]);
+
+    // Calculate which image to show based on progress
+    const getCurrentImageIndex = () => {
+        return Math.min(Math.floor((loadingProgress / 100) * 40), 40);
+    };
+
     const handleTapToBegin = () => {
-        navigate('/register');
+        if (onComplete) {
+            onComplete();
+        }
     };
 
     return (
@@ -35,16 +75,24 @@ const SplashScreen = () => {
                 className="w-64 h-32 object-contain mb-8"
             />
 
-            {/* Generic Loader */}
-            {!showButton && (
-                <div className="mb-8">
-                    <div className="w-48 h-2 bg-white/30 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-white transition-all duration-300 ease-out"
-                            style={{ width: `${loadingProgress}%` }}
+            {/* Image Sequence Loader */}
+            {!showButton && imagesLoaded && (
+                <div className="mb-8 flex flex-col items-center">
+                    <div className="mb-4">
+                        <img
+                            src={preloadedImages[getCurrentImageIndex()]}
+                            alt="Loading animation"
+                            className="w-42 h-42 object-contain"
                         />
                     </div>
-                    <p className="text-center mt-4">{loadingProgress}%</p>
+                    <p className="text-center text-xl font-bold">{Math.round(loadingProgress)}%</p>
+                </div>
+            )}
+
+            {/* Loading message while preloading images */}
+            {!imagesLoaded && (
+                <div className="mb-8">
+                    <p className="text-center text-lg">Loading...</p>
                 </div>
             )}
 
@@ -52,7 +100,7 @@ const SplashScreen = () => {
             {showButton && (
                 <button
                     onClick={handleTapToBegin}
-                    className="text-white text-xl"
+                    className="text-white text-xl font-bold"
                     style={{
                         width: '208px',
                         height: '38px',
@@ -61,12 +109,7 @@ const SplashScreen = () => {
                         border: '1px solid rgba(255, 255, 255, 0.52)',
                         boxShadow: '2px 2px 4px 0px rgba(0, 0, 0, 0.39)',
                         backdropFilter: 'blur(20px)',
-                        opacity: '100%',
-                        textAlign: 'center',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        display: 'flex',
-                        cursor: 'pointer',
+                        opacity: '100%'
                     }}
                 >
                     TAP TO BEGIN!
