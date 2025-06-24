@@ -2,13 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* @font-face {
+  font-family: "Gotham Pro";
+  src: url("src/assets/fonts/Gotham-Black.otf") format("opentype");
+} */
+
+/*  */
+/* Gotham Rounded Bold */
 @font-face {
-  font-family: 'Gotham Pro';
-  src: url('src/assets/fonts/Gotham-Black.otf') format('opentype');
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham Rounded Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Gotham Black */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
+/* Gotham Book Italic */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-BookItalic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Gotham Light */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Gotham Thin */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-Thin.otf") format("opentype");
+  font-weight: 100;
+  font-style: normal;
+}
+
+/* Gotham Thin Italic */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-ThinItalic.otf") format("opentype");
+  font-weight: 100;
+  font-style: italic;
+}
+
+/* Gotham Ultra Italic */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-UltraItalic.otf") format("opentype");
+  font-weight: 950;
+  font-style: italic;
+}
+
+/* Gotham XLight */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-XLight.otf") format("opentype");
+  font-weight: 200;
+  font-style: normal;
+}
+
+/* Gotham XLight Italic */
+@font-face {
+  font-family: "Gotham";
+  src: url("/src/assets/fonts/Gotham-XLightItalic.otf") format("opentype");
+  font-weight: 200;
+  font-style: italic;
 }
 
 :root {
-  font-family: 'Gotham Pro', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Gotham", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -33,7 +106,7 @@ a:hover {
 }
 
 body {
-  background-image: url('/bg.png');
+  background-image: url("/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -80,3 +153,17 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+.chamking-smile-logo {
+  max-width: 30%;
+}
+@media (max-width: 575.98px) {
+  .chamking-smile-logo {
+    max-width: 209px;
+  }
+}
+/* button.ctaBtn {
+  font-family: "Gotham", sans-serif;
+  font-style: italic;
+  font-weight: 500;
+  text-transform: uppercase;
+} */
