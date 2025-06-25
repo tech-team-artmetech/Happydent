@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const RegistrationScreen = ({ onComplete, onTerms }) => {
   const [formData, setFormData] = useState({
@@ -7,12 +7,43 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     groupSize: "",
   });
 
+  const [otpData, setOtpData] = useState({
+    otp: "",
+    isOtpSent: false,
+    isOtpVerified: false,
+    timeLeft: 0,
+    canResend: false
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [phoneTouched, setPhoneTouched] = useState(false);
+  const [otpTouched, setOtpTouched] = useState(false);
 
   // API endpoint - change this to your backend URL
   const API_BASE_URL = 'http://localhost:3001';
+
+  // Timer for OTP expiry
+  useEffect(() => {
+    let timer;
+    if (otpData.timeLeft > 0) {
+      timer = setTimeout(() => {
+        setOtpData(prev => ({
+          ...prev,
+          timeLeft: prev.timeLeft - 1,
+          canResend: prev.timeLeft - 1 <= 0
+        }));
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [otpData.timeLeft]);
+
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Validate Indian phone number (exactly 10 digits)
   const validatePhone = (phone) => {
@@ -20,12 +51,19 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     return phoneRegex.test(phone);
   };
 
+  // Validate OTP (6 digits)
+  const validateOTP = (otp) => {
+    const otpRegex = /^\d{6}$/;
+    return otpRegex.test(otp);
+  };
+
   // Check if all fields are filled and valid
   const isFormValid = () => {
     return (
       formData.name.trim() !== "" &&
       validatePhone(formData.phone) &&
-      formData.groupSize !== ""
+      formData.groupSize !== "" &&
+      otpData.isOtpVerified
     );
   };
 
@@ -38,6 +76,17 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     setError(""); // Clear error when user types
     const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
 
+    // Reset OTP state if phone number changes
+    if (value !== formData.phone) {
+      setOtpData({
+        otp: "",
+        isOtpSent: false,
+        isOtpVerified: false,
+        timeLeft: 0,
+        canResend: false
+      });
+    }
+
     // Only allow first digit to be 6-9
     if (value.length === 0 || /^[6-9]/.test(value)) {
       if (value.length <= 10) {
@@ -46,9 +95,126 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     }
   };
 
+  const handleOtpChange = (e) => {
+    setError("");
+    const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    if (value.length <= 6) {
+      setOtpData((prev) => ({ ...prev, otp: value }));
+    }
+  };
+
   const handleGroupSizeSelect = (size) => {
     setError(""); // Clear error when user selects
     setFormData((prev) => ({ ...prev, groupSize: size }));
+  };
+
+  // Send OTP API call
+  const sendOTP = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone: formData.phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send OTP');
+      }
+
+      setOtpData(prev => ({
+        ...prev,
+        isOtpSent: true,
+        timeLeft: data.data.expiresIn * 60, // Convert minutes to seconds
+        canResend: false
+      }));
+
+      console.log('OTP sent successfully:', data);
+
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      setError(error.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Verify OTP API call
+  const verifyOTP = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const response = await fetch(`${API_BASE_URL}/api/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: formData.phone,
+          otp: otpData.otp
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'OTP verification failed');
+      }
+
+      setOtpData(prev => ({
+        ...prev,
+        isOtpVerified: true,
+        timeLeft: 0
+      }));
+
+      console.log('OTP verified successfully:', data);
+
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+
+      if (error.message.includes('expired')) {
+        setOtpData(prev => ({
+          ...prev,
+          isOtpSent: false,
+          otp: "",
+          timeLeft: 0,
+          canResend: true
+        }));
+      }
+
+      setError(error.message || "OTP verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Send/Resend OTP button click
+  const handleSendOTP = async () => {
+    if (!validatePhone(formData.phone)) {
+      setError("Please enter a valid 10-digit phone number");
+      setPhoneTouched(true);
+      return;
+    }
+
+    await sendOTP();
+  };
+
+  // Handle Verify OTP button click
+  const handleVerifyOTP = async () => {
+    if (!validateOTP(otpData.otp)) {
+      setError("Please enter a valid 6-digit OTP");
+      setOtpTouched(true);
+      return;
+    }
+
+    await verifyOTP();
   };
 
   // API call to register user
@@ -59,7 +225,10 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          ...userData,
+          otpVerified: otpData.isOtpVerified
+        }),
       });
 
       const data = await response.json();
@@ -77,7 +246,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
   const handleGetStarted = async () => {
     if (!isFormValid()) {
-      setError("Please fill all fields correctly");
+      if (!otpData.isOtpVerified) {
+        setError("Please verify your phone number first");
+      } else {
+        setError("Please fill all fields correctly");
+      }
       return;
     }
 
@@ -99,6 +272,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
       console.log('Registration successful:', response);
 
+      // Store phone number in localStorage for photo download later
+      localStorage.setItem('userPhone', formData.phone);
+      localStorage.setItem('userId', response.data.id.toString());
+      localStorage.setItem('userName', formData.name.trim());
+
       // Pass the user data to parent component
       onComplete({
         ...formData,
@@ -115,6 +293,8 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
         setError("This phone number is already registered");
       } else if (error.message.includes('Invalid phone')) {
         setError("Please enter a valid phone number");
+      } else if (error.message.includes('verification required')) {
+        setError("Please verify your phone number first");
       } else if (error.message.includes('network') || error.message.includes('fetch')) {
         setError("Network error. Please check your connection and try again");
       } else {
@@ -157,10 +337,17 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
           </div>
         )}
 
-        {/* Success Message for Existing Users */}
+        {/* Success Message for OTP Verification */}
+        {otpData.isOtpVerified && (
+          <div className="bg-green-500/20 border border-green-500/50 rounded p-3 text-center">
+            <p className="text-green-300 text-sm">✅ Phone number verified successfully!</p>
+          </div>
+        )}
+
+        {/* Loading Message */}
         {isLoading && (
           <div className="bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center">
-            <p className="text-blue-300 text-sm">Connecting to server...</p>
+            <p className="text-blue-300 text-sm">Processing...</p>
           </div>
         )}
 
@@ -176,28 +363,83 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
           />
         </div>
 
-        {/* Phone Input */}
+        {/* Phone Input with OTP Button */}
         <div>
-          <input
-            type="tel"
-            placeholder="Phone No."
-            value={formData.phone}
-            onChange={handlePhoneChange}
-            onBlur={() => setPhoneTouched(true)}
-            disabled={isLoading}
-            className="w-full px-4 py-3 bg-transparent border border-white/50 rounded text-white placeholder-white/70 focus:outline-none focus:border-white disabled:opacity-50 disabled:cursor-not-allowed"
-            maxLength="10"
-            pattern="^[6-9]\d{9}$"
-          />
-          <p
-            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone)
-              ? "visible"
-              : "invisible"
-              }`}
-          >
+          <div className="flex space-x-2">
+            <input
+              type="tel"
+              placeholder="Phone No."
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              onBlur={() => setPhoneTouched(true)}
+              disabled={isLoading || otpData.isOtpVerified}
+              className="flex-1 px-4 py-3 bg-transparent border border-white/50 rounded text-white placeholder-white/70 focus:outline-none focus:border-white disabled:opacity-50 disabled:cursor-not-allowed"
+              maxLength="10"
+              pattern="^[6-9]\d{9}$"
+            />
+
+            {!otpData.isOtpVerified && (
+              <button
+                onClick={handleSendOTP}
+                disabled={!validatePhone(formData.phone) || isLoading || (otpData.isOtpSent && !otpData.canResend)}
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) && !isLoading && (!otpData.isOtpSent || otpData.canResend)
+                  ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
+                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                  }`}
+              >
+                {otpData.isOtpSent && !otpData.canResend ? "Sent" : otpData.isOtpSent ? "Resend" : "Send OTP"}
+              </button>
+            )}
+          </div>
+
+          <p className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone) ? "visible" : "invisible"
+            }`}>
             Enter valid 10 digit mobile number
           </p>
         </div>
+
+        {/* OTP Input (shown only when OTP is sent) */}
+        {otpData.isOtpSent && !otpData.isOtpVerified && (
+          <div>
+            <div className="flex space-x-2">
+              <input
+                type="tel"
+                placeholder="Enter 6-digit OTP"
+                value={otpData.otp}
+                onChange={handleOtpChange}
+                onBlur={() => setOtpTouched(true)}
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 bg-transparent border border-white/50 rounded text-white placeholder-white/70 focus:outline-none focus:border-white disabled:opacity-50 disabled:cursor-not-allowed"
+                maxLength="6"
+                pattern="^\d{6}$"
+              />
+
+              <button
+                onClick={handleVerifyOTP}
+                disabled={!validateOTP(otpData.otp) || isLoading}
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
+                  ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                  }`}
+              >
+                Verify
+              </button>
+            </div>
+
+            {/* OTP Timer */}
+            {otpData.timeLeft > 0 && (
+              <p className="text-blue-300 text-xs mt-1">
+                OTP expires in: {formatTime(otpData.timeLeft)}
+              </p>
+            )}
+
+            {/* OTP Validation Error */}
+            <p className={`text-red-300 text-xs mt-1 transition-all duration-200 ${otpTouched && !validateOTP(otpData.otp) ? "visible" : "invisible"
+              }`}>
+              Enter valid 6-digit OTP
+            </p>
+          </div>
+        )}
 
         {/* Group Size Selection */}
         <div className="text-center">
