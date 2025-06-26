@@ -7,13 +7,13 @@ const EndScreen = ({ onRetry }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE_URL = 'http://localhost:3001';
+  const API_BASE_URL = "https://artmetech.co.in";
 
   useEffect(() => {
     // Get user info from localStorage
-    const phone = localStorage.getItem('userPhone');
-    const userId = localStorage.getItem('userId');
-    const userName = localStorage.getItem('userName');
+    const phone = localStorage.getItem("userPhone");
+    const userId = localStorage.getItem("userId");
+    const userName = localStorage.getItem("userName");
 
     if (phone && userId && userName) {
       setUserInfo({ phone, userId, userName });
@@ -25,7 +25,7 @@ const EndScreen = ({ onRetry }) => {
   const fetchUserPhoto = async (phone) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/user/${phone}/photo`);
+      const response = await fetch(`/api/user/${phone}/photo`);
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -35,7 +35,7 @@ const EndScreen = ({ onRetry }) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching photo:', error);
+      console.error("Error fetching photo:", error);
     } finally {
       setIsLoading(false);
     }
@@ -59,13 +59,13 @@ const EndScreen = ({ onRetry }) => {
     try {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
-      const response = await fetch(`${API_BASE_URL}/api/download-photo/${userInfo.phone}`, {
-        method: 'GET',
+      const response = await fetch(`/api/download-photo/${userInfo.phone}`, {
+        method: "GET",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Download failed');
+        throw new Error(errorData.message || "Download failed");
       }
 
       // Get the blob data
@@ -73,11 +73,14 @@ const EndScreen = ({ onRetry }) => {
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
 
       // Set filename
-      const fileName = `${userInfo.userName.replace(/\s+/g, '_')}_happydent_photo.jpg`;
+      const fileName = `${userInfo.userName.replace(
+        /\s+/g,
+        "_"
+      )}_happydent_photo.jpg`;
       link.download = fileName;
 
       // Trigger download
@@ -89,9 +92,8 @@ const EndScreen = ({ onRetry }) => {
       window.URL.revokeObjectURL(url);
 
       console.log(`✅ Photo downloaded successfully: ${fileName}`);
-
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
       setError(error.message || "Failed to download photo. Please try again.");
     } finally {
       setIsLoading(false);
@@ -107,9 +109,9 @@ const EndScreen = ({ onRetry }) => {
 
   const handleRetry = () => {
     // Clear localStorage when retrying
-    localStorage.removeItem('userPhone');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userName');
+    localStorage.removeItem("userPhone");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
 
     if (onRetry) {
       onRetry();
