@@ -555,7 +555,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
   const [otpTouched, setOtpTouched] = useState(false);
 
   // ⭐ TESTING MODE - Set to true to bypass OTP
-  const BYPASS_OTP = true; // Change to false for production
+  const BYPASS_OTP = false; // Change to false for production
 
   // API endpoint - change this to your backend URL
   const API_BASE_URL = "https://artmetech.co.in";
