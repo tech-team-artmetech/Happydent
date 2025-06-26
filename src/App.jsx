@@ -47,8 +47,6 @@
 // }
 
 // export default App
-
-
 import React, { useState, useEffect } from 'react'
 import SplashScreen from './components/SplashScreen'
 import RegistrationScreen from './components/RegistrationScreen'
@@ -94,13 +92,17 @@ function App() {
     setCurrentScreen('register');
   };
 
+  const goToCapture = () => {
+    setCurrentScreen('capture');
+  };
+
   // Handle standalone capture page
   if (currentScreen === 'capture') {
     return <CapturePage />;
   }
 
   if (currentScreen === 'splash') {
-    return <SplashScreen onComplete={goToRegister} />;
+    return <SplashScreen onComplete={goToRegister} onCameraTest={goToCapture} />;
   }
 
   if (currentScreen === 'register') {
