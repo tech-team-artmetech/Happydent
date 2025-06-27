@@ -25,7 +25,9 @@ const EndScreen = ({ onRetry }) => {
   const fetchUserPhoto = async (phone) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://artmetech.co.in/api/user/${phone}/photo`);
+      const response = await fetch(
+        `https://artmetech.co.in/api/user/${phone}/photo`
+      );
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -59,9 +61,12 @@ const EndScreen = ({ onRetry }) => {
     try {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
-      const response = await fetch(`https://artmetech.co.in/api/download-photo/${userInfo.phone}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `https://artmetech.co.in/api/download-photo/${userInfo.phone}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -180,8 +185,18 @@ const EndScreen = ({ onRetry }) => {
         <button
           onClick={handlePrint}
           disabled={isLoading}
-          className="text-white text-xl font-bold hover:scale-105 transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={buttonStyle}
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background:
+              "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
+            borderRadius: "4px",
+            border: "1px solid rgba(255, 255, 255, 0.52)",
+            borderStyle: "inside",
+            boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            opacity: "100%",
+          }}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -199,8 +214,18 @@ const EndScreen = ({ onRetry }) => {
         <button
           onClick={handleRetry}
           disabled={isLoading}
-          className="text-white text-xl font-bold hover:scale-105 transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={buttonStyle}
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background:
+              "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
+            borderRadius: "4px",
+            border: "1px solid rgba(255, 255, 255, 0.52)",
+            borderStyle: "inside",
+            boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            opacity: "100%",
+          }}
         >
           RETRY
         </button>

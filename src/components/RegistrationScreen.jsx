@@ -825,7 +825,6 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     setError("");
 
     try {
-
       // 🎭 START AR SESSION - Set AR state to ongoing (false)
       console.log(`🎭 Starting AR session for ${formData.phone}`);
       try {
@@ -836,7 +835,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
           },
           body: JSON.stringify({
             phone: formData.phone,
-            ended: false // false = AR ongoing
+            ended: false, // false = AR ongoing
           }),
         });
         console.log(`✅ AR session started for ${formData.phone}`);
@@ -893,8 +892,6 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
     } finally {
       setIsLoading(false);
     }
-
-
   };
 
   const handleTermsClick = () => {
@@ -994,29 +991,31 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
                   isLoading ||
                   (otpData.isOtpSent && !otpData.canResend && !BYPASS_OTP)
                 }
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) &&
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                  ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-                  }`}
+                    ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
+                    : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                }`}
               >
                 {BYPASS_OTP
                   ? "Verify"
                   : otpData.isOtpSent && !otpData.canResend
-                    ? "Sent"
-                    : otpData.isOtpSent
-                      ? "Resend"
-                      : "Send OTP"}
+                  ? "Sent"
+                  : otpData.isOtpSent
+                  ? "Resend"
+                  : "Send OTP"}
               </button>
             )}
           </div>
 
           <p
-            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone)
-              ? "visible"
-              : "invisible"
-              }`}
+            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+              phoneTouched && !validatePhone(formData.phone)
+                ? "visible"
+                : "invisible"
+            }`}
           >
             Enter valid 10 digit mobile number
           </p>
@@ -1041,10 +1040,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
-                  ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-                  }`}
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validateOTP(otpData.otp) && !isLoading
+                    ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+                    : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                }`}
               >
                 Verify
               </button>
@@ -1059,10 +1059,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
             {/* OTP Validation Error */}
             <p
-              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${otpTouched && !validateOTP(otpData.otp)
-                ? "visible"
-                : "invisible"
-                }`}
+              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+                otpTouched && !validateOTP(otpData.otp)
+                  ? "visible"
+                  : "invisible"
+              }`}
             >
               Enter valid 6-digit OTP
             </p>
@@ -1079,20 +1080,22 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
             <button
               onClick={() => handleGroupSizeSelect("less")}
               disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "less"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
+              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                formData.groupSize === "less"
+                  ? "bg-white text-blue-600 font-medium"
+                  : "bg-transparent text-white"
+              }`}
             >
               Less than 3 people
             </button>
             <button
               onClick={() => handleGroupSizeSelect("more")}
               disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "more"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
+              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                formData.groupSize === "more"
+                  ? "bg-white text-blue-600 font-medium"
+                  : "bg-transparent text-white"
+              }`}
             >
               More than 3 people
             </button>
@@ -1104,10 +1107,20 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
           <button
             onClick={handleGetStarted}
             disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
-              ? "bg-blue-600 text-white border border-white/50 hover:bg-blue-700"
-              : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-              }`}
+            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${
+              isFormValid() && !isLoading ? "" : "cursor-not-allowed"
+            }`}
+            style={{
+              background:
+                "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
+              borderRadius: "4px",
+              border: "1px solid rgba(255, 255, 255, 0.52)",
+              borderStyle: "inside",
+              boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              opacity: "100%",
+            }}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
