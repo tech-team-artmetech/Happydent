@@ -58,6 +58,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     const cameraManagerRef = useRef(null);
     const sessionRef = useRef(null);
     const captureTimeoutRef = useRef(null);
+    const [showCaptureButton, setShowCaptureButton] = useState(false);
+    const buttonTimeoutRef = useRef(null);
 
     useEffect(() => {
         initializeCameraKit();
@@ -145,11 +147,18 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             setIsLoading(false);
 
             // Start automatic capture after 8 seconds of AR being ready
-            console.log('⏰ Starting 8-second countdown for automatic capture...');
-            captureTimeoutRef.current = setTimeout(() => {
-                console.log('🎯 Auto-capture triggered after 8 seconds');
-                captureAndUpload();
-            }, 8000);
+            // console.log('⏰ Starting 8-second countdown for automatic capture...');
+            // captureTimeoutRef.current = setTimeout(() => {
+            //     console.log('🎯 Auto-capture triggered after 8 seconds');
+            //     captureAndUpload();
+            // }, 8000);
+
+            // Show capture button after 10 seconds
+            console.log('⏰ Starting 10-second countdown for capture button...');
+            buttonTimeoutRef.current = setTimeout(() => {
+                console.log('🔲 Showing capture button after 10 seconds');
+                setShowCaptureButton(true);
+            }, 5000);
 
         } catch (err) {
             console.error('Camera Kit initialization error:', err);
@@ -170,6 +179,12 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
                 track.stop();
             });
         }
+
+        // Clear the button timeout
+        if (buttonTimeoutRef.current) {
+            clearTimeout(buttonTimeoutRef.current);
+            buttonTimeoutRef.current = null;
+        }
     };
 
     const skipToEnd = () => {
@@ -181,6 +196,12 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             lensGroupId: lensGroupId,
             testMode: true
         });
+    };
+
+    const handleManualCapture = () => {
+        console.log('🎯 Manual capture button clicked');
+        setShowCaptureButton(false); // Hide button immediately
+        captureAndUpload(); // Use existing capture function
     };
 
     const captureAndUpload = async () => {
@@ -455,6 +476,18 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
                 </div>
 
                 {/* Controls */}
+
+                {/* Manual Capture Button */}
+                {showCaptureButton && !isCapturing && (
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
+                        <button
+                            onClick={handleManualCapture}
+                            className="bg-white/90 hover:bg-white text-black font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+                        >
+                            PROCEED
+                        </button>
+                    </div>
+                )}
 
             </div>
         </>
