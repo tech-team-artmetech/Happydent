@@ -25,7 +25,7 @@ const EndScreen = ({ onRetry }) => {
   const fetchUserPhoto = async (phone) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/user/${phone}/photo`);
+      const response = await fetch(`https://artmetech.co.in/api/user/${phone}/photo`);
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -59,7 +59,7 @@ const EndScreen = ({ onRetry }) => {
     try {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
-      const response = await fetch(`/api/download-photo/${userInfo.phone}`, {
+      const response = await fetch(`https://artmetech.co.in/api/download-photo/${userInfo.phone}`, {
         method: "GET",
       });
 
