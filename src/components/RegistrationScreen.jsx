@@ -677,7 +677,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`http://localhost:3001/api/send-otp`, {
+      const response = await fetch(`/api/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -718,7 +718,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`http://localhost:3001/api/verify-otp`, {
+      const response = await fetch(`/api/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -786,7 +786,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
   // API call to register user
   const registerUser = async (userData) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/register`, {
+      const response = await fetch(`/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -829,7 +829,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
       // 🎭 START AR SESSION - Set AR state to ongoing (false)
       console.log(`🎭 Starting AR session for ${formData.phone}`);
       try {
-        await fetch(`http://localhost:3001/api/ar-end`, {
+        await fetch(`/api/ar-end`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
