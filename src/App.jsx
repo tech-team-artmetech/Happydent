@@ -1,54 +1,55 @@
-import React, { useState } from 'react'
-import SplashScreen from './components/SplashScreen'
-import RegistrationScreen from './components/RegistrationScreen'
-import SnapARExperience from './components/SnapARExperience'
-import EndScreen from './components/EndScreen'
-import Terms from './components/terms'
+import React, { useState } from "react";
+import SplashScreen from "./components/SplashScreen";
+import RegistrationScreen from "./components/RegistrationScreen";
+import SnapARExperience from "./components/SnapARExperience";
+import EndScreen from "./components/EndScreen";
+import Terms from "./components/terms";
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('splash');
+  const [currentScreen, setCurrentScreen] = useState("splash");
   const [userData, setUserData] = useState(null);
 
   // Your Snap AR credentials - REPLACE WITH YOUR ACTUAL VALUES
-  const SNAP_API_TOKEN = 'eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-U1RBR0lOR340MDg2OWI4MC05ZmFhLTRiNDItYmFhZi1kYzUzNTIwMjE1MjAifQ.KdKKmZgB55cHRYL7L8O7O8-XyX2WnRfxbfF2iMZQ1v0';
-  const LENS_GROUP_ID = 'b2aafdd8-cb11-4817-9df9-835b36d9d5a7';
+  const SNAP_API_TOKEN =
+    "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg";
+  const LENS_GROUP_ID = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
 
   const goToRegister = () => {
-    setCurrentScreen('register');
+    setCurrentScreen("register");
   };
 
   const goToSnapAR = (data) => {
     setUserData(data);
-    setCurrentScreen('snapar');
+    setCurrentScreen("snapar");
   };
 
   const goToEnd = (data) => {
     setUserData(data);
-    setCurrentScreen('end');
+    setCurrentScreen("end");
   };
 
   const goToSplash = () => {
-    setCurrentScreen('splash');
+    setCurrentScreen("splash");
     setUserData(null);
   };
 
   const goToTerms = () => {
-    setCurrentScreen('terms');
+    setCurrentScreen("terms");
   };
 
   const goBackToRegister = () => {
-    setCurrentScreen('register');
+    setCurrentScreen("register");
   };
 
-  if (currentScreen === 'splash') {
+  if (currentScreen === "splash") {
     return <SplashScreen onComplete={goToRegister} />;
   }
 
-  if (currentScreen === 'register') {
+  if (currentScreen === "register") {
     return <RegistrationScreen onComplete={goToSnapAR} onTerms={goToTerms} />;
   }
 
-  if (currentScreen === 'snapar') {
+  if (currentScreen === "snapar") {
     return (
       <SnapARExperience
         onComplete={goToEnd}
@@ -59,15 +60,15 @@ function App() {
     );
   }
 
-  if (currentScreen === 'end') {
+  if (currentScreen === "end") {
     return <EndScreen onRetry={goToSplash} userData={userData} />;
   }
 
-  if (currentScreen === 'terms') {
+  if (currentScreen === "terms") {
     return <Terms onBack={goBackToRegister} />;
   }
 
   return <SplashScreen onComplete={goToRegister} />;
 }
 
-export default App
+export default App;
