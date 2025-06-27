@@ -555,7 +555,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
   const [otpTouched, setOtpTouched] = useState(false);
 
   // ⭐ TESTING MODE - Set to true to bypass OTP
-  const BYPASS_OTP = false; // Change to false for production
+  const BYPASS_OTP = true; // Change to false for production
 
   // API endpoint - change this to your backend URL
   const API_BASE_URL = "https://artmetech.co.in";
@@ -596,7 +596,8 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
   // Check if all fields are filled and valid
   const isFormValid = () => {
-    const basicFields = formData.name.trim() !== "" &&
+    const basicFields =
+      formData.name.trim() !== "" &&
       validatePhone(formData.phone) &&
       formData.groupSize !== "";
 
@@ -901,7 +902,9 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
       {BYPASS_OTP && (
         <div className="w-full max-w-sm mb-4">
           <div className="bg-yellow-500/20 border border-yellow-500/50 rounded p-2 text-center">
-            <p className="text-yellow-300 text-xs">🧪 Testing Mode - OTP Bypassed</p>
+            <p className="text-yellow-300 text-xs">
+              🧪 Testing Mode - OTP Bypassed
+            </p>
           </div>
         </div>
       )}
@@ -919,7 +922,10 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
         {otpData.isOtpVerified && (
           <div className="bg-green-500/20 border border-green-500/50 rounded p-3 text-center">
             <p className="text-green-300 text-sm">
-              ✅ {BYPASS_OTP ? 'Phone number verified (bypass mode)' : 'Phone number verified successfully!'}
+              ✅{" "}
+              {BYPASS_OTP
+                ? "Phone number verified (bypass mode)"
+                : "Phone number verified successfully!"}
             </p>
           </div>
         )}
@@ -966,28 +972,31 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
                   isLoading ||
                   (otpData.isOtpSent && !otpData.canResend && !BYPASS_OTP)
                 }
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) &&
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                  ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-                  }`}
+                    ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
+                    : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                }`}
               >
-                {BYPASS_OTP ? "Verify" :
-                  (otpData.isOtpSent && !otpData.canResend
-                    ? "Sent"
-                    : otpData.isOtpSent
-                      ? "Resend"
-                      : "Send OTP")}
+                {BYPASS_OTP
+                  ? "Verify"
+                  : otpData.isOtpSent && !otpData.canResend
+                  ? "Sent"
+                  : otpData.isOtpSent
+                  ? "Resend"
+                  : "Send OTP"}
               </button>
             )}
           </div>
 
           <p
-            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone)
-              ? "visible"
-              : "invisible"
-              }`}
+            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+              phoneTouched && !validatePhone(formData.phone)
+                ? "visible"
+                : "invisible"
+            }`}
           >
             Enter valid 10 digit mobile number
           </p>
@@ -1012,10 +1021,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
-                  ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-                  }`}
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validateOTP(otpData.otp) && !isLoading
+                    ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
+                    : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                }`}
               >
                 Verify
               </button>
@@ -1030,10 +1040,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
             {/* OTP Validation Error */}
             <p
-              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${otpTouched && !validateOTP(otpData.otp)
-                ? "visible"
-                : "invisible"
-                }`}
+              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+                otpTouched && !validateOTP(otpData.otp)
+                  ? "visible"
+                  : "invisible"
+              }`}
             >
               Enter valid 6-digit OTP
             </p>
@@ -1050,20 +1061,22 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
             <button
               onClick={() => handleGroupSizeSelect("less")}
               disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "less"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
+              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                formData.groupSize === "less"
+                  ? "bg-white text-blue-600 font-medium"
+                  : "bg-transparent text-white"
+              }`}
             >
               Less than 3 people
             </button>
             <button
               onClick={() => handleGroupSizeSelect("more")}
               disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "more"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
+              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                formData.groupSize === "more"
+                  ? "bg-white text-blue-600 font-medium"
+                  : "bg-transparent text-white"
+              }`}
             >
               More than 3 people
             </button>
@@ -1075,10 +1088,11 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
           <button
             onClick={handleGetStarted}
             disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
-              ? "bg-blue-600 text-white border border-white/50 hover:bg-blue-700"
-              : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
-              }`}
+            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${
+              isFormValid() && !isLoading
+                ? "bg-blue-600 text-white border border-white/50 hover:bg-blue-700"
+                : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+            }`}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
