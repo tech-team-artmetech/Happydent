@@ -329,7 +329,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
                         captureMode: 'polaroid',
                         uploadSuccess: true
                     });
-                }, 4000);
+                }, 0);
 
             } else {
                 console.error('❌ Upload failed:', result.message);
