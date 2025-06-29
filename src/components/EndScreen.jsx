@@ -7,7 +7,7 @@ const EndScreen = ({ onRetry }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE_URL = "https://artmetech.co.in";
+  const API_BASE_URL = "";
 
   useEffect(() => {
     // Get user info from localStorage
@@ -26,7 +26,7 @@ const EndScreen = ({ onRetry }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `https://artmetech.co.in/api/user/${phone}/photo`
+        `/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -62,7 +62,7 @@ const EndScreen = ({ onRetry }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `https://artmetech.co.in/api/download-photo/${userInfo.phone}`,
+        `/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
