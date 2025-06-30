@@ -531,13 +531,13 @@
 
 // export default SnapARExperience;
 
-import React, { useRef, useEffect, useState } from 'react';
-import { createMediaStreamSource, Transform2D } from '@snap/camera-kit';
+import React, { useRef, useEffect, useState } from "react";
+import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 
 const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   const canvasRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
   const [autoCapturing, setAutoCapturing] = useState(false);
   const sessionRef = useRef(null);
@@ -562,24 +562,24 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         const data = await response.json();
 
         if (data.success && data.data.arEnded) {
-          console.log('🎭 AR session ended by server - triggering capture');
+          console.log("🎭 AR session ended by server - triggering capture");
           captureAndUpload();
         }
       } catch (error) {
-        console.error('❌ Failed to check AR state:', error);
+        console.error("❌ Failed to check AR state:", error);
       }
     };
 
     let stateCheckInterval;
     if (!isLoading && userData?.phone) {
       stateCheckInterval = setInterval(checkARState, 3000);
-      console.log('🎭 Started AR state monitoring every 3 seconds');
+      console.log("🎭 Started AR state monitoring every 3 seconds");
     }
 
     return () => {
       if (stateCheckInterval) {
         clearInterval(stateCheckInterval);
-        console.log('🎭 Stopped AR state monitoring');
+        console.log("🎭 Stopped AR state monitoring");
       }
     };
   }, [isLoading, userData?.phone]);
@@ -587,19 +587,21 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   const initializeCameraKitFromCache = async () => {
     try {
       setIsLoading(true);
-      setError('');
+      setError("");
 
-      console.log('⚡ Initializing AR from preloaded cache...');
+      console.log("⚡ Initializing AR from preloaded cache...");
 
       // Check if everything is preloaded
       if (!window.snapARPreloadCache?.isPreloaded) {
-        console.warn('⚠️ AR not preloaded, falling back to regular initialization');
+        console.warn(
+          "⚠️ AR not preloaded, falling back to regular initialization"
+        );
         await fallbackInitialization();
         return;
       }
 
       const cache = window.snapARPreloadCache;
-      console.log('✅ Using preloaded Camera Kit and assets');
+      console.log("✅ Using preloaded Camera Kit and assets");
 
       // Get canvas element for live render target
       const liveRenderTarget = canvasRef.current;
@@ -623,21 +625,20 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       // Apply preloaded lens
       if (cache.lenses && cache.lenses.length > 0) {
         await session.applyLens(cache.lenses[0]);
-        console.log('✅ Applied preloaded lens');
+        console.log("✅ Applied preloaded lens");
       }
 
-      console.log('🚀 AR Experience ready instantly!');
+      console.log("🚀 AR Experience ready instantly!");
       setIsLoading(false);
 
       // Show capture button after 5 seconds (reduced from 10)
-      console.log('⏰ Starting 5-second countdown for capture button...');
+      console.log("⏰ Starting 5-second countdown for capture button...");
       buttonTimeoutRef.current = setTimeout(() => {
-        console.log('🔲 Showing capture button after 5 seconds');
+        console.log("🔲 Showing capture button after 5 seconds");
         setShowCaptureButton(true);
       }, 5000);
-
     } catch (err) {
-      console.error('❌ Failed to use cached AR, falling back:', err);
+      console.error("❌ Failed to use cached AR, falling back:", err);
       await fallbackInitialization();
     }
   };
@@ -645,14 +646,15 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   // Fallback to original initialization if preload failed
   const fallbackInitialization = async () => {
     try {
-      console.log('🔄 Starting fallback AR initialization...');
+      console.log("🔄 Starting fallback AR initialization...");
 
       // Your original initialization code here
-      const actualApiToken = 'eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg';
-      const actualLensGroupId = 'b2aafdd8-cb11-4817-9df9-835b36d9d5a7';
+      const actualApiToken =
+        "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg";
+      const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
 
       // Import the bootstrap function dynamically to avoid loading if cached
-      const { bootstrapCameraKit } = await import('@snap/camera-kit');
+      const { bootstrapCameraKit } = await import("@snap/camera-kit");
 
       // Initialize Camera Kit
       const cameraKit = await bootstrapCameraKit({
@@ -671,7 +673,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         video: { facingMode: "user" },
         audio: true,
       };
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const mediaStream = await navigator.mediaDevices.getUserMedia(
+        constraints
+      );
 
       const source = createMediaStreamSource(mediaStream, {
         cameraType: "user",
@@ -685,7 +689,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       await session.play();
 
       // Load and apply lens
-      const { lenses } = await cameraKit.lensRepository.loadLensGroups([actualLensGroupId]);
+      const { lenses } = await cameraKit.lensRepository.loadLensGroups([
+        actualLensGroupId,
+      ]);
       if (lenses && lenses.length > 0) {
         await session.applyLens(lenses[0]);
       }
@@ -696,9 +702,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       buttonTimeoutRef.current = setTimeout(() => {
         setShowCaptureButton(true);
       }, 5000);
-
     } catch (err) {
-      console.error('❌ Fallback initialization failed:', err);
+      console.error("❌ Fallback initialization failed:", err);
       setError(`Failed to initialize AR: ${err.message}`);
       setIsLoading(false);
     }
@@ -722,9 +727,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         // Stop tracks if we created them in fallback mode
         try {
           const tracks = sessionRef.current.source?.getAllTracks?.() || [];
-          tracks.forEach(track => track.stop());
+          tracks.forEach((track) => track.stop());
         } catch (e) {
-          console.log('Could not stop tracks:', e);
+          console.log("Could not stop tracks:", e);
         }
       }
     }
@@ -734,29 +739,31 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     cleanup();
     onComplete({
       ...userData,
-      photo: 'test-photo-url',
+      photo: "test-photo-url",
       timestamp: new Date().toISOString(),
       lensGroupId: lensGroupId,
-      testMode: true
+      testMode: true,
     });
   };
 
   const handleManualCapture = () => {
-    console.log('🎯 Manual capture button clicked');
+    console.log("🎯 Manual capture button clicked");
     setShowCaptureButton(false);
     captureAndUpload();
   };
 
   const captureAndUpload = async () => {
     if (!canvasRef.current || !userData?.phone || isCapturing) {
-      console.log('❌ Cannot capture: missing canvas, phone, or already capturing');
+      console.log(
+        "❌ Cannot capture: missing canvas, phone, or already capturing"
+      );
       return;
     }
 
     try {
       setIsCapturing(true);
       setAutoCapturing(true);
-      console.log('📸 Starting polaroid capture process...');
+      console.log("📸 Starting polaroid capture process...");
 
       const canvas = canvasRef.current;
       const canvasWidth = canvas.width;
@@ -767,7 +774,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         x: 3,
         y: 0,
         width: 94,
-        height: 85
+        height: 85,
       };
 
       // Convert percentages to pixels
@@ -775,12 +782,12 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),
         y: Math.floor((canvasHeight * polaroidArea.y) / 100),
         width: Math.floor((canvasWidth * polaroidArea.width) / 100),
-        height: Math.floor((canvasHeight * polaroidArea.height) / 100)
+        height: Math.floor((canvasHeight * polaroidArea.height) / 100),
       };
 
       // Create temporary canvas with 30% larger dimensions
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
       const enlargedWidth = Math.floor(captureArea.width * 1.3);
       const enlargedHeight = Math.floor(captureArea.height * 1.3);
 
@@ -790,29 +797,39 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       // Draw cropped and scaled image
       tempCtx.drawImage(
         canvas,
-        captureArea.x, captureArea.y, captureArea.width, captureArea.height,
-        0, 0, enlargedWidth, enlargedHeight
+        captureArea.x,
+        captureArea.y,
+        captureArea.width,
+        captureArea.height,
+        0,
+        0,
+        enlargedWidth,
+        enlargedHeight
       );
 
       // Convert to blob
       const blob = await new Promise((resolve, reject) => {
-        tempCanvas.toBlob((result) => {
-          if (result) {
-            resolve(result);
-          } else {
-            reject(new Error('Failed to create blob'));
-          }
-        }, 'image/jpeg', 0.9);
+        tempCanvas.toBlob(
+          (result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error("Failed to create blob"));
+            }
+          },
+          "image/jpeg",
+          0.9
+        );
       });
 
       // Upload
       const formData = new FormData();
-      formData.append('photo', blob, `polaroid_${userData.phone}.jpg`);
-      formData.append('phone', userData.phone);
-      formData.append('source', 'snapchat_polaroid');
+      formData.append("photo", blob, `polaroid_${userData.phone}.jpg`);
+      formData.append("phone", userData.phone);
+      formData.append("source", "snapchat_polaroid");
 
-      const response = await fetch('/api/upload-photo', {
-        method: 'POST',
+      const response = await fetch("/api/upload-photo", {
+        method: "POST",
         body: formData,
       });
 
@@ -823,43 +840,42 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       const result = await response.json();
 
       if (result.success) {
-        console.log('✅ Upload successful:', result.data.imageUrl);
+        console.log("✅ Upload successful:", result.data.imageUrl);
         setTimeout(() => {
           onComplete({
             ...userData,
             photo: result.data.imageUrl,
             timestamp: new Date().toISOString(),
             lensGroupId: lensGroupId,
-            captureMode: 'polaroid',
-            uploadSuccess: true
+            captureMode: "polaroid",
+            uploadSuccess: true,
           });
         }, 0);
       } else {
-        console.error('❌ Upload failed:', result.message);
+        console.error("❌ Upload failed:", result.message);
         setTimeout(() => {
           onComplete({
             ...userData,
-            photo: 'upload-failed',
+            photo: "upload-failed",
             timestamp: new Date().toISOString(),
             lensGroupId: lensGroupId,
-            captureMode: 'polaroid',
+            captureMode: "polaroid",
             uploadSuccess: false,
-            errorMessage: result.message
+            errorMessage: result.message,
           });
         }, 2400);
       }
-
     } catch (error) {
-      console.error('❌ Capture and upload error:', error);
+      console.error("❌ Capture and upload error:", error);
       setTimeout(() => {
         onComplete({
           ...userData,
-          photo: 'capture-failed',
+          photo: "capture-failed",
           timestamp: new Date().toISOString(),
           lensGroupId: lensGroupId,
-          captureMode: 'polaroid',
+          captureMode: "polaroid",
           uploadSuccess: false,
-          errorMessage: error.message
+          errorMessage: error.message,
         });
       }, 2400);
     } finally {
@@ -888,47 +904,47 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     <>
       {/* CSS styles - same as before */}
       <style jsx>{`
-                #canvas {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                @media screen and (min-width: 768px) and (max-width: 1024px) {
-                    #canvas {
-                        width: 100% !important;
-                        height: 100% !important;
-                        object-fit: contain !important;
-                        aspect-ratio: 9 / 16 !important;
-                        background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
-                    }
-                    
-                    .canvas-container {
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                    }
-                }
-                
-                @media screen and (device-width: 768px) and (device-height: 1024px),
-                       screen and (device-width: 1024px) and (device-height: 768px),
-                       screen and (device-width: 820px) and (device-height: 1180px),
-                       screen and (device-width: 1180px) and (device-height: 820px) {
-                    #canvas {
-                        width: 100% !important;
-                        height: 100% !important;
-                        object-fit: contain !important;
-                        aspect-ratio: 9 / 16 !important;
-                        background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
-                    }
-                    
-                    .canvas-container {
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                    }
-                }
-            `}</style>
+        #canvas {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        @media screen and (min-width: 768px) and (max-width: 1024px) {
+          #canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            aspect-ratio: 9 / 16 !important;
+            background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
+          }
+
+          .canvas-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+        }
+
+        @media screen and (device-width: 768px) and (device-height: 1024px),
+          screen and (device-width: 1024px) and (device-height: 768px),
+          screen and (device-width: 820px) and (device-height: 1180px),
+          screen and (device-width: 1180px) and (device-height: 820px) {
+          #canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            aspect-ratio: 9 / 16 !important;
+            background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
+          }
+
+          .canvas-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
 
       <div className="min-h-screen flex flex-col bg-black text-white max-w-[768px] mx-auto">
         {/* AR Canvas Container */}
@@ -940,8 +956,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
                 <p className="text-white">
                   {window.snapARPreloadCache?.isPreloaded
                     ? "Starting AR experience..."
-                    : "Loading AR experience..."
-                  }
+                    : "Loading AR experience..."}
                 </p>
               </div>
             </div>
@@ -966,8 +981,19 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         {showCaptureButton && !isCapturing && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
             <button
+              style={{
+                background:
+                  "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
+                borderRadius: "4px",
+                border: "1px solid rgba(255, 255, 255, 0.52)",
+                borderStyle: "inside",
+                boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                opacity: "100%",
+              }}
               onClick={handleManualCapture}
-              className="bg-white/90 hover:bg-white text-black font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+              className="text-black font-bold py-4 px-8 transition-all duration-200 hover:scale-105"
             >
               PROCEED
             </button>
