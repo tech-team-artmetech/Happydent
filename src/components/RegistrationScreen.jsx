@@ -4,7 +4,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    groupSize: "",
+    groupSize: "less",
   });
 
   const [otpData, setOtpData] = useState({
@@ -19,6 +19,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
   const [error, setError] = useState("");
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [otpTouched, setOtpTouched] = useState(false);
+
 
   // ⭐ TESTING MODE - Set to true to bypass OTP
   const BYPASS_OTP = true; // Change to false for production
@@ -404,7 +405,7 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
         )}
 
         {/* Success Message for OTP Verification */}
-        {otpData.isOtpVerified && (
+        {/* {otpData.isOtpVerified && (
           <div className="bg-green-500/20 border border-green-500/50 rounded p-3 text-center">
             <p className="text-green-300 text-sm">
               ✅{" "}
@@ -413,14 +414,9 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
                 : "Phone number verified successfully!"}
             </p>
           </div>
-        )}
+        )} */}
 
-        {/* Loading Message */}
-        {isLoading && (
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center">
-            <p className="text-blue-300 text-sm">Processing...</p>
-          </div>
-        )}
+
 
         {/* Name Input */}
         <div>
@@ -460,9 +456,16 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
                 className={`px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                  ? "bg-blue-600 text-white border border-blue-600 hover:bg-blue-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                  ? "text-white hover:opacity-80 border-white"
+                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
                   }`}
+                style={{
+                  backgroundColor: validatePhone(formData.phone) &&
+                    !isLoading &&
+                    (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
+                    ? "#041763"
+                    : undefined
+                }}
               >
                 {BYPASS_OTP
                   ? "Verify"
@@ -505,9 +508,14 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
                 className={`px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
-                  ? "bg-green-600 text-white border border-green-600 hover:bg-green-700"
-                  : "bg-gray-500/30 text-gray-400 border border-gray-500/30 cursor-not-allowed"
+                  ? "text-white hover:opacity-80 border-white"
+                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
                   }`}
+                style={{
+                  backgroundColor: validateOTP(otpData.otp) && !isLoading
+                    ? "#041763"
+                    : undefined
+                }}
               >
                 Verify
               </button>
@@ -534,31 +542,65 @@ const RegistrationScreen = ({ onComplete, onTerms }) => {
 
         {/* Group Size Selection */}
         <div className="text-center">
-          <h3 className="text-white text-lg mb-4">
-            ——— Select you <span className="font-bold">GROUP SIZE</span> ———
+          <h3 className="text-white text-lg mb-4 text-[20px] flex items-center gap-4">
+            <div className="flex-1 h-px bg-white"></div>
+            Select your<span className="font-bold drop-shadow-[0_0_15px_rgba(255,255,255,0.9)] text-white">GROUP SIZE</span>
+            <div className="flex-1 h-px bg-white"></div>
           </h3>
 
-          <div className="flex space-x-1">
-            <button
-              onClick={() => handleGroupSizeSelect("less")}
-              disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "less"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
-            >
-              Less than 3 people
-            </button>
-            <button
-              onClick={() => handleGroupSizeSelect("more")}
-              disabled={isLoading}
-              className={`flex-1 py-3 px-4 border border-white/50 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed ${formData.groupSize === "more"
-                ? "bg-white text-blue-600 font-medium"
-                : "bg-transparent text-white"
-                }`}
-            >
-              More than 3 people
-            </button>
+          <div className="relative">
+            {/* Background container */}
+            <div className="relative flex border-2 border-white rounded-[4px] overflow-hidden bg-transparent">
+              {/* Sliding white background */}
+              <div
+                className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${formData.groupSize === "more" ? "translate-x-full" : "translate-x-0"
+                  }`}
+                style={{
+                  margin: "0px",
+                  width: "50%",
+                  height: "100%",
+                  borderRadius: "4px",
+                }}
+              />
+
+              {/* Button container */}
+              <div className="relative flex w-full">
+                <button
+                  onClick={() => handleGroupSizeSelect("less")}
+                  disabled={isLoading}
+                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "less"
+                    ? "bg-transparent text-blue-700"    // Selected: transparent bg (white shows from behind), blue text
+                    : "bg-transparent text-white"       // Not selected: transparent bg, white text
+                    }`}
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
+                >
+                  Less than 3 people
+                </button>
+                <button
+                  onClick={() => handleGroupSizeSelect("more")}
+                  disabled={isLoading}
+                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "more"
+                    ? "bg-transparent text-blue-700"    // Selected: transparent bg (white shows from behind), blue text
+                    : "bg-transparent text-white"       // Not selected: transparent bg, white text
+                    }`}
+                  style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
+                >
+                  More than 3 people
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

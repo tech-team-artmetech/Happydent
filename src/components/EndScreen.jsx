@@ -244,7 +244,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         <button
           onClick={handlePrint}
           disabled={isLoading}
-          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-[180px]"
           style={{
             background:
               "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
@@ -273,7 +273,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         <button
           onClick={handleRetry}
           disabled={isLoading}
-          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-[180px]"
           style={{
             background:
               "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
@@ -288,24 +288,8 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         >
           {window.snapARPreloadCache?.sessionReady ? "RETRY" : "RETRY"}
         </button>
-
-
       </div>
 
-      {/* User Info */}
-      {userInfo && (
-        <div className="mt-8 text-center z-20">
-          <p className="text-white/60 text-xs">
-            Welcome back, {userInfo.userName}!
-          </p>
-          {/* 🚀 Show AR session status for debugging */}
-          {/* {window.snapARPreloadCache?.sessionReady && (
-            // <p className="text-green-400/60 text-xs mt-1">
-            //   ⚡ AR session ready - instant retry available
-            // </p>
-          )} */}
-        </div>
-      )}
     </div>
   );
 };
