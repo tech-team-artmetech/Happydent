@@ -28,7 +28,16 @@ function App() {
     setCurrentScreen("end");
   };
 
-  const goToSplash = () => {
+  // 🔄 Retry function - Goes back to splash screen
+  const handleRetry = () => {
+    console.log("🔄 Retry clicked - going back to splash screen");
+
+    // Clear localStorage to ensure fresh start
+    localStorage.removeItem("userPhone");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+
+    // Reset app state
     setCurrentScreen("splash");
     setUserData(null);
   };
@@ -61,7 +70,12 @@ function App() {
   }
 
   if (currentScreen === "end") {
-    return <EndScreen onRetry={goToSplash} userData={userData} />;
+    return (
+      <EndScreen
+        onRetry={handleRetry}  // 🔄 Retry goes to splash screen
+        userData={userData}
+      />
+    );
   }
 
   if (currentScreen === "terms") {

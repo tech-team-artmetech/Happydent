@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const EndScreen = ({ onRetry }) => {
+const EndScreen = ({ onRetry, onRetryAR }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [photoInfo, setPhotoInfo] = useState(null);
   const [userPhoto, setUserPhoto] = useState(null);
@@ -26,7 +26,7 @@ const EndScreen = ({ onRetry }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/user/${phone}/photo`
+        `http://localhost:3001/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -62,7 +62,7 @@ const EndScreen = ({ onRetry }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `/api/download-photo/${userInfo.phone}`,
+        `http://localhost:3001/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
@@ -112,8 +112,67 @@ const EndScreen = ({ onRetry }) => {
     }
   };
 
+  // 🚀 NEW: Smart retry function that checks for existing AR session
   const handleRetry = () => {
-    // Clear localStorage when retrying
+    console.log("🔄 Retry button clicked");
+
+    // Check if AR session is still available and ready
+    const cache = window.snapARPreloadCache;
+    const hasValidARSession = cache?.sessionReady && cache?.session;
+
+    console.log("📊 AR Session Status:", {
+      hasCache: !!cache,
+      sessionReady: cache?.sessionReady,
+      hasSession: !!cache?.session,
+      canReuseAR: hasValidARSession
+    });
+
+    if (hasValidARSession && onRetryAR) {
+      // AR session is available - go directly to AR experience
+      console.log("✅ Reusing existing AR session - no reload needed!");
+
+      // Don't clear localStorage - keep user info for retry
+      // Just trigger AR experience with existing session
+      onRetryAR({
+        phone: userInfo.phone,
+        userId: userInfo.userId,
+        userName: userInfo.userName
+      });
+    } else {
+      // AR session not available - do full restart
+      console.log("🔄 AR session not available - doing full restart");
+
+      // Clear localStorage for full restart
+      localStorage.removeItem("userPhone");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userName");
+
+      if (onRetry) {
+        onRetry();
+      }
+    }
+  };
+
+  // 🚀 NEW: Reset AR session function (optional - for troubleshooting)
+  const resetARSession = () => {
+    console.log("🧹 Resetting AR session cache");
+
+    if (window.snapARPreloadCache) {
+      // Stop the session if it's playing
+      if (window.snapARPreloadCache.session) {
+        try {
+          window.snapARPreloadCache.session.pause();
+        } catch (e) {
+          console.log("Session already paused or stopped");
+        }
+      }
+
+      // Reset cache flags but keep the session for potential reuse
+      window.snapARPreloadCache.sessionReady = false;
+      window.snapARPreloadCache.isPreloaded = false;
+    }
+
+    // Now do full restart
     localStorage.removeItem("userPhone");
     localStorage.removeItem("userId");
     localStorage.removeItem("userName");
@@ -210,7 +269,7 @@ const EndScreen = ({ onRetry }) => {
           )}
         </button>
 
-        {/* Retry Button */}
+        {/* Smart Retry Button */}
         <button
           onClick={handleRetry}
           disabled={isLoading}
@@ -227,16 +286,40 @@ const EndScreen = ({ onRetry }) => {
             opacity: "100%",
           }}
         >
-          RETRY
+          {window.snapARPreloadCache?.sessionReady ? "TRY AGAIN" : "RETRY"}
         </button>
+
+        {/* 🚀 Optional: Reset button for troubleshooting (you can remove this in production) */}
+        {window.snapARPreloadCache?.sessionReady && (
+          <button
+            onClick={resetARSession}
+            disabled={isLoading}
+            className="text-white text-sm font-normal cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 opacity-60 hover:opacity-100"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              borderRadius: "4px",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
+              padding: "8px 16px",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            Full Reset
+          </button>
+        )}
       </div>
 
-      {/* User Info (Optional - Hidden by default) */}
+      {/* User Info */}
       {userInfo && (
         <div className="mt-8 text-center z-20">
           <p className="text-white/60 text-xs">
             Welcome back, {userInfo.userName}!
           </p>
+          {/* 🚀 Show AR session status for debugging */}
+          {window.snapARPreloadCache?.sessionReady && (
+            <p className="text-green-400/60 text-xs mt-1">
+              ⚡ AR session ready - instant retry available
+            </p>
+          )}
         </div>
       )}
     </div>
