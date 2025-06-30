@@ -25,7 +25,7 @@
 //       if (!userData?.phone) return;
 
 //       try {
-//         const response = await fetch(`http://localhost:3001/api/ar-end/${userData.phone}`);
+//         const response = await fetch(`/api/ar-end/${userData.phone}`);
 //         const data = await response.json();
 
 //         if (data.success && data.data.arEnded) {
@@ -295,7 +295,7 @@
 //       formData.append("phone", userData.phone);
 //       formData.append("source", "snapchat_polaroid");
 
-//       const response = await fetch("http://localhost:3001/api/upload-photo", {
+//       const response = await fetch("/api/upload-photo", {
 //         method: "POST",
 //         body: formData,
 //       });
@@ -542,7 +542,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   //     if (!userData?.phone) return;
 
   //     try {
-  //       const response = await fetch(`http://localhost:3001/api/ar-end/${userData.phone}`);
+  //       const response = await fetch(`/api/ar-end/${userData.phone}`);
   //       const data = await response.json();
 
   //       if (data.success && data.data.arEnded) {
@@ -769,7 +769,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   //     formData.append("phone", userData.phone);
   //     formData.append("source", "snapchat_polaroid");
 
-  //     const response = await fetch("http://localhost:3001/api/upload-photo", {
+  //     const response = await fetch("/api/upload-photo", {
   //       method: "POST",
   //       body: formData,
   //     });
@@ -955,7 +955,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       formData.append("phone", userData.phone);
       formData.append("source", "snapchat_polaroid");
 
-      const response = await fetch("http://localhost:3001/api/upload-photo", {
+      const response = await fetch("/api/upload-photo", {
         method: "POST",
         body: formData,
       });

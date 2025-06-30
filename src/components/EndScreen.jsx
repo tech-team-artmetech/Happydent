@@ -26,7 +26,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `http://localhost:3001/api/user/${phone}/photo`
+        `/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -62,7 +62,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `http://localhost:3001/api/download-photo/${userInfo.phone}`,
+        `/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
