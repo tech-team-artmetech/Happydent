@@ -286,26 +286,10 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             opacity: "100%",
           }}
         >
-          {window.snapARPreloadCache?.sessionReady ? "TRY AGAIN" : "RETRY"}
+          {window.snapARPreloadCache?.sessionReady ? "RETRY" : "RETRY"}
         </button>
 
-        {/* 🚀 Optional: Reset button for troubleshooting (you can remove this in production) */}
-        {window.snapARPreloadCache?.sessionReady && (
-          <button
-            onClick={resetARSession}
-            disabled={isLoading}
-            className="text-white text-sm font-normal cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 opacity-60 hover:opacity-100"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "4px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              padding: "8px 16px",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            Full Reset
-          </button>
-        )}
+
       </div>
 
       {/* User Info */}
@@ -315,11 +299,11 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             Welcome back, {userInfo.userName}!
           </p>
           {/* 🚀 Show AR session status for debugging */}
-          {window.snapARPreloadCache?.sessionReady && (
-            <p className="text-green-400/60 text-xs mt-1">
-              ⚡ AR session ready - instant retry available
-            </p>
-          )}
+          {/* {window.snapARPreloadCache?.sessionReady && (
+            // <p className="text-green-400/60 text-xs mt-1">
+            //   ⚡ AR session ready - instant retry available
+            // </p>
+          )} */}
         </div>
       )}
     </div>
