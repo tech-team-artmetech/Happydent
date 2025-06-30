@@ -993,7 +993,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
                 opacity: "100%",
               }}
               onClick={handleManualCapture}
-              className="text-black font-bold py-4 px-8 transition-all duration-200 hover:scale-105"
+              className="font-bold py-4 px-8 transition-all duration-200 hover:scale-105"
             >
               PROCEED
             </button>

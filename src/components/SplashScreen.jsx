@@ -133,7 +133,7 @@
 // export default SplashScreen;
 
 import React, { useState, useEffect } from "react";
-import { bootstrapCameraKit, createMediaStreamSource } from '@snap/camera-kit';
+import { bootstrapCameraKit, createMediaStreamSource } from "@snap/camera-kit";
 import smileLoaded from "../../src/assets/smile_loaded.png";
 import chamkingSmile from "../../src/assets/chamking-smile-logo.png";
 
@@ -150,7 +150,9 @@ class CameraManager {
       document.body.classList.add("desktop");
     }
 
-    this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
+    this.mediaStream = await navigator.mediaDevices.getUserMedia(
+      this.getConstraints()
+    );
     return this.mediaStream;
   }
 
@@ -181,7 +183,9 @@ class CameraManager {
     };
 
     return this.isMobile
-      ? (this.isBackFacing ? settings.camera.constraints.back : settings.camera.constraints.front)
+      ? this.isBackFacing
+        ? settings.camera.constraints.back
+        : settings.camera.constraints.front
       : settings.camera.constraints.desktop;
   }
 }
@@ -193,7 +197,7 @@ window.snapARPreloadCache = {
   cameraManager: null,
   mediaStream: null,
   isPreloaded: false,
-  preloadProgress: 0
+  preloadProgress: 0,
 };
 
 const SplashScreen = ({ onComplete }) => {
@@ -255,56 +259,58 @@ const SplashScreen = ({ onComplete }) => {
   // Preload Snap AR dependencies
   const preloadSnapAR = async () => {
     if (window.snapARPreloadCache.isPreloaded) {
-      console.log('✅ Snap AR already preloaded');
+      console.log("✅ Snap AR already preloaded");
       return;
     }
 
     try {
       setIsPreloadingAR(true);
       setArPreloadProgress(10);
-      console.log('🚀 Starting Snap AR preload...');
+      console.log("🚀 Starting Snap AR preload...");
 
       // Step 1: Initialize Camera Kit
-      console.log('📱 Initializing Camera Kit...');
-      const actualApiToken = 'eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg';
+      console.log("📱 Initializing Camera Kit...");
+      const actualApiToken =
+        "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg";
 
       const cameraKit = await bootstrapCameraKit({
         apiToken: actualApiToken,
       });
       window.snapARPreloadCache.cameraKit = cameraKit;
       setArPreloadProgress(30);
-      console.log('✅ Camera Kit initialized');
+      console.log("✅ Camera Kit initialized");
 
       // Step 2: Initialize Camera Manager and get permissions
-      console.log('📷 Setting up camera...');
+      console.log("📷 Setting up camera...");
       const cameraManager = new CameraManager();
       const mediaStream = await cameraManager.initializeCamera();
       window.snapARPreloadCache.cameraManager = cameraManager;
       window.snapARPreloadCache.mediaStream = mediaStream;
       setArPreloadProgress(60);
-      console.log('✅ Camera permissions granted and stream ready');
+      console.log("✅ Camera permissions granted and stream ready");
 
       // Step 3: Preload lens assets
-      console.log('🎭 Loading lens assets...');
-      const actualLensGroupId = 'b2aafdd8-cb11-4817-9df9-835b36d9d5a7';
-      const { lenses } = await cameraKit.lensRepository.loadLensGroups([actualLensGroupId]);
+      console.log("🎭 Loading lens assets...");
+      const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
+      const { lenses } = await cameraKit.lensRepository.loadLensGroups([
+        actualLensGroupId,
+      ]);
       window.snapARPreloadCache.lenses = lenses;
       setArPreloadProgress(90);
-      console.log('✅ Lens assets loaded');
+      console.log("✅ Lens assets loaded");
 
       // Mark as complete
       window.snapARPreloadCache.isPreloaded = true;
       window.snapARPreloadCache.preloadProgress = 100;
       setArPreloadProgress(100);
-      console.log('🎉 Snap AR preload complete!');
+      console.log("🎉 Snap AR preload complete!");
 
       // Small delay to show 100% progress
       setTimeout(() => {
         setIsPreloadingAR(false);
       }, 500);
-
     } catch (error) {
-      console.error('❌ Snap AR preload failed:', error);
+      console.error("❌ Snap AR preload failed:", error);
       setArPreloadProgress(0);
       setIsPreloadingAR(false);
       // Don't block the user, they can still try the AR experience
@@ -334,6 +340,9 @@ const SplashScreen = ({ onComplete }) => {
       />
 
       <img className="chamking-smile-logo" src={chamkingSmile} alt="" />
+      <div className="font-gotham font-light italic opacity-0 my-[8px]">
+        Loading...
+      </div>
 
       {/* Image Sequence Loader */}
       {!showButton && imagesLoaded && (
@@ -382,8 +391,9 @@ const SplashScreen = ({ onComplete }) => {
           <button
             onClick={handleTapToBegin}
             disabled={isPreloadingAR}
-            className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all ${isPreloadingAR ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all ${
+              isPreloadingAR ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             style={{
               background: isPreloadingAR
                 ? "rgba(128, 128, 128, 0.5)"
@@ -397,7 +407,7 @@ const SplashScreen = ({ onComplete }) => {
               opacity: "100%",
             }}
           >
-            {isPreloadingAR ? 'PREPARING...' : 'TAP TO BEGIN!'}
+            {isPreloadingAR ? "PREPARING..." : "TAP TO BEGIN!"}
           </button>
         </div>
       )}
