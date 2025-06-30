@@ -25,9 +25,7 @@ const EndScreen = ({ onRetry }) => {
   const fetchUserPhoto = async (phone) => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `/api/user/${phone}/photo`
-      );
+      const response = await fetch(`/api/user/${phone}/photo`);
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -61,12 +59,9 @@ const EndScreen = ({ onRetry }) => {
     try {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
-      const response = await fetch(
-        `/api/download-photo/${userInfo.phone}`,
-        {
-          method: "GET",
-        }
-      );
+      const response = await fetch(`/api/download-photo/${userInfo.phone}`, {
+        method: "GET",
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

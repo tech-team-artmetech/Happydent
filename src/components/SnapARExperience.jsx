@@ -904,17 +904,17 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     <>
       {/* CSS styles - same as before */}
       <style jsx>{`
-        #canvas {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
+        // #canvas {
+        //   width: 100%;
+        //   height: 100%;
+        //   object-fit: cover;
+        // }
 
         @media screen and (min-width: 768px) and (max-width: 1024px) {
           #canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain !important;
+            // width: 100% !important;
+            // height: 100% !important;
+            // object-fit: contain !important;
             aspect-ratio: 9 / 16 !important;
             background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
           }
@@ -946,7 +946,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         }
       `}</style>
 
-      <div className="min-h-screen flex flex-col bg-black text-white max-w-[768px] mx-auto">
+      <div className="min-h-screen flex flex-col bg-black text-white max-w-[992px] mx-auto">
         {/* AR Canvas Container */}
         <div className="flex-1 relative canvas-container">
           {isLoading && (

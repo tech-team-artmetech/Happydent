@@ -1,143 +1,9 @@
-// import React, { useState, useEffect } from "react";
-// import smileLoaded from "../../src/assets/smile_loaded.png";
-// import chamkingSmile from "../../src/assets/chamking-smile-logo.png";
-
-// const SplashScreen = ({ onComplete }) => {
-//   const [loadingProgress, setLoadingProgress] = useState(0);
-//   const [showButton, setShowButton] = useState(false);
-//   const [imagesLoaded, setImagesLoaded] = useState(false);
-//   const [preloadedImages, setPreloadedImages] = useState({});
-
-//   // Preload all images
-//   useEffect(() => {
-//     const images = {};
-//     let loadedCount = 0;
-//     const totalImages = 31; // 0 to 40 = 31 images
-
-//     for (let i = 0; i <= 30; i++) {
-//       const img = new Image();
-//       const fileName = `Comp 1_${i.toString().padStart(5, "0")}.png`;
-//       const src = `/assets/smile/${fileName}`;
-
-//       img.onload = () => {
-//         loadedCount++;
-//         if (loadedCount === totalImages) {
-//           setImagesLoaded(true);
-//         }
-//       };
-
-//       img.src = src;
-//       images[i] = src;
-//     }
-
-//     setPreloadedImages(images);
-//   }, []);
-
-//   // Start progress animation after images are loaded
-//   useEffect(() => {
-//     if (!imagesLoaded) return;
-
-//     let step = 0;
-//     const totalSteps = 31; // One step per frame
-
-//     const interval = setInterval(() => {
-//       if (step >= totalSteps) {
-//         setLoadingProgress(100);
-//         setShowButton(true);
-//         clearInterval(interval);
-//         return;
-//       }
-
-//       const progress = (step / (totalSteps - 1)) * 100; // precise 0–100%
-//       setLoadingProgress(progress);
-//       step++;
-//     }, 50); // ~2 seconds total
-
-//     return () => clearInterval(interval);
-//   }, [imagesLoaded]);
-
-//   // Calculate which image to show based on progress
-//   const getCurrentImageIndex = () => {
-//     return Math.min(Math.floor((loadingProgress / 100) * 30), 30);
-//   };
-
-//   const handleTapToBegin = () => {
-//     if (onComplete) {
-//       onComplete();
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto">
-//       {/* Image */}
-
-//       <img
-//         src="/assets/happydent-logo.png"
-//         alt="HAPPYDENT"
-//         className="w-64 h-32 object-contain mb-8"
-//       />
-
-//       <img className="chamking-smile-logo" src={chamkingSmile} alt="" />
-//       {/* Image Sequence Loader */}
-//       {!showButton && imagesLoaded && (
-//         <div className="mb-8 flex flex-col items-center">
-//           <div className="font-gotham font-light italic">Loading...</div>
-//           <div className="mb-4">
-//             <img
-//               src={preloadedImages[getCurrentImageIndex()]}
-//               alt="Loading animation"
-//               className="w-42 h-42 object-contain"
-//             />
-//           </div>
-//           <p className="text-center text-xl font-bold">
-//             {Math.round(loadingProgress)}%
-//           </p>
-//         </div>
-//       )}
-
-//       {/* Loading message while preloading images */}
-//       {!imagesLoaded && (
-//         <div className="mb-8">
-//           <p className="text-center text-lg">Loading...</p>
-//         </div>
-//       )}
-
-//       {/* Button */}
-
-//       {showButton && (
-//         <div className="flex flex-col items-center space-y-4">
-//           <img src={smileLoaded} alt="Final Smile Frame" />
-//           <button
-//             onClick={handleTapToBegin}
-//             className="text-white text-[18px] ctaBtn font-gotham font-medium italic"
-//             style={{
-//               background:
-//                 "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
-//               borderRadius: "4px",
-//               border: "1px solid rgba(255, 255, 255, 0.52)",
-//               borderStyle: "inside",
-//               boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
-//               backdropFilter: "blur(20px)",
-//               WebkitBackdropFilter: "blur(20px)",
-//               opacity: "100%",
-//             }}
-//           >
-//             TAP TO BEGIN!
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default SplashScreen;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { bootstrapCameraKit, createMediaStreamSource } from "@snap/camera-kit";
 import smileLoaded from "../../src/assets/smile_loaded.png";
 import chamkingSmile from "../../src/assets/chamking-smile-logo.png";
 
-// Camera Manager class (same as your AR component)
+// Camera Manager class
 class CameraManager {
   constructor() {
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -201,63 +67,76 @@ window.snapARPreloadCache = {
 };
 
 const SplashScreen = ({ onComplete }) => {
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [showButton, setShowButton] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [loadingState, setLoadingState] = useState("preloading"); // 'preloading', 'animating', 'complete'
+  const [currentFrame, setCurrentFrame] = useState(0);
   const [preloadedImages, setPreloadedImages] = useState({});
-  const [arPreloadProgress, setArPreloadProgress] = useState(0);
   const [isPreloadingAR, setIsPreloadingAR] = useState(false);
+
+  const TOTAL_FRAMES = 31; // 0 to 30
+  const ANIMATION_DURATION = 2000; // 2 seconds
+  const FRAME_INTERVAL = ANIMATION_DURATION / (TOTAL_FRAMES - 1);
 
   // Preload all images
   useEffect(() => {
-    const images = {};
-    let loadedCount = 0;
-    const totalImages = 31;
+    const preloadImages = async () => {
+      const images = {};
+      const loadPromises = [];
 
-    for (let i = 0; i <= 30; i++) {
-      const img = new Image();
-      const fileName = `Comp 1_${i.toString().padStart(5, "0")}.png`;
-      const src = `/assets/smile/${fileName}`;
+      for (let i = 0; i < TOTAL_FRAMES; i++) {
+        const promise = new Promise((resolve, reject) => {
+          const img = new Image();
+          const fileName = `Comp 1_${i.toString().padStart(5, "0")}.png`;
+          const src = `/assets/smile/${fileName}`;
 
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-          setImagesLoaded(true);
-        }
-      };
+          img.onload = () => {
+            images[i] = src;
+            resolve();
+          };
+          img.onerror = reject;
+          img.src = src;
+        });
 
-      img.src = src;
-      images[i] = src;
-    }
+        loadPromises.push(promise);
+      }
 
-    setPreloadedImages(images);
+      try {
+        await Promise.all(loadPromises);
+        setPreloadedImages(images);
+        setLoadingState("animating");
+      } catch (error) {
+        console.error("Failed to preload images:", error);
+        // Fallback: still proceed with animation
+        setPreloadedImages(images);
+        setLoadingState("animating");
+      }
+    };
+
+    preloadImages();
   }, []);
 
-  // Start progress animation after images are loaded
+  // Handle animation sequence
   useEffect(() => {
-    if (!imagesLoaded) return;
+    if (loadingState !== "animating") return;
 
-    let step = 0;
-    const totalSteps = 31;
-
+    let frameIndex = 0;
     const interval = setInterval(() => {
-      if (step >= totalSteps) {
-        setLoadingProgress(100);
-        setShowButton(true);
+      setCurrentFrame(frameIndex);
+
+      if (frameIndex >= TOTAL_FRAMES - 1) {
+        // Animation complete - stay on last frame
+        setLoadingState("complete");
         clearInterval(interval);
         return;
       }
 
-      const progress = (step / (totalSteps - 1)) * 100;
-      setLoadingProgress(progress);
-      step++;
-    }, 50);
+      frameIndex++;
+    }, FRAME_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [imagesLoaded]);
+  }, [loadingState, FRAME_INTERVAL, TOTAL_FRAMES]);
 
   // Preload Snap AR dependencies
-  const preloadSnapAR = async () => {
+  const preloadSnapAR = useCallback(async () => {
     if (window.snapARPreloadCache.isPreloaded) {
       console.log("✅ Snap AR already preloaded");
       return;
@@ -265,11 +144,9 @@ const SplashScreen = ({ onComplete }) => {
 
     try {
       setIsPreloadingAR(true);
-      setArPreloadProgress(10);
       console.log("🚀 Starting Snap AR preload...");
 
       // Step 1: Initialize Camera Kit
-      console.log("📱 Initializing Camera Kit...");
       const actualApiToken =
         "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg";
 
@@ -277,49 +154,30 @@ const SplashScreen = ({ onComplete }) => {
         apiToken: actualApiToken,
       });
       window.snapARPreloadCache.cameraKit = cameraKit;
-      setArPreloadProgress(30);
-      console.log("✅ Camera Kit initialized");
 
       // Step 2: Initialize Camera Manager and get permissions
-      console.log("📷 Setting up camera...");
       const cameraManager = new CameraManager();
       const mediaStream = await cameraManager.initializeCamera();
       window.snapARPreloadCache.cameraManager = cameraManager;
       window.snapARPreloadCache.mediaStream = mediaStream;
-      setArPreloadProgress(60);
-      console.log("✅ Camera permissions granted and stream ready");
 
       // Step 3: Preload lens assets
-      console.log("🎭 Loading lens assets...");
       const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
       const { lenses } = await cameraKit.lensRepository.loadLensGroups([
         actualLensGroupId,
       ]);
       window.snapARPreloadCache.lenses = lenses;
-      setArPreloadProgress(90);
-      console.log("✅ Lens assets loaded");
 
       // Mark as complete
       window.snapARPreloadCache.isPreloaded = true;
       window.snapARPreloadCache.preloadProgress = 100;
-      setArPreloadProgress(100);
       console.log("🎉 Snap AR preload complete!");
-
-      // Small delay to show 100% progress
-      setTimeout(() => {
-        setIsPreloadingAR(false);
-      }, 500);
     } catch (error) {
       console.error("❌ Snap AR preload failed:", error);
-      setArPreloadProgress(0);
+    } finally {
       setIsPreloadingAR(false);
-      // Don't block the user, they can still try the AR experience
     }
-  };
-
-  const getCurrentImageIndex = () => {
-    return Math.min(Math.floor((loadingProgress / 100) * 30), 30);
-  };
+  }, []);
 
   const handleTapToBegin = async () => {
     // Start AR preloading immediately when user clicks
@@ -330,6 +188,17 @@ const SplashScreen = ({ onComplete }) => {
     }
   };
 
+  const getCurrentProgress = () => {
+    if (loadingState === "preloading") return 0;
+    if (loadingState === "complete") return 100;
+    return Math.round((currentFrame / (TOTAL_FRAMES - 1)) * 100);
+  };
+
+  const shouldShowLoadingText =
+    loadingState === "preloading" || loadingState === "animating";
+  const shouldShowProgress = loadingState === "animating";
+  const shouldShowButton = loadingState === "complete" && !isPreloadingAR;
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto">
       {/* HAPPYDENT Logo */}
@@ -339,60 +208,61 @@ const SplashScreen = ({ onComplete }) => {
         className="w-64 h-32 object-contain mb-8"
       />
 
-      <img className="chamking-smile-logo" src={chamkingSmile} alt="" />
-      <div className="font-gotham font-light italic opacity-0 my-[8px]">
+      {/* Chamking Smile Logo */}
+      <img
+        className="chamking-smile-logo"
+        src={chamkingSmile}
+        alt="Chamking Smile"
+      />
+
+      {/* Loading Text - Hidden but maintains space */}
+      <div
+        className={`font-gotham font-light italic my-2 transition-opacity duration-300 ${
+          shouldShowLoadingText ? "opacity-100" : "opacity-0"
+        }`}
+      >
         Loading...
       </div>
 
-      {/* Image Sequence Loader */}
-      {!showButton && imagesLoaded && (
-        <div className="mb-8 flex flex-col items-center">
-          <div className="font-gotham font-light italic">Loading...</div>
+      {/* Animation Container */}
+      <div className="mb-8 flex flex-col items-center">
+        {/* Image Sequence */}
+        {loadingState !== "preloading" && preloadedImages[currentFrame] && (
           <div className="mb-4">
             <img
-              src={preloadedImages[getCurrentImageIndex()]}
+              src={preloadedImages[currentFrame]}
               alt="Loading animation"
               className="w-42 h-42 object-contain"
+              style={{ imageRendering: "auto" }}
             />
           </div>
-          <p className="text-center text-xl font-bold">
-            {Math.round(loadingProgress)}%
+        )}
+
+        {/* Progress Percentage */}
+        {shouldShowProgress && (
+          <p className="text-center text-xl font-bold transition-opacity duration-300">
+            {getCurrentProgress()}%
           </p>
-        </div>
-      )}
+        )}
 
-      {/* Loading message while preloading images */}
-      {!imagesLoaded && (
-        <div className="mb-8">
-          <p className="text-center text-lg">Loading...</p>
-        </div>
-      )}
-
-      {/* AR Preloading Indicator */}
-      {/* {isPreloadingAR && (
-        <div className="mb-4 w-full max-w-xs">
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center">
-            <p className="text-blue-300 text-sm mb-2">Preparing AR Experience...</p>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${arPreloadProgress}%` }}
-              ></div>
-            </div>
-            <p className="text-blue-300 text-xs mt-1">{arPreloadProgress}%</p>
+        {/* Initial Loading State */}
+        {loadingState === "preloading" && (
+          <div className="w-42 h-42 flex items-center justify-center">
+            <p className="text-center text-lg">Preparing...</p>
           </div>
-        </div>
-      )} */}
+        )}
+      </div>
 
       {/* Button */}
-      {showButton && (
-        <div className="flex flex-col items-center space-y-4">
-          <img src={smileLoaded} alt="Final Smile Frame" />
+      {shouldShowButton && (
+        <div className="flex flex-col items-center space-y-4 animate-fade-in">
           <button
             onClick={handleTapToBegin}
             disabled={isPreloadingAR}
-            className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all ${
-              isPreloadingAR ? "opacity-50 cursor-not-allowed" : ""
+            className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 ${
+              isPreloadingAR
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:scale-105"
             }`}
             style={{
               background: isPreloadingAR
@@ -400,11 +270,9 @@ const SplashScreen = ({ onComplete }) => {
                 : "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
               borderRadius: "4px",
               border: "1px solid rgba(255, 255, 255, 0.52)",
-              borderStyle: "inside",
               boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
-              opacity: "100%",
             }}
           >
             {isPreloadingAR ? "PREPARING..." : "TAP TO BEGIN!"}
