@@ -519,7 +519,7 @@ class ARErrorBoundary extends React.Component {
 
 const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   const containerRef = useRef(null);
-  const canvasRef = useRef(null); // Add back canvasRef for capture
+  const canvasRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
@@ -530,45 +530,119 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   const buttonTimeoutRef = useRef(null);
 
   useEffect(() => {
-    movePreloadedCanvas();
+    // 🚀 REVIVE SESSION EVERY TIME COMPONENT MOUNTS
+    console.log("🔄 SnapARExperience mounted - reviving AR session");
+    reviveARSession();
+
     return () => {
       cleanup();
     };
-  }, []);
+  }, []); // Empty dependency array - only runs on mount
 
-  // AR state monitoring
-  // useEffect(() => {
-  //   const checkARState = async () => {
-  //     if (!userData?.phone) return;
+  // 🚀 SENIOR DEVELOPER SOLUTION: Revive existing session pattern
+  const reviveARSession = async () => {
+    try {
+      console.log("🔄 Starting AR session revival...");
+      setIsLoading(true);
+      setError("");
 
-  //     try {
-  //       const response = await fetch(`/api/ar-end/${userData.phone}`);
-  //       const data = await response.json();
+      const cache = window.snapARPreloadCache;
 
-  //       if (data.success && data.data.arEnded) {
-  //         console.log("🎭 AR session ended by server - triggering capture");
-  //         captureAndUpload();
-  //       }
-  //     } catch (error) {
-  //       console.error("❌ Failed to check AR state:", error);
-  //     }
-  //   };
+      if (!cache?.session || !cache?.cameraKit || !cache?.lenses) {
+        console.log("❌ No existing session found - falling back to normal flow");
+        movePreloadedCanvas();
+        return;
+      }
 
-  //   let stateCheckInterval;
-  //   if (!isLoading && userData?.phone) {
-  //     stateCheckInterval = setInterval(checkARState, 3000);
-  //     console.log("🎭 Started AR state monitoring every 3 seconds");
-  //   }
+      console.log("✅ Found existing session - applying revival pattern");
 
-  //   return () => {
-  //     if (stateCheckInterval) {
-  //       clearInterval(stateCheckInterval);
-  //       console.log("🎭 Stopped AR state monitoring");
-  //     }
-  //   };
-  // }, [isLoading, userData?.phone]);
+      const session = cache.session;
+      sessionRef.current = session;
 
-  // 🚀 INSTANT CANVAS DISPLAY - Use React ref to avoid DOM conflicts
+      // Step 1: Pause everything to reset state
+      console.log("⏸️ Pausing all session outputs...");
+      await session.pause(); // Pauses both live and capture
+
+      // Step 2: Wait for complete pause
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Step 3: Clear any existing lens to reset lens state
+      console.log("🧹 Clearing lens to reset state...");
+      try {
+        await session.clearLens();
+      } catch (clearError) {
+        console.log("⚠️ Lens clear warning:", clearError.message);
+      }
+
+      // Step 4: Get fresh media stream (this is crucial for revival)
+      console.log("📹 Getting fresh media stream...");
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const constraints = isMobile
+        ? { video: { facingMode: "user" }, audio: true }
+        : { video: { facingMode: "user" }, audio: true };
+
+      const freshMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      // Step 5: Create fresh source with new media stream
+      console.log("🔄 Creating fresh media source...");
+      const { createMediaStreamSource, Transform2D } = await import("@snap/camera-kit");
+      const freshSource = createMediaStreamSource(freshMediaStream, {
+        cameraType: "user",
+        disableSourceAudio: false,
+      });
+
+      // Step 6: Update session with fresh source
+      console.log("🔗 Connecting fresh source to session...");
+      await session.setSource(freshSource);
+      freshSource.setTransform(Transform2D.MirrorX);
+      await freshSource.setRenderSize(window.innerWidth, window.innerHeight);
+
+      // Step 7: Re-apply lens to fresh session
+      console.log("🎭 Re-applying lens to revived session...");
+      if (cache.lenses && cache.lenses.length > 0) {
+        await session.applyLens(cache.lenses[0]);
+      }
+
+      // Step 8: Get the existing canvas (should be live again now)
+      const arCanvas = session.output?.live;
+      if (!arCanvas) {
+        throw new Error("Session canvas not available after revival");
+      }
+
+      // Step 9: Ensure canvas is properly styled
+      arCanvas.id = "canvas";
+      arCanvas.style.width = "100%";
+      arCanvas.style.height = "100%";
+      arCanvas.style.objectFit = "cover";
+
+      // Step 10: Set up canvas in container
+      const container = containerRef.current;
+      if (container && container.parentNode) {
+        container.parentNode.replaceChild(arCanvas, container);
+        containerRef.current = arCanvas;
+        canvasRef.current = arCanvas;
+      }
+
+      // Step 11: Start the revived session (this should show live camera)
+      console.log("▶️ Starting revived session...");
+      await session.play('live'); // Explicitly start live output
+
+      // Step 12: Update cache with fresh components
+      cache.mediaStream = freshMediaStream;
+      cache.source = freshSource;
+
+      console.log("🎉 AR session successfully revived with live camera!");
+      setIsLoading(false);
+      startCaptureTimer();
+
+    } catch (error) {
+      console.error("❌ Failed to revive AR session:", error);
+      console.log("🔄 Falling back to normal preloaded flow");
+      movePreloadedCanvas();
+    }
+  };
+
+  // 🚀 FALLBACK: Original working code for when revival fails
   const movePreloadedCanvas = async () => {
     try {
       console.log("⚡ Setting up preloaded AR canvas...");
@@ -587,13 +661,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       }
 
       console.log("🎯 Getting Camera Kit's canvas...");
-      console.log("📊 Cache debug info:", {
-        sessionExists: !!cache.session,
-        sessionOutput: !!cache.session?.output,
-        liveCanvas: !!cache.session?.output?.live,
-        canvasTagName: cache.session?.output?.live?.tagName,
-        canvasParent: cache.session?.output?.live?.parentNode?.tagName || 'none'
-      });
 
       // Get the canvas that Camera Kit created
       const arCanvas = cache.session.output.live;
@@ -615,21 +682,19 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       arCanvas.style.height = "100%";
       arCanvas.style.objectFit = "cover";
 
-      // Instead of moving the canvas, let's replace our container with it
+      // Set up canvas in container
       const container = containerRef.current;
       if (container && container.parentNode) {
-        // Replace our container with the AR canvas
         container.parentNode.replaceChild(arCanvas, container);
-        // Update our refs to point to the canvas
         containerRef.current = arCanvas;
-        canvasRef.current = arCanvas; // Also set canvasRef for capture function
+        canvasRef.current = arCanvas;
       }
 
-      // NOW start the session (this is when AR actually becomes visible)
+      // Start the session
       console.log("▶️ Starting AR session...");
       await cache.session.play();
 
-      console.log("🎉 AR canvas displayed and session started - ZERO API calls!");
+      console.log("🎉 AR canvas displayed and session started!");
       setIsLoading(false);
       startCaptureTimer();
 
@@ -677,8 +742,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       buttonTimeoutRef.current = null;
     }
 
-    // Don't destroy the session - it might be reused
-    console.log("🧹 Cleaned up AR component (session preserved)");
+    console.log("🧹 Cleaned up AR component");
   };
 
   const skipToEnd = () => {
@@ -697,133 +761,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     setShowCaptureButton(false);
     captureAndUpload();
   };
-
-  // const captureAndUpload = async () => {
-  //   // Get the AR canvas (it should be our container now)
-  //   const canvas = containerRef.current ||
-  //     window.snapARPreloadCache?.session?.output?.live;
-
-  //   if (!canvas || !userData?.phone || isCapturing) {
-  //     console.log("❌ Cannot capture: missing canvas, phone, or already capturing");
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsCapturing(true);
-  //     setAutoCapturing(true);
-  //     console.log("📸 Starting polaroid capture process...");
-
-  //     const canvasWidth = canvas.width;
-  //     const canvasHeight = canvas.height;
-
-  //     const polaroidArea = {
-  //       x: 3,
-  //       y: 0,
-  //       width: 94,
-  //       height: 85,
-  //     };
-
-  //     const captureArea = {
-  //       x: Math.floor((canvasWidth * polaroidArea.x) / 100),
-  //       y: Math.floor((canvasHeight * polaroidArea.y) / 100),
-  //       width: Math.floor((canvasWidth * polaroidArea.width) / 100),
-  //       height: Math.floor((canvasHeight * polaroidArea.height) / 100),
-  //     };
-
-  //     const tempCanvas = document.createElement("canvas");
-  //     const tempCtx = tempCanvas.getContext("2d");
-  //     const enlargedWidth = Math.floor(captureArea.width * 1.3);
-  //     const enlargedHeight = Math.floor(captureArea.height * 1.3);
-
-  //     tempCanvas.width = enlargedWidth;
-  //     tempCanvas.height = enlargedHeight;
-
-  //     tempCtx.drawImage(
-  //       canvas,
-  //       captureArea.x,
-  //       captureArea.y,
-  //       captureArea.width,
-  //       captureArea.height,
-  //       0,
-  //       0,
-  //       enlargedWidth,
-  //       enlargedHeight
-  //     );
-
-  //     const blob = await new Promise((resolve, reject) => {
-  //       tempCanvas.toBlob(
-  //         (result) => {
-  //           if (result) {
-  //             resolve(result);
-  //           } else {
-  //             reject(new Error("Failed to create blob"));
-  //           }
-  //         },
-  //         "image/jpeg",
-  //         0.9
-  //       );
-  //     });
-
-  //     const formData = new FormData();
-  //     formData.append("photo", blob, `polaroid_${userData.phone}.jpg`);
-  //     formData.append("phone", userData.phone);
-  //     formData.append("source", "snapchat_polaroid");
-
-  //     const response = await fetch("/api/upload-photo", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     const result = await response.json();
-
-  //     if (result.success) {
-  //       console.log("✅ Upload successful:", result.data.imageUrl);
-  //       setTimeout(() => {
-  //         onComplete({
-  //           ...userData,
-  //           photo: result.data.imageUrl,
-  //           timestamp: new Date().toISOString(),
-  //           lensGroupId: lensGroupId,
-  //           captureMode: "polaroid",
-  //           uploadSuccess: true,
-  //         });
-  //       }, 0);
-  //     } else {
-  //       console.error("❌ Upload failed:", result.message);
-  //       setTimeout(() => {
-  //         onComplete({
-  //           ...userData,
-  //           photo: "upload-failed",
-  //           timestamp: new Date().toISOString(),
-  //           lensGroupId: lensGroupId,
-  //           captureMode: "polaroid",
-  //           uploadSuccess: false,
-  //           errorMessage: result.message,
-  //         });
-  //       }, 2400);
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Capture and upload error:", error);
-  //     setTimeout(() => {
-  //       onComplete({
-  //         ...userData,
-  //         photo: "capture-failed",
-  //         timestamp: new Date().toISOString(),
-  //         lensGroupId: lensGroupId,
-  //         captureMode: "polaroid",
-  //         uploadSuccess: false,
-  //         errorMessage: error.message,
-  //       });
-  //     }, 2400);
-  //   } finally {
-  //     setIsCapturing(false);
-  //     setAutoCapturing(false);
-  //   }
-  // };
 
   const captureAndUpload = async () => {
     // Try multiple ways to get the AR canvas
@@ -845,9 +782,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       canvas = canvasRef.current;
     }
 
-    // Method 3: Get from cache session
-    if (!canvas && window.snapARPreloadCache?.session?.output?.live) {
-      canvas = window.snapARPreloadCache.session.output.live;
+    // Method 3: Get from session reference
+    if (!canvas && sessionRef.current?.output?.live) {
+      canvas = sessionRef.current.output.live;
     }
 
     // Method 4: Find any canvas with ID
@@ -871,13 +808,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       setIsCapturing(true);
       setAutoCapturing(true);
       console.log("📸 Starting polaroid capture process...");
-      console.log("📊 Using canvas:", {
-        tagName: canvas.tagName,
-        width: canvas.width,
-        height: canvas.height,
-        clientWidth: canvas.clientWidth,
-        clientHeight: canvas.clientHeight
-      });
 
       // Wait a moment for canvas to be stable
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -890,12 +820,23 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         throw new Error(`Canvas has invalid dimensions: ${canvasWidth}x${canvasHeight}`);
       }
 
-      const polaroidArea = {
-        x: 3,
-        y: 0,
-        width: 94,
-        height: 85,
-      };
+      if (isTablet) {
+        // Tablet - maybe wider capture area
+        polaroidArea = {
+          x: 5,
+          y: 10,
+          width: 90,
+          height: 80,
+        };
+      } else {
+        // Mobile - maybe taller capture area
+        polaroidArea = {
+          x: 2,
+          y: 10,
+          width: 96,
+          height: 90,
+        };
+      }
 
       const captureArea = {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),
@@ -1059,12 +1000,10 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white">Moving AR experience...</p>
+                <p className="text-white">Reviving AR session...</p>
               </div>
             </div>
           )}
-
-          {/* Canvas will be moved here by JavaScript */}
 
           {autoCapturing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-20">
