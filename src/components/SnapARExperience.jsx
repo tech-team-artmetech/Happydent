@@ -74,7 +74,16 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   const sessionRef = useRef(null);
   const captureTimeoutRef = useRef(null);
   const [showCaptureButton, setShowCaptureButton] = useState(false);
-  const buttonTimeoutRef = useRef(null);
+  // const buttonTimeoutRef = useRef(null);
+
+  // 📡 SSE State Management - FIXED LOGIC
+  const [sseConnected, setSseConnected] = useState(false);
+  const [arSessionEnded, setArSessionEnded] = useState(false); // Track if AR session has ended
+  const sseRef = useRef(null);
+  const currentSessionId = useRef(null);
+
+  // 🚀 FIXED: Use state instead of ref for sessionId to trigger useEffect
+  const [sessionId, setSessionId] = useState(null);
 
   useEffect(() => {
     initializeARSession();
@@ -83,12 +92,242 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     };
   }, []);
 
+  // 📡 FIXED SSE Effect - Connect to AR events when sessionId state changes
+  useEffect(() => {
+    console.log("📡 SSE useEffect triggered - sessionId:", sessionId, "sseConnected:", sseConnected);
+
+    if (sessionId && !sseRef.current) {
+      console.log("📡 Setting up SSE connection for session:", sessionId);
+      setupSSEConnection(sessionId);
+    }
+
+    return () => {
+      if (sseRef.current) {
+        console.log("📡 Cleaning up SSE connection");
+        sseRef.current.close();
+        sseRef.current = null;
+        setSseConnected(false);
+      }
+    };
+  }, [sessionId]); // 🚀 FIXED: Use sessionId state instead of ref
+
+  // 🎯 FIXED: Show PROCEED button based on correct logic
+  useEffect(() => {
+    if (arSessionEnded) {
+      // AR has ended - SHOW the PROCEED button
+      console.log("🎯 AR Session ended via SSE - showing PROCEED button");
+      setShowCaptureButton(true);
+
+      // Clear the timer since AR ended
+      // if (buttonTimeoutRef.current) {
+      //   clearTimeout(buttonTimeoutRef.current);
+      //   buttonTimeoutRef.current = null;
+      // }
+
+    } else {
+      // AR is ongoing - HIDE the PROCEED button and start timer
+      console.log("🎯 AR Session ongoing - hiding PROCEED button, starting timer");
+      setShowCaptureButton(false);
+
+      // Start the 5-second timer for fallback
+      // if (!isLoading) { // Only start timer if not loading
+      //   startCaptureTimer();
+      // }
+    }
+  }, [arSessionEnded, isLoading]);
+
+  // 📡 SETUP SSE CONNECTION FOR AR END DETECTION
+  const setupSSEConnection = (sessionId) => {
+    try {
+      console.log("📡 Connecting to SSE endpoint for session:", sessionId);
+
+      const eventSource = new EventSource(`/api/ar-events/${sessionId}`);
+      sseRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        console.log("📡 SSE connection established");
+        setSseConnected(true);
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("📡 SSE message received:", data);
+
+          switch (data.type) {
+            case 'connected':
+              console.log("📡 SSE connected confirmation");
+              setSseConnected(true);
+              break;
+
+            case 'ar_ended':
+              console.log("🎯 AR End detected via SSE!", data);
+              if (data.sessionId === sessionId || data.phone === userData?.phone) {
+                // 🚀 FIXED: Set AR session as ended when we receive the callback
+                setArSessionEnded(true);
+              }
+              break;
+
+            case 'heartbeat':
+              // Silent heartbeat
+              break;
+
+            default:
+              console.log("📡 Unknown SSE message type:", data.type);
+          }
+        } catch (parseError) {
+          console.warn("📡 Failed to parse SSE message:", event.data);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("📡 SSE connection error:", error);
+        setSseConnected(false);
+
+        // Don't retry immediately, let the timer handle fallback
+        if (eventSource.readyState === EventSource.CLOSED) {
+          console.log("📡 SSE connection closed");
+          sseRef.current = null;
+        }
+      };
+
+    } catch (error) {
+      console.error("📡 Failed to setup SSE connection:", error);
+    }
+  };
+
+  // 🔍 CHECK AR SESSION STATUS FROM BACKEND
+  const checkARSessionStatus = async (sessionId) => {
+    try {
+      const response = await fetch(`/api/snap/session-status/${sessionId}`);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        console.log("📊 Session status:", data.data.arState);
+        return data.data.arState.ended;
+      }
+      return false;
+    } catch (error) {
+      console.error("❌ Failed to check session status:", error);
+      return false;
+    }
+  };
+
   // 🚀 UNIFIED AR SESSION INITIALIZATION
   const initializeARSession = async () => {
     try {
       console.log("🚀 Initializing AR session...");
       setIsLoading(true);
       setError("");
+
+      // 🔍 ENHANCED: Try multiple sources for session ID
+      let retrievedSessionId = null;
+
+      // Method 1: From userData prop
+      if (userData?.sessionId) {
+        retrievedSessionId = userData.sessionId;
+        console.log("📝 Got session ID from userData:", retrievedSessionId);
+      }
+
+      // Method 2: From localStorage with correct key
+      if (!retrievedSessionId) {
+        retrievedSessionId = localStorage.getItem("snapARSessionId"); // 🚀 FIXED: Use correct key
+        if (retrievedSessionId) {
+          console.log("📝 Got session ID from localStorage (snapARSessionId):", retrievedSessionId);
+        }
+      }
+
+      // Method 3: Fallback to old key
+      if (!retrievedSessionId) {
+        retrievedSessionId = localStorage.getItem("currentSessionId");
+        if (retrievedSessionId) {
+          console.log("📝 Got session ID from localStorage (currentSessionId):", retrievedSessionId);
+        }
+      }
+
+      // Method 4: Try to fetch from phone if available
+      if (!retrievedSessionId && userData?.phone) {
+        console.log("📱 No session ID found, checking for existing session by phone:", userData.phone);
+        try {
+          const checkResponse = await fetch(`/api/snap/check-session/${userData.phone}`);
+          const checkData = await checkResponse.json();
+
+          if (checkResponse.ok && checkData.success && checkData.data.hasExistingSession) {
+            retrievedSessionId = checkData.data.session.sessionId;
+            console.log("📝 Found existing session ID for phone:", retrievedSessionId);
+
+            // Store it with correct key
+            localStorage.setItem("snapARSessionId", retrievedSessionId);
+            localStorage.setItem("currentSessionId", retrievedSessionId); // Keep both for compatibility
+          }
+        } catch (error) {
+          console.warn("❌ Failed to check existing session:", error);
+        }
+      }
+
+      // Method 5: Create new session if still no ID found
+      if (!retrievedSessionId && userData?.phone) {
+        console.log("🆕 No session found, creating new session for phone:", userData.phone);
+        try {
+          const createResponse = await fetch("/api/snap/create-session", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone: userData.phone,
+              forceNew: false,
+            }),
+          });
+
+          const createData = await createResponse.json();
+
+          if (createResponse.ok && createData.success) {
+            retrievedSessionId = createData.data.sessionId;
+            console.log("✅ Created new session ID:", retrievedSessionId);
+
+            // Store it with correct key
+            localStorage.setItem("snapARSessionId", retrievedSessionId);
+            localStorage.setItem("currentSessionId", retrievedSessionId); // Keep both for compatibility
+
+            // Associate phone with session
+            if (userData.phone) {
+              console.log("📱 Associating phone with new session");
+              await fetch("/api/snap/associate-phone", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  sessionId: retrievedSessionId,
+                  phone: userData.phone,
+                  userInfo: {
+                    userId: userData.userId,
+                    userName: userData.userName,
+                    phone: userData.phone,
+                  },
+                }),
+              });
+            }
+          }
+        } catch (error) {
+          console.error("❌ Failed to create new session:", error);
+        }
+      }
+
+      // Set session ID if found
+      if (retrievedSessionId) {
+        console.log("✅ Final session ID:", retrievedSessionId);
+        currentSessionId.current = retrievedSessionId;
+        setSessionId(retrievedSessionId); // This will trigger SSE connection
+
+        // 🔍 Check initial AR session status
+        const isEnded = await checkARSessionStatus(retrievedSessionId);
+        setArSessionEnded(isEnded);
+        console.log(`📊 Initial AR session status - Ended: ${isEnded}`);
+      } else {
+        console.warn("⚠️ No session ID could be obtained");
+      }
 
       const cache = window.snapARPreloadCache;
       const isRetry = userData?.isRetry;
@@ -297,7 +536,11 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
       console.log("🎉 AR session started successfully!");
       setIsLoading(false);
-      startCaptureTimer();
+
+      // 🚀 FIXED: Only start timer if AR session hasn't ended yet
+      // if (!arSessionEnded) {
+      //   startCaptureTimer();
+      // }
 
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
@@ -330,11 +573,23 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     });
   };
 
-  const startCaptureTimer = () => {
-    buttonTimeoutRef.current = setTimeout(() => {
-      setShowCaptureButton(true);
-    }, 5000);
-  };
+  // const startCaptureTimer = () => {
+  //   // Clear any existing timer first
+  //   if (buttonTimeoutRef.current) {
+  //     clearTimeout(buttonTimeoutRef.current);
+  //     buttonTimeoutRef.current = null;
+  //   }
+
+  //   console.log("⏰ Starting 5-second capture timer");
+  //   buttonTimeoutRef.current = setTimeout(() => {
+  //     if (!arSessionEnded) {
+  //       console.log("⏰ Timer expired - showing PROCEED button (fallback)");
+  //       setShowCaptureButton(true);
+  //     } else {
+  //       console.log("⏰ Timer expired but AR already ended");
+  //     }
+  //   }, 5000);
+  // };
 
   const cleanup = () => {
     if (captureTimeoutRef.current) {
@@ -342,9 +597,17 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       captureTimeoutRef.current = null;
     }
 
-    if (buttonTimeoutRef.current) {
-      clearTimeout(buttonTimeoutRef.current);
-      buttonTimeoutRef.current = null;
+    // if (buttonTimeoutRef.current) {
+    //   clearTimeout(buttonTimeoutRef.current);
+    //   buttonTimeoutRef.current = null;
+    // }
+
+    // 📡 Close SSE connection
+    if (sseRef.current) {
+      console.log("📡 Closing SSE connection during cleanup");
+      sseRef.current.close();
+      sseRef.current = null;
+      setSseConnected(false);
     }
 
     // Don't destroy the session - it might be reused
@@ -367,6 +630,38 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     setShowCaptureButton(false);
     captureAndUpload();
   };
+
+  // 🚀 ADDED: Debug function to manually trigger SSE connection
+  const debugSSEConnection = () => {
+    console.log("🐛 Debug: Manual SSE connection trigger");
+    console.log("SessionId state:", sessionId);
+    console.log("CurrentSessionId ref:", currentSessionId.current);
+    console.log("SSE connected:", sseConnected);
+    console.log("SSE ref:", sseRef.current);
+
+    if (!sessionId && currentSessionId.current) {
+      console.log("🐛 Setting sessionId state from ref");
+      setSessionId(currentSessionId.current);
+    }
+
+    if (sessionId && !sseRef.current) {
+      console.log("🐛 Manually setting up SSE connection");
+      setupSSEConnection(sessionId);
+    }
+  };
+
+  // 🚀 ADDED: Force SSE connection if sessionId exists but no connection
+  useEffect(() => {
+    // Fallback check every 3 seconds to ensure SSE connection
+    const fallbackTimer = setInterval(() => {
+      if (sessionId && !sseRef.current && !sseConnected) {
+        console.log("🔄 Fallback: Attempting to reconnect SSE");
+        setupSSEConnection(sessionId);
+      }
+    }, 3000);
+
+    return () => clearInterval(fallbackTimer);
+  }, [sessionId, sseConnected]);
 
   const captureAndUpload = async () => {
     // Try multiple ways to get the AR canvas
@@ -625,8 +920,29 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
               </div>
             </div>
           )}
+
+          {/* 📡 SSE Connection Indicator (optional debug info) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <div className={`w-3 h-3 rounded-full ${sseConnected ? 'bg-green-500' : 'bg-red-500'}`}
+                title={`SSE: ${sseConnected ? 'Connected' : 'Disconnected'}`}>
+              </div>
+              <div className={`w-3 h-3 rounded-full ${arSessionEnded ? 'bg-red-500' : 'bg-green-500'}`}
+                title={`AR: ${arSessionEnded ? 'Ended' : 'Active'}`}>
+              </div>
+              {/* Debug button */}
+              <button
+                onClick={debugSSEConnection}
+                className="text-xs bg-gray-700 px-2 py-1 rounded"
+                title="Debug SSE Connection"
+              >
+                SSE
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* 🚀 FIXED: Show PROCEED button when AR has ended OR timer expires (fallback) */}
         {showCaptureButton && !isCapturing && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
             <button

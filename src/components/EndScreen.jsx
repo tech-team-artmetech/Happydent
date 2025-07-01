@@ -112,73 +112,246 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     }
   };
 
-  // 🚀 NEW: Smart retry function that checks for existing AR session
-  const handleRetry = () => {
-    console.log("🔄 Retry button clicked");
+  // 🚀 NEW: Smart retry function that checks for existing session
+  const handleSmartRetry = async () => {
+    console.log("🔄 Smart retry initiated");
+    setIsLoading(true);
+    setError("");
 
-    // Check if AR session is still available and ready
-    const cache = window.snapARPreloadCache;
-    const hasValidARSession = cache?.sessionReady && cache?.session;
-
-    console.log("📊 AR Session Status:", {
-      hasCache: !!cache,
-      sessionReady: cache?.sessionReady,
-      hasSession: !!cache?.session,
-      canReuseAR: hasValidARSession
-    });
-
-    if (hasValidARSession && onRetryAR) {
-      // AR session is available - go directly to AR experience
-      console.log("✅ Reusing existing AR session - no reload needed!");
-
-      // Don't clear localStorage - keep user info for retry
-      // Just trigger AR experience with existing session
-      onRetryAR({
-        phone: userInfo.phone,
-        userId: userInfo.userId,
-        userName: userInfo.userName
-      });
-    } else {
-      // AR session not available - do full restart
-      console.log("🔄 AR session not available - doing full restart");
-
-      // Clear localStorage for full restart
-      localStorage.removeItem("userPhone");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("userName");
-
-      if (onRetry) {
-        onRetry();
+    try {
+      const phone = userInfo?.phone;
+      if (!phone) {
+        throw new Error("User phone not found. Please start over.");
       }
-    }
-  };
 
-  // 🚀 NEW: Reset AR session function (optional - for troubleshooting)
-  const resetARSession = () => {
-    console.log("🧹 Resetting AR session cache");
+      console.log(`📱 Checking existing session for phone: ${phone}`);
 
-    if (window.snapARPreloadCache) {
-      // Stop the session if it's playing
-      if (window.snapARPreloadCache.session) {
-        try {
-          window.snapARPreloadCache.session.pause();
-        } catch (e) {
-          console.log("Session already paused or stopped");
+      // Step 1: Check if there's an existing session for this phone
+      const sessionCheckResponse = await fetch(
+        `/api/snap/check-session/${phone}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const sessionCheckData = await sessionCheckResponse.json();
+      console.log("📊 Session check result:", sessionCheckData);
+
+      let sessionId = null;
+      let isNewSession = false;
+
+      if (sessionCheckResponse.ok && sessionCheckData.success) {
+        if (sessionCheckData.data.hasExistingSession && sessionCheckData.data.session.canReuse) {
+          // Existing session found and can be reused
+          sessionId = sessionCheckData.data.session.sessionId;
+          console.log(`♻️ Found existing reusable session: ${sessionId}`);
+
+          // Step 2a: Reset the existing session to ended: false
+          const resetResponse = await fetch(
+            "/api/snap/reset-session",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                sessionId: sessionId,
+                phone: phone,
+              }),
+            }
+          );
+
+          const resetData = await resetResponse.json();
+
+          if (!resetResponse.ok || !resetData.success) {
+            throw new Error(resetData.message || "Failed to reset session");
+          }
+
+          console.log(`✅ Session reset successfully:`, resetData.data);
+        } else {
+          // No existing session or not reusable - create new one
+          console.log(`🆕 No reusable session found, creating new session`);
+          isNewSession = true;
+        }
+      } else {
+        console.log(`🆕 Session check failed, creating new session`);
+        isNewSession = true;
+      }
+
+      // Step 2b: Create new session if needed
+      if (isNewSession) {
+        const createSessionResponse = await fetch(
+          "/api/snap/create-session",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone: phone,
+              forceNew: true, // Force new session
+            }),
+          }
+        );
+
+        const createSessionData = await createSessionResponse.json();
+
+        if (!createSessionResponse.ok || !createSessionData.success) {
+          throw new Error(createSessionData.message || "Failed to create new session");
+        }
+
+        sessionId = createSessionData.data.sessionId;
+        console.log(`✅ New session created: ${sessionId}`);
+
+        // Step 3: Associate phone with the new session
+        const associateResponse = await fetch(
+          "/api/snap/associate-phone",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              sessionId: sessionId,
+              phone: phone,
+              userInfo: {
+                userId: userInfo.userId,
+                userName: userInfo.userName,
+                phone: phone,
+              },
+            }),
+          }
+        );
+
+        const associateData = await associateResponse.json();
+
+        if (!associateResponse.ok || !associateData.success) {
+          throw new Error(associateData.message || "Failed to associate phone with session");
+        }
+
+        console.log(`✅ Phone associated with session:`, associateData.data);
+      }
+
+      // Step 4: Reset the phone-based AR state to ended: false
+      const arEndResponse = await fetch(
+        "/api/ar-end",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: phone,
+            ended: false, // Reset to ongoing
+          }),
+        }
+      );
+
+      const arEndData = await arEndResponse.json();
+
+      if (!arEndResponse.ok || !arEndData.success) {
+        console.warn("⚠️ Failed to reset AR end state:", arEndData.message);
+        // Don't throw error here, as the session is already set up
+      } else {
+        console.log(`✅ AR state reset to ongoing:`, arEndData.data);
+      }
+
+      // Step 5: Update local storage with session info
+      localStorage.setItem("currentSessionId", sessionId);
+      localStorage.setItem("arSessionReady", "true");
+
+      // Step 6: Check if we can reuse AR session from cache
+      const cache = window.snapARPreloadCache;
+      const hasValidARSession = cache?.sessionReady && cache?.session;
+
+      console.log("📊 Final AR Session Status:", {
+        sessionId: sessionId,
+        hasCache: !!cache,
+        sessionReady: cache?.sessionReady,
+        hasSession: !!cache?.session,
+        canReuseAR: hasValidARSession
+      });
+
+      // Step 7: Execute the appropriate retry action
+      if (hasValidARSession && onRetryAR) {
+        // AR session is available - go directly to AR experience
+        console.log("🎮 Launching AR experience with session:", sessionId);
+
+        onRetryAR({
+          sessionId: sessionId,
+          phone: userInfo.phone,
+          userId: userInfo.userId,
+          userName: userInfo.userName,
+          isRetry: true,
+        });
+      } else {
+        // No AR session in cache - do full restart but keep session info
+        console.log("🔄 Doing full restart with session:", sessionId);
+
+        // Keep session info but clear other data for fresh registration flow
+        localStorage.removeItem("userPhone");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("userName");
+
+        if (onRetry) {
+          onRetry({
+            sessionId: sessionId,
+            preserveSession: true,
+          });
         }
       }
 
-      // Reset cache flags but keep the session for potential reuse
-      window.snapARPreloadCache.sessionReady = false;
-      window.snapARPreloadCache.isPreloaded = false;
+    } catch (error) {
+      console.error("❌ Retry error:", error);
+      setError(error.message || "Failed to restart session. Please try again.");
+
+      // Fallback: Clear everything and do fresh start
+      localStorage.clear();
+      if (onRetry) {
+        onRetry({ freshStart: true });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Updated handleRetry to use smart retry
+  const handleRetry = () => {
+    console.log("🔄 Retry button clicked - using smart retry");
+    handleSmartRetry();
+  };
+
+  // 🚀 NEW: Debug function (optional - for development)
+  const handleDebug = async () => {
+    const phone = userInfo?.phone;
+    const sessionId = localStorage.getItem("currentSessionId");
+
+    console.log("🔍 Debug Session State:");
+    console.log("Phone:", phone);
+    console.log("Stored Session ID:", sessionId);
+    console.log("AR Cache:", window.snapARPreloadCache);
+
+    if (phone) {
+      try {
+        const arStatus = await fetch(`/api/snap/ar-status/${phone}`);
+        const arData = await arStatus.json();
+        console.log("Phone AR Status:", arData);
+      } catch (e) {
+        console.log("Could not fetch phone AR status");
+      }
     }
 
-    // Now do full restart
-    localStorage.removeItem("userPhone");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userName");
-
-    if (onRetry) {
-      onRetry();
+    if (sessionId) {
+      try {
+        const sessionStatus = await fetch(`/api/snap/session-status/${sessionId}`);
+        const sessionData = await sessionStatus.json();
+        console.log("Session Status:", sessionData);
+      } catch (e) {
+        console.log("Could not fetch session status");
+      }
     }
   };
 
@@ -209,7 +382,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       {isLoading && (
         <div className="mb-4 bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center z-20">
           <p className="text-blue-300 text-sm">
-            {userPhoto ? "Downloading your photo..." : "Loading your photo..."}
+            {userPhoto ? "Processing retry..." : "Loading your photo..."}
           </p>
         </div>
       )}
@@ -230,9 +403,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         {userInfo && (
           <div className="text-center mt-2">
             {photoInfo?.hasPhoto ? (
-              <p className="text-green-300 text-xs"></p>
+              <p className="text-green-300 text-xs">Your photo is ready!</p>
             ) : (
-              <p className="text-yellow-300 text-xs"></p>
+              <p className="text-yellow-300 text-xs">Using default image</p>
             )}
           </div>
         )}
@@ -260,7 +433,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              DOWNLOADING...
+              DOWNLOADING
             </div>
           ) : photoInfo?.hasPhoto ? (
             "DOWNLOAD"
@@ -286,10 +459,17 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             opacity: "100%",
           }}
         >
-          {window.snapARPreloadCache?.sessionReady ? "RETRY" : "RETRY"}
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              PROCESSING
+            </div>
+          ) : (
+            "RETRY"
+          )}
         </button>
-      </div>
 
+      </div>
     </div>
   );
 };
