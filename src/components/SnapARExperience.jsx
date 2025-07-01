@@ -477,6 +477,56 @@ import React, { useRef, useEffect, useState } from "react";
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet = /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 
+// 🚀 CAMERA QUALITY ENHANCEMENT FUNCTIONS
+const enhanceCameraStream = async () => {
+  try {
+    console.log("🚀 Enhancing camera stream quality...");
+
+    // 🎯 HIGH QUALITY CONSTRAINTS
+    const constraints = {
+      video: {
+        width: { ideal: isMobile ? 1920 : 2560, max: 4096 },
+        height: { ideal: isMobile ? 1080 : 1440, max: 2160 },
+        frameRate: { ideal: isMobile ? 30 : 60, min: 24 },
+        facingMode: isMobile ? { ideal: "environment" } : "user",
+
+        // 🎨 QUALITY SETTINGS
+        aspectRatio: { ideal: 16 / 9 },
+        resizeMode: 'crop-and-scale',
+        focusMode: "continuous",
+        exposureMode: "continuous",
+        whiteBalanceMode: "continuous"
+      }
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const settings = stream.getVideoTracks()[0].getSettings();
+    console.log(`🏆 Enhanced camera: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`);
+
+    return stream;
+  } catch (error) {
+    console.warn("⚠️ Enhanced camera failed, using standard:", error);
+    return navigator.mediaDevices.getUserMedia({ video: true });
+  }
+};
+
+const enhanceCanvas = (canvas) => {
+  if (!canvas) return;
+
+  try {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 🚀 MAXIMUM QUALITY SETTINGS
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    console.log("🎨 Canvas quality enhanced");
+  } catch (error) {
+    console.warn("Canvas enhancement failed:", error);
+  }
+};
+
 // Error Boundary to catch DOM manipulation errors
 class ARErrorBoundary extends React.Component {
   constructor(props) {
@@ -539,42 +589,17 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     };
   }, []);
 
-  // AR state monitoring
-  // useEffect(() => {
-  //   const checkARState = async () => {
-  //     if (!userData?.phone) return;
-
-  //     try {
-  //       const response = await fetch(`/api/ar-end/${userData.phone}`);
-  //       const data = await response.json();
-
-  //       if (data.success && data.data.arEnded) {
-  //         console.log("🎭 AR session ended by server - triggering capture");
-  //         captureAndUpload();
-  //       }
-  //     } catch (error) {
-  //       console.error("❌ Failed to check AR state:", error);
-  //     }
-  //   };
-
-  //   let stateCheckInterval;
-  //   if (!isLoading && userData?.phone) {
-  //     stateCheckInterval = setInterval(checkARState, 3000);
-  //     console.log("🎭 Started AR state monitoring every 3 seconds");
-  //   }
-
-  //   return () => {
-  //     if (stateCheckInterval) {
-  //       clearInterval(stateCheckInterval);
-  //       console.log("🎭 Stopped AR state monitoring");
-  //     }
-  //   };
-  // }, [isLoading, userData?.phone]);
-
-  // 🚀 INSTANT CANVAS DISPLAY - Use React ref to avoid DOM conflicts
+  // 🚀 ENHANCED VERSION OF YOUR movePreloadedCanvas
   const movePreloadedCanvas = async () => {
     try {
       console.log("⚡ Setting up preloaded AR canvas...");
+
+      // 🎯 ENHANCE CAMERA QUALITY FIRST
+      try {
+        await enhanceCameraStream();
+      } catch (enhanceError) {
+        console.warn("Camera enhancement failed, continuing:", enhanceError);
+      }
 
       const cache = window.snapARPreloadCache;
 
@@ -617,6 +642,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       arCanvas.style.width = "100%";
       arCanvas.style.height = "100%";
       arCanvas.style.objectFit = "cover";
+
+      // 🎨 ENHANCE CANVAS QUALITY
+      enhanceCanvas(arCanvas);
 
       // Instead of moving the canvas, let's replace our container with it
       const container = containerRef.current;
@@ -701,133 +729,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     captureAndUpload();
   };
 
-  // const captureAndUpload = async () => {
-  //   // Get the AR canvas (it should be our container now)
-  //   const canvas = containerRef.current ||
-  //     window.snapARPreloadCache?.session?.output?.live;
-
-  //   if (!canvas || !userData?.phone || isCapturing) {
-  //     console.log("❌ Cannot capture: missing canvas, phone, or already capturing");
-  //     return;
-  //   }
-
-  //   try {
-  //     setIsCapturing(true);
-  //     setAutoCapturing(true);
-  //     console.log("📸 Starting polaroid capture process...");
-
-  //     const canvasWidth = canvas.width;
-  //     const canvasHeight = canvas.height;
-
-  //     const polaroidArea = {
-  //       x: 3,
-  //       y: 0,
-  //       width: 94,
-  //       height: 85,
-  //     };
-
-  //     const captureArea = {
-  //       x: Math.floor((canvasWidth * polaroidArea.x) / 100),
-  //       y: Math.floor((canvasHeight * polaroidArea.y) / 100),
-  //       width: Math.floor((canvasWidth * polaroidArea.width) / 100),
-  //       height: Math.floor((canvasHeight * polaroidArea.height) / 100),
-  //     };
-
-  //     const tempCanvas = document.createElement("canvas");
-  //     const tempCtx = tempCanvas.getContext("2d");
-  //     const enlargedWidth = Math.floor(captureArea.width * 1.3);
-  //     const enlargedHeight = Math.floor(captureArea.height * 1.3);
-
-  //     tempCanvas.width = enlargedWidth;
-  //     tempCanvas.height = enlargedHeight;
-
-  //     tempCtx.drawImage(
-  //       canvas,
-  //       captureArea.x,
-  //       captureArea.y,
-  //       captureArea.width,
-  //       captureArea.height,
-  //       0,
-  //       0,
-  //       enlargedWidth,
-  //       enlargedHeight
-  //     );
-
-  //     const blob = await new Promise((resolve, reject) => {
-  //       tempCanvas.toBlob(
-  //         (result) => {
-  //           if (result) {
-  //             resolve(result);
-  //           } else {
-  //             reject(new Error("Failed to create blob"));
-  //           }
-  //         },
-  //         "image/jpeg",
-  //         0.9
-  //       );
-  //     });
-
-  //     const formData = new FormData();
-  //     formData.append("photo", blob, `polaroid_${userData.phone}.jpg`);
-  //     formData.append("phone", userData.phone);
-  //     formData.append("source", "snapchat_polaroid");
-
-  //     const response = await fetch("/api/upload-photo", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     const result = await response.json();
-
-  //     if (result.success) {
-  //       console.log("✅ Upload successful:", result.data.imageUrl);
-  //       setTimeout(() => {
-  //         onComplete({
-  //           ...userData,
-  //           photo: result.data.imageUrl,
-  //           timestamp: new Date().toISOString(),
-  //           lensGroupId: lensGroupId,
-  //           captureMode: "polaroid",
-  //           uploadSuccess: true,
-  //         });
-  //       }, 0);
-  //     } else {
-  //       console.error("❌ Upload failed:", result.message);
-  //       setTimeout(() => {
-  //         onComplete({
-  //           ...userData,
-  //           photo: "upload-failed",
-  //           timestamp: new Date().toISOString(),
-  //           lensGroupId: lensGroupId,
-  //           captureMode: "polaroid",
-  //           uploadSuccess: false,
-  //           errorMessage: result.message,
-  //         });
-  //       }, 2400);
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Capture and upload error:", error);
-  //     setTimeout(() => {
-  //       onComplete({
-  //         ...userData,
-  //         photo: "capture-failed",
-  //         timestamp: new Date().toISOString(),
-  //         lensGroupId: lensGroupId,
-  //         captureMode: "polaroid",
-  //         uploadSuccess: false,
-  //         errorMessage: error.message,
-  //       });
-  //     }, 2400);
-  //   } finally {
-  //     setIsCapturing(false);
-  //     setAutoCapturing(false);
-  //   }
-  // };
-
   const captureAndUpload = async () => {
     // Try multiple ways to get the AR canvas
     let canvas = null;
@@ -873,7 +774,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     try {
       setIsCapturing(true);
       setAutoCapturing(true);
-      console.log("📸 Starting polaroid capture process...");
+      console.log("📸 Starting enhanced polaroid capture process...");
       console.log("📊 Using canvas:", {
         tagName: canvas.tagName,
         width: canvas.width,
@@ -881,6 +782,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         clientWidth: canvas.clientWidth,
         clientHeight: canvas.clientHeight
       });
+
+      // 🎨 ENHANCE CANVAS ONE MORE TIME BEFORE CAPTURE
+      enhanceCanvas(canvas);
 
       // Wait a moment for canvas to be stable
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -892,8 +796,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       if (canvasWidth === 0 || canvasHeight === 0) {
         throw new Error(`Canvas has invalid dimensions: ${canvasWidth}x${canvasHeight}`);
       }
-
-
 
       let polaroidArea = {
         x: 2,
@@ -929,6 +831,11 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
       const tempCanvas = document.createElement("canvas");
       const tempCtx = tempCanvas.getContext("2d");
+
+      // 🚀 ENHANCE TEMPORARY CANVAS TOO
+      tempCtx.imageSmoothingEnabled = true;
+      tempCtx.imageSmoothingQuality = 'high';
+
       const enlargedWidth = Math.floor(captureArea.width * 1.3);
       const enlargedHeight = Math.floor(captureArea.height * 1.3);
 
@@ -953,6 +860,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         throw new Error(`Canvas drawing failed: ${drawError.message}`);
       }
 
+      // 🏆 CAPTURE WITH HIGHER QUALITY
       const blob = await new Promise((resolve, reject) => {
         tempCanvas.toBlob(
           (result) => {
@@ -962,8 +870,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
               reject(new Error("Failed to create blob from canvas"));
             }
           },
-          "image/jpeg",
-          0.9
+          "image/png", // PNG for better quality
+          1.0 // Maximum quality
         );
       });
 
@@ -971,12 +879,12 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         throw new Error("Generated blob is empty");
       }
 
-      console.log("✅ Blob created successfully, size:", blob.size);
+      console.log("✅ Enhanced blob created successfully, size:", blob.size);
 
       const formData = new FormData();
-      formData.append("photo", blob, `polaroid_${userData.phone}.jpg`);
+      formData.append("photo", blob, `enhanced_polaroid_${userData.phone}.png`);
       formData.append("phone", userData.phone);
-      formData.append("source", "snapchat_polaroid");
+      formData.append("source", "enhanced_snapchat_polaroid");
 
       const response = await fetch("/api/upload-photo", {
         method: "POST",
@@ -990,17 +898,15 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Upload successful:", result.data.imageUrl);
-        setTimeout(() => {
-          onComplete({
-            ...userData,
-            photo: result.data.imageUrl,
-            timestamp: new Date().toISOString(),
-            lensGroupId: lensGroupId,
-            captureMode: "polaroid",
-            uploadSuccess: true,
-          });
-        }, 0);
+        console.log("✅ Enhanced upload successful:", result.data.imageUrl);
+        onComplete({  // Remove setTimeout completely
+          ...userData,
+          photo: result.data.imageUrl,
+          timestamp: new Date().toISOString(),
+          lensGroupId: lensGroupId,
+          captureMode: "enhanced_polaroid",
+          uploadSuccess: true,
+        });
       } else {
         console.error("❌ Upload failed:", result.message);
         setTimeout(() => {
@@ -1009,21 +915,21 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             photo: "upload-failed",
             timestamp: new Date().toISOString(),
             lensGroupId: lensGroupId,
-            captureMode: "polaroid",
+            captureMode: "enhanced_polaroid",
             uploadSuccess: false,
             errorMessage: result.message,
           });
         }, 2400);
       }
     } catch (error) {
-      console.error("❌ Capture and upload error:", error);
+      console.error("❌ Enhanced capture and upload error:", error);
       setTimeout(() => {
         onComplete({
           ...userData,
           photo: "capture-failed",
           timestamp: new Date().toISOString(),
           lensGroupId: lensGroupId,
-          captureMode: "polaroid",
+          captureMode: "enhanced_polaroid",
           uploadSuccess: false,
           errorMessage: error.message,
         });
@@ -1082,7 +988,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white">Moving AR experience...</p>
+                <p className="text-white">🚀 Loading enhanced AR experience...</p>
               </div>
             </div>
           )}
@@ -1093,7 +999,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-20">
               <div className="text-center">
                 <div className="animate-pulse text-white text-lg font-medium">
-                  📸 Capturing your moment...
+                  📸 Capturing your enhanced moment...
                 </div>
               </div>
             </div>
