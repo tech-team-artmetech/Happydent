@@ -4,39 +4,6 @@ import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet = /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 
-// 🚀 CAMERA QUALITY ENHANCEMENT FUNCTIONS
-const enhanceCameraStream = async () => {
-  try {
-    console.log("🚀 Enhancing camera stream quality...");
-
-    // 🎯 HIGH QUALITY CONSTRAINTS
-    const constraints = {
-      video: {
-        width: { ideal: isMobile ? 1920 : 2560, max: 4096 },
-        height: { ideal: isMobile ? 1080 : 1440, max: 2160 },
-        frameRate: { ideal: isMobile ? 30 : 60, min: 24 },
-        facingMode: isMobile ? { ideal: "environment" } : "user",
-
-        // 🎨 QUALITY SETTINGS
-        aspectRatio: { ideal: 16 / 9 },
-        resizeMode: 'crop-and-scale',
-        focusMode: "continuous",
-        exposureMode: "continuous",
-        whiteBalanceMode: "continuous"
-      }
-    };
-
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    const settings = stream.getVideoTracks()[0].getSettings();
-    console.log(`🏆 Enhanced camera: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`);
-
-    return stream;
-  } catch (error) {
-    console.warn("⚠️ Enhanced camera failed, using standard:", error);
-    return navigator.mediaDevices.getUserMedia({ video: true });
-  }
-};
-
 const enhanceCanvas = (canvas) => {
   if (!canvas) return;
 
@@ -141,13 +108,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         console.log("🔥 Complete restart requested - recreating entire AR session");
         await createCompletelyFreshARSession();
         return;
-      }
-
-      // 🎯 ENHANCE CAMERA QUALITY FIRST (for normal flow)
-      try {
-        await enhanceCameraStream();
-      } catch (enhanceError) {
-        console.warn("Camera enhancement failed, continuing:", enhanceError);
       }
 
       // 🆕 FRESH INITIALIZATION: Wait for preloaded session or create new
@@ -651,7 +611,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white">🚀 Loading enhanced AR experience...</p>
+                <p className="text-white">🚀 Loading AR experience...</p>
               </div>
             </div>
           )}
@@ -660,7 +620,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-20">
               <div className="text-center">
                 <div className="animate-pulse text-white text-lg font-medium">
-                  📸 Capturing your enhanced moment...
+                  📸 Capturing your moment...
                 </div>
               </div>
             </div>
