@@ -180,3 +180,10 @@ button:focus-visible {
     background: linear-gradient(180deg, #0c1f59, #0b3396) !important;
   }
 }
+
+.radio-btn-container button,
+.radio-btn-container button:hover {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}

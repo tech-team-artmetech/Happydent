@@ -26,7 +26,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/user/${phone}/photo`
+        `https://artmetech.co.in/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -62,7 +62,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `/api/download-photo/${userInfo.phone}`,
+        `https://artmetech.co.in/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
@@ -128,7 +128,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
       // Step 1: Check if there's an existing session for this phone
       const sessionCheckResponse = await fetch(
-        `/api/snap/check-session/${phone}`,
+        `https://artmetech.co.in/api/snap/check-session/${phone}`,
         {
           method: "GET",
           headers: {
@@ -144,14 +144,17 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       let isNewSession = false;
 
       if (sessionCheckResponse.ok && sessionCheckData.success) {
-        if (sessionCheckData.data.hasExistingSession && sessionCheckData.data.session.canReuse) {
+        if (
+          sessionCheckData.data.hasExistingSession &&
+          sessionCheckData.data.session.canReuse
+        ) {
           // Existing session found and can be reused
           sessionId = sessionCheckData.data.session.sessionId;
           console.log(`♻️ Found existing reusable session: ${sessionId}`);
 
           // Step 2a: Reset the existing session to ended: false
           const resetResponse = await fetch(
-            "/api/snap/reset-session",
+            "https://artmetech.co.in/api/snap/reset-session",
             {
               method: "POST",
               headers: {
@@ -184,7 +187,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       // Step 2b: Create new session if needed
       if (isNewSession) {
         const createSessionResponse = await fetch(
-          "/api/snap/create-session",
+          "https://artmetech.co.in/api/snap/create-session",
           {
             method: "POST",
             headers: {
@@ -200,7 +203,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         const createSessionData = await createSessionResponse.json();
 
         if (!createSessionResponse.ok || !createSessionData.success) {
-          throw new Error(createSessionData.message || "Failed to create new session");
+          throw new Error(
+            createSessionData.message || "Failed to create new session"
+          );
         }
 
         sessionId = createSessionData.data.sessionId;
@@ -208,7 +213,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
         // Step 3: Associate phone with the new session
         const associateResponse = await fetch(
-          "/api/snap/associate-phone",
+          "https://artmetech.co.in/api/snap/associate-phone",
           {
             method: "POST",
             headers: {
@@ -229,26 +234,25 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         const associateData = await associateResponse.json();
 
         if (!associateResponse.ok || !associateData.success) {
-          throw new Error(associateData.message || "Failed to associate phone with session");
+          throw new Error(
+            associateData.message || "Failed to associate phone with session"
+          );
         }
 
         console.log(`✅ Phone associated with session:`, associateData.data);
       }
 
       // Step 4: Reset the phone-based AR state to ended: false
-      const arEndResponse = await fetch(
-        "/api/ar-end",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: phone,
-            ended: false, // Reset to ongoing
-          }),
-        }
-      );
+      const arEndResponse = await fetch("https://artmetech.co.in/api/ar-end", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phone,
+          ended: false, // Reset to ongoing
+        }),
+      });
 
       const arEndData = await arEndResponse.json();
 
@@ -272,7 +276,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         hasCache: !!cache,
         sessionReady: cache?.sessionReady,
         hasSession: !!cache?.session,
-        canReuseAR: hasValidARSession
+        canReuseAR: hasValidARSession,
       });
 
       // Step 7: Execute the appropriate retry action
@@ -303,7 +307,6 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           });
         }
       }
-
     } catch (error) {
       console.error("❌ Retry error:", error);
       setError(error.message || "Failed to restart session. Please try again.");
@@ -336,7 +339,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
     if (phone) {
       try {
-        const arStatus = await fetch(`/api/snap/ar-status/${phone}`);
+        const arStatus = await fetch(
+          `https://artmetech.co.in/api/snap/ar-status/${phone}`
+        );
         const arData = await arStatus.json();
         console.log("Phone AR Status:", arData);
       } catch (e) {
@@ -346,7 +351,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
     if (sessionId) {
       try {
-        const sessionStatus = await fetch(`/api/snap/session-status/${sessionId}`);
+        const sessionStatus = await fetch(
+          `https://artmetech.co.in/api/snap/session-status/${sessionId}`
+        );
         const sessionData = await sessionStatus.json();
         console.log("Session Status:", sessionData);
       } catch (e) {
@@ -392,7 +399,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         <img
           src={userPhoto || "/assets/enddummy.png"}
           alt="Result"
-          className="w-80 h-80 object-contain rounded-lg"
+          className="object-contain rounded-lg"
           onError={(e) => {
             // Fallback to dummy image if user photo fails to load
             e.target.src = "/assets/enddummy.png";
@@ -400,7 +407,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         />
 
         {/* Photo Status Indicator */}
-        {userInfo && (
+        {/* {userInfo && (
           <div className="text-center mt-2">
             {photoInfo?.hasPhoto ? (
               <p className="text-green-300 text-xs">Your photo is ready!</p>
@@ -408,7 +415,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
               <p className="text-yellow-300 text-xs">Using default image</p>
             )}
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Buttons Container */}
@@ -417,7 +424,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         <button
           onClick={handlePrint}
           disabled={isLoading}
-          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-[180px]"
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-80"
           style={{
             background:
               "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
@@ -446,7 +453,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         <button
           onClick={handleRetry}
           disabled={isLoading}
-          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-[180px]"
+          className="text-white text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-3 w-80"
           style={{
             background:
               "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
@@ -468,7 +475,6 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             "RETRY"
           )}
         </button>
-
       </div>
     </div>
   );

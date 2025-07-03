@@ -143,7 +143,7 @@
 //       setIsLoading(true);
 //       setError("");
 
-//       const response = await fetch(`/api/send-otp`, {
+//       const response = await fetch(`https://artmetech.co.in/api/send-otp`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -184,7 +184,7 @@
 //       setIsLoading(true);
 //       setError("");
 
-//       const response = await fetch(`/api/verify-otp`, {
+//       const response = await fetch(`https://artmetech.co.in/api/verify-otp`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -252,7 +252,7 @@
 //   // API call to register user
 //   const registerUser = async (userData) => {
 //     try {
-//       const response = await fetch(`/api/register`, {
+//       const response = await fetch(`https://artmetech.co.in/api/register`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -294,7 +294,7 @@
 //       // 🎭 START AR SESSION - Set AR state to ongoing (false)
 //       console.log(`🎭 Starting AR session for ${formData.phone}`);
 //       try {
-//         await fetch(`/api/ar-end`, {
+//         await fetch(`https://artmetech.co.in/api/ar-end`, {
 //           method: "POST",
 //           headers: {
 //             "Content-Type": "application/json",
@@ -682,7 +682,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   });
 
   // ⭐ TESTING MODE - Set to true to bypass OTP
-  const BYPASS_OTP = false; // Change to false for production
+  const BYPASS_OTP = true; // Change to false for production
 
   // API endpoint - change this to your backend URL
   const API_BASE_URL = "";
@@ -820,7 +820,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`/api/send-otp`, {
+      const response = await fetch(`https://artmetech.co.in/api/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -861,7 +861,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`/api/verify-otp`, {
+      const response = await fetch(`https://artmetech.co.in/api/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -938,17 +938,20 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         `📱 Associating phone ${phone} with session ${snapAR.sessionId}`
       );
 
-      const response = await fetch(`/api/snap/associate-phone`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sessionId: snapAR.sessionId,
-          phone: phone,
-          userInfo: userInfo,
-        }),
-      });
+      const response = await fetch(
+        `https://artmetech.co.in/api/snap/associate-phone`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId: snapAR.sessionId,
+            phone: phone,
+            userInfo: userInfo,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -972,7 +975,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   // API call to register user
   const registerUser = async (userData) => {
     try {
-      const response = await fetch(`/api/register`, {
+      const response = await fetch(`https://artmetech.co.in/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1025,22 +1028,21 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
       // 2. START AR SESSION - Set AR state to ongoing (false)
       console.log(`🎭 Step 2: Starting AR session for ${formData.phone}`);
-      try {
-        await fetch(`/api/ar-end`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: formData.phone,
-            ended: false, // false = AR ongoing
-          }),
-        });
-        console.log(`✅ AR session started for ${formData.phone}`);
-      } catch (arError) {
-        console.error("❌ Failed to start AR session:", arError);
-        // Continue with registration even if AR state fails
-      }
+      // try {
+      //   await fetch(`https://artmetech.co.in/api/ar-end`, {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       phone: formData.phone,
+      //       ended: false, // false = AR ongoing
+      //     }),
+      //   });
+      //   console.log(`✅ AR session started for ${formData.phone}`);
+      // } catch (arError) {
+      //   console.error("❌ Failed to start AR session:", arError);
+      // }
 
       // 3. REGISTER USER
       const userData = {
@@ -1132,14 +1134,14 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         )}
 
         {/* NEW: Session Status Indicator */}
-        {snapAR.sessionId && (
+        {/* {snapAR.sessionId && (
           <div className="bg-blue-500/20 border border-blue-500/50 rounded p-2 text-center">
             <p className="text-blue-300 text-xs">
               🆔 Session: {snapAR.sessionId.substring(0, 15)}...
               {snapAR.phoneAssociated && " | 📱 Phone Associated"}
             </p>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Form Container */}
@@ -1186,7 +1188,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                   isLoading ||
                   (otpData.isOtpSent && !otpData.canResend && !BYPASS_OTP)
                 }
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${
                   validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
@@ -1226,7 +1228,11 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
         {/* OTP Input (shown only when OTP is sent and not bypassing) */}
         {otpData.isOtpSent && !otpData.isOtpVerified && !BYPASS_OTP && (
-          <div>
+          <div
+            style={{
+              margin: "0px",
+            }}
+          >
             <div className="flex space-x-2">
               <input
                 type="tel"
@@ -1243,7 +1249,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${
                   validateOTP(otpData.otp) && !isLoading
                     ? "text-white hover:opacity-80 border-white"
                     : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
@@ -1292,7 +1298,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
           <div className="relative">
             {/* Background container */}
-            <div className="relative flex border-2 border-white rounded-[4px] overflow-hidden bg-transparent">
+            <div className="relative flex border-2 border-white rounded-[4px] overflow-hidden bg-transparent mt-[24px]">
               {/* Sliding white background */}
               <div
                 className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${
@@ -1309,11 +1315,11 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
               />
 
               {/* Button container */}
-              <div className="relative flex w-full">
+              <div className="relative flex w-full radio-btn-container">
                 <button
                   onClick={() => handleGroupSizeSelect("less")}
                   disabled={isLoading}
-                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
+                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
                     formData.groupSize === "less"
                       ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
                       : "bg-transparent text-white" // Not selected: transparent bg, white text
@@ -1324,6 +1330,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                     MozUserSelect: "none",
                     msUserSelect: "none",
                     userSelect: "none",
+                    outline: "none",
                   }}
                 >
                   Less than 3 people
@@ -1331,7 +1338,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 <button
                   onClick={() => handleGroupSizeSelect("more")}
                   disabled={isLoading}
-                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
+                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
                     formData.groupSize === "more"
                       ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
                       : "bg-transparent text-white" // Not selected: transparent bg, white text
@@ -1342,6 +1349,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                     MozUserSelect: "none",
                     msUserSelect: "none",
                     userSelect: "none",
+                    outline: "none",
                   }}
                 >
                   More than 3 people
