@@ -187,3 +187,9 @@ button:focus-visible {
   box-shadow: none !important;
   border: none !important;
 }
+
+@media (max-width: 390px) {
+  button.fixed-btn {
+    min-width: auto !important;
+  }
+}

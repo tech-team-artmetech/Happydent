@@ -190,12 +190,15 @@ const SplashScreen = ({ onComplete }) => {
     try {
       setSessionState((prev) => ({ ...prev, isCreating: true, error: null }));
 
-      const response = await fetch(`/api/snap/create-session`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://artmetech.co.in/api/snap/create-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -361,8 +364,9 @@ const SplashScreen = ({ onComplete }) => {
 
       {/* Loading text below logo - ALWAYS in DOM, just visibility controlled */}
       <div
-        className={`font-gotham font-light font-[18px] italic mb-2 transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
-          }`}
+        className={`font-gotham font-light font-[18px] italic mb-2 transition-opacity duration-300 ${
+          showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+        }`}
         style={{
           visibility: showLoadingContent && imagesLoaded ? "visible" : "hidden",
         }}
@@ -407,8 +411,9 @@ const SplashScreen = ({ onComplete }) => {
 
         {/* Progress percentage - ALWAYS in DOM, just visibility controlled */}
         <p
-          className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-center text-xl font-bold transition-opacity duration-300 ${
+            showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility:
               showLoadingContent && imagesLoaded ? "visible" : "hidden",
@@ -419,8 +424,9 @@ const SplashScreen = ({ onComplete }) => {
 
         {/* Initial loading message - ALWAYS in DOM */}
         <p
-          className={`text-center text-lg transition-opacity duration-300 ${!imagesLoaded ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-center text-lg transition-opacity duration-300 ${
+            !imagesLoaded ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility: !imagesLoaded ? "visible" : "hidden",
           }}
@@ -434,8 +440,9 @@ const SplashScreen = ({ onComplete }) => {
         <button
           onClick={handleTapToBegin}
           disabled={sessionState.isCreating}
-          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${showFinalContent ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            showFinalContent ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility: showFinalContent ? "visible" : "hidden",
             background:
