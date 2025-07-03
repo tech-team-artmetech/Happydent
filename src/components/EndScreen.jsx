@@ -290,6 +290,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           userId: userInfo.userId,
           userName: userInfo.userName,
           isRetry: true,
+          // CHANGE: if you're passing lens info
         });
       } else {
         // No AR session in cache - do full restart but keep session info
@@ -304,6 +305,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           onRetry({
             sessionId: sessionId,
             preserveSession: true,
+            // CHANGE: if you're passing lens info
           });
         }
       }

@@ -42,8 +42,8 @@ const FastDemonDetection = {
       this.isDemonDetected = true;
       console.log(
         "👹 Demon detected in " +
-          this.checkCounter +
-          " checks - DETECTION COMPLETE"
+        this.checkCounter +
+        " checks - DETECTION COMPLETE"
       );
       return true;
     }
@@ -273,7 +273,7 @@ class ARErrorBoundary extends React.Component {
   }
 }
 
-const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
+const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -791,10 +791,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       cache.mediaStream = await cache.cameraManager.initializeCamera();
 
       console.log("🔥 Step 3: Load lenses...");
-      const { lenses } = await cache.cameraKit.lensRepository.loadLensGroups([
-        lensGroupId,
-      ]);
-      cache.lenses = lenses;
+      const lens = await cache.cameraKit.lensRepository.loadLens(lensId, lensGroupId);
+      cache.lenses = [lens];
 
       console.log("🔥 Step 4: Create session...");
       cache.session = await cache.cameraKit.createSession();
@@ -1150,7 +1148,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           ...userData,
           photo: result.data.imageUrl,
           timestamp: new Date().toISOString(),
-          lensGroupId: lensGroupId,
+          lensId: lensId,
           captureMode: "enhanced_polaroid",
           uploadSuccess: true,
           demonDetected: FastDemonDetection.isDemonDetected,
@@ -1162,7 +1160,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             ...userData,
             photo: "upload-failed",
             timestamp: new Date().toISOString(),
-            lensGroupId: lensGroupId,
+            lensId: lensId,
             captureMode: "enhanced_polaroid",
             uploadSuccess: false,
             errorMessage: result.message,
@@ -1177,7 +1175,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           ...userData,
           photo: "capture-failed",
           timestamp: new Date().toISOString(),
-          lensGroupId: lensGroupId,
+          lensId: lensId,
           captureMode: "enhanced_polaroid",
           uploadSuccess: false,
           errorMessage: error.message,
@@ -1257,28 +1255,24 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           {process.env.NODE_ENV === "development" && (
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${
-                  sseConnected ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-3 h-3 rounded-full ${sseConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
                 title={`SSE: ${sseConnected ? "Connected" : "Disconnected"}`}
               ></div>
               <div
-                className={`w-3 h-3 rounded-full ${
-                  arSessionEnded ? "bg-red-500" : "bg-green-500"
-                }`}
+                className={`w-3 h-3 rounded-full ${arSessionEnded ? "bg-red-500" : "bg-green-500"
+                  }`}
                 title={`AR: ${arSessionEnded ? "Ended" : "Active"}`}
               ></div>
               <div
-                className={`w-3 h-3 rounded-full ${
-                  FastDemonDetection.isDemonDetected
-                    ? "bg-red-500"
-                    : "bg-gray-500"
-                }`}
-                title={`Demon: ${
-                  FastDemonDetection.isDemonDetected
-                    ? "Detected"
-                    : "Not Detected"
-                }`}
+                className={`w-3 h-3 rounded-full ${FastDemonDetection.isDemonDetected
+                  ? "bg-red-500"
+                  : "bg-gray-500"
+                  }`}
+                title={`Demon: ${FastDemonDetection.isDemonDetected
+                  ? "Detected"
+                  : "Not Detected"
+                  }`}
               ></div>
               {/* Debug button */}
               <button

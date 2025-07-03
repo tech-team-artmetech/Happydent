@@ -101,6 +101,7 @@ function App() {
   const SNAP_API_TOKEN =
     "eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNzUwMjUxNDQ5LCJzdWIiOiJmZDFmZDkyMi01NWI1LTQ3ZTQtOTlmOS1kMjQ1YzIyNzZjZWZ-UFJPRFVDVElPTn4wYTBiZDg4OC0zYzJkLTQ2NTQtOWJhZS04NWNkZjIwZGZkM2MifQ.DXp0F3LA8ZqxuB0UH4TCaQT2iMbCsc9xrT8xbuoYOJg";
   const LENS_GROUP_ID = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
+  const LENS_ID = "31000d06-6d26-4b39-8dd0-6e63aeb5901d";
 
   const goToRegister = () => {
     setCurrentScreen("register");
@@ -218,6 +219,7 @@ function App() {
         onComplete={goToEnd}
         userData={userData}
         lensGroupId={LENS_GROUP_ID}
+        lensId={LENS_ID}
         apiToken={SNAP_API_TOKEN}
       />
     );
