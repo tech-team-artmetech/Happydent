@@ -143,7 +143,7 @@
 //       setIsLoading(true);
 //       setError("");
 
-//       const response = await fetch(`https://artmetech.co.in/api/send-otp`, {
+//       const response = await fetch(`/api/send-otp`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -184,7 +184,7 @@
 //       setIsLoading(true);
 //       setError("");
 
-//       const response = await fetch(`https://artmetech.co.in/api/verify-otp`, {
+//       const response = await fetch(`/api/verify-otp`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -252,7 +252,7 @@
 //   // API call to register user
 //   const registerUser = async (userData) => {
 //     try {
-//       const response = await fetch(`https://artmetech.co.in/api/register`, {
+//       const response = await fetch(`/api/register`, {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -294,7 +294,7 @@
 //       // 🎭 START AR SESSION - Set AR state to ongoing (false)
 //       console.log(`🎭 Starting AR session for ${formData.phone}`);
 //       try {
-//         await fetch(`https://artmetech.co.in/api/ar-end`, {
+//         await fetch(`/api/ar-end`, {
 //           method: "POST",
 //           headers: {
 //             "Content-Type": "application/json",
@@ -820,7 +820,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`https://artmetech.co.in/api/send-otp`, {
+      const response = await fetch(`/api/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -861,7 +861,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`https://artmetech.co.in/api/verify-otp`, {
+      const response = await fetch(`/api/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -938,20 +938,17 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         `📱 Associating phone ${phone} with session ${snapAR.sessionId}`
       );
 
-      const response = await fetch(
-        `https://artmetech.co.in/api/snap/associate-phone`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sessionId: snapAR.sessionId,
-            phone: phone,
-            userInfo: userInfo,
-          }),
-        }
-      );
+      const response = await fetch(`/api/snap/associate-phone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: snapAR.sessionId,
+          phone: phone,
+          userInfo: userInfo,
+        }),
+      });
 
       const data = await response.json();
 
@@ -975,7 +972,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   // API call to register user
   // const registerUser = async (userData) => {
   //   try {
-  //     const response = await fetch(`https://artmetech.co.in/api/register`, {
+  //     const response = await fetch(`/api/register`, {
   //       method: "POST",
   //       headers: {
   //         "Content-Type": "application/json",
@@ -1002,7 +999,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
   const registerUser = async (userData) => {
     try {
-      const response = await fetch(`https://artmetech.co.in/api/register`, {
+      const response = await fetch(`/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1057,7 +1054,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       // 2. START AR SESSION - Set AR state to ongoing (false)
       console.log(`🎭 Step 2: Starting AR session for ${formData.phone}`);
       // try {
-      //   await fetch(`https://artmetech.co.in/api/ar-end`, {
+      //   await fetch(`/api/ar-end`, {
       //     method: "POST",
       //     headers: {
       //       "Content-Type": "application/json",
