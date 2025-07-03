@@ -42,8 +42,8 @@ const FastDemonDetection = {
       this.isDemonDetected = true;
       console.log(
         "👹 Demon detected in " +
-          this.checkCounter +
-          " checks - DETECTION COMPLETE"
+        this.checkCounter +
+        " checks - DETECTION COMPLETE"
       );
       return true;
     }
@@ -1250,28 +1250,24 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           {process.env.NODE_ENV === "development" && (
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${
-                  sseConnected ? "bg-green-500" : "bg-red-500"
-                }`}
+                className={`w-3 h-3 rounded-full ${sseConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
                 title={`SSE: ${sseConnected ? "Connected" : "Disconnected"}`}
               ></div>
               <div
-                className={`w-3 h-3 rounded-full ${
-                  arSessionEnded ? "bg-red-500" : "bg-green-500"
-                }`}
+                className={`w-3 h-3 rounded-full ${arSessionEnded ? "bg-red-500" : "bg-green-500"
+                  }`}
                 title={`AR: ${arSessionEnded ? "Ended" : "Active"}`}
               ></div>
               <div
-                className={`w-3 h-3 rounded-full ${
-                  FastDemonDetection.isDemonDetected
-                    ? "bg-red-500"
-                    : "bg-gray-500"
-                }`}
-                title={`Demon: ${
-                  FastDemonDetection.isDemonDetected
-                    ? "Detected"
-                    : "Not Detected"
-                }`}
+                className={`w-3 h-3 rounded-full ${FastDemonDetection.isDemonDetected
+                  ? "bg-red-500"
+                  : "bg-gray-500"
+                  }`}
+                title={`Demon: ${FastDemonDetection.isDemonDetected
+                  ? "Detected"
+                  : "Not Detected"
+                  }`}
               ></div>
               {/* Debug button */}
               <button

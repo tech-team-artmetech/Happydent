@@ -970,6 +970,33 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   };
 
   // API call to register user
+  // const registerUser = async (userData) => {
+  //   try {
+  //     const response = await fetch(`/api/register`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         ...userData,
+  //         otpVerified: BYPASS_OTP ? true : otpData.isOtpVerified,
+  //         bypassMode: BYPASS_OTP, // Let backend know this is bypass mode
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || "Registration failed");
+  //     }
+
+  //     return data;
+  //   } catch (error) {
+  //     console.error("Registration API error:", error);
+  //     throw error;
+  //   }
+  // };
+
   const registerUser = async (userData) => {
     try {
       const response = await fetch(`/api/register`, {
@@ -979,6 +1006,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         },
         body: JSON.stringify({
           ...userData,
+          category: "internal", // Hardcoded for microsite
           otpVerified: BYPASS_OTP ? true : otpData.isOtpVerified,
           bypassMode: BYPASS_OTP, // Let backend know this is bypass mode
         }),
@@ -1185,18 +1213,17 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                   isLoading ||
                   (otpData.isOtpSent && !otpData.canResend && !BYPASS_OTP)
                 }
-                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${
-                  validatePhone(formData.phone) &&
+                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                    ? "text-white hover:opacity-80 border-white"
-                    : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
-                }`}
+                  ? "text-white hover:opacity-80 border-white"
+                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
+                  }`}
                 style={{
                   backgroundColor:
                     validatePhone(formData.phone) &&
-                    !isLoading &&
-                    (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
+                      !isLoading &&
+                      (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
                       ? "#041763"
                       : undefined,
                 }}
@@ -1204,20 +1231,19 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 {BYPASS_OTP
                   ? "Verify"
                   : otpData.isOtpSent && !otpData.canResend
-                  ? "Sent"
-                  : otpData.isOtpSent
-                  ? "Resend"
-                  : "Send OTP"}
+                    ? "Sent"
+                    : otpData.isOtpSent
+                      ? "Resend"
+                      : "Send OTP"}
               </button>
             )}
           </div>
 
           <p
-            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
-              phoneTouched && !validatePhone(formData.phone)
-                ? "visible"
-                : "invisible"
-            }`}
+            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone)
+              ? "visible"
+              : "invisible"
+              }`}
           >
             Enter valid 10 digit mobile number
           </p>
@@ -1246,11 +1272,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
-                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${
-                  validateOTP(otpData.otp) && !isLoading
-                    ? "text-white hover:opacity-80 border-white"
-                    : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
-                }`}
+                className={`min-w-[120px] px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
+                  ? "text-white hover:opacity-80 border-white"
+                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
+                  }`}
                 style={{
                   backgroundColor:
                     validateOTP(otpData.otp) && !isLoading
@@ -1271,11 +1296,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
             {/* OTP Validation Error */}
             <p
-              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
-                otpTouched && !validateOTP(otpData.otp)
-                  ? "visible"
-                  : "invisible"
-              }`}
+              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${otpTouched && !validateOTP(otpData.otp)
+                ? "visible"
+                : "invisible"
+                }`}
             >
               Enter valid 6-digit OTP
             </p>
@@ -1298,11 +1322,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             <div className="relative flex border-2 border-white rounded-[4px] overflow-hidden bg-transparent mt-[24px]">
               {/* Sliding white background */}
               <div
-                className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${
-                  formData.groupSize === "more"
-                    ? "translate-x-full"
-                    : "translate-x-0"
-                }`}
+                className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${formData.groupSize === "more"
+                  ? "translate-x-full"
+                  : "translate-x-0"
+                  }`}
                 style={{
                   margin: "0px",
                   width: "50%",
@@ -1316,11 +1339,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 <button
                   onClick={() => handleGroupSizeSelect("less")}
                   disabled={isLoading}
-                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
-                    formData.groupSize === "less"
-                      ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
-                      : "bg-transparent text-white" // Not selected: transparent bg, white text
-                  }`}
+                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "less"
+                    ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
+                    : "bg-transparent text-white" // Not selected: transparent bg, white text
+                    }`}
                   style={{
                     WebkitTapHighlightColor: "transparent",
                     WebkitUserSelect: "none",
@@ -1335,11 +1357,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 <button
                   onClick={() => handleGroupSizeSelect("more")}
                   disabled={isLoading}
-                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
-                    formData.groupSize === "more"
-                      ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
-                      : "bg-transparent text-white" // Not selected: transparent bg, white text
-                  }`}
+                  className={`outline-none hover:outline-none flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "more"
+                    ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
+                    : "bg-transparent text-white" // Not selected: transparent bg, white text
+                    }`}
                   style={{
                     WebkitTapHighlightColor: "transparent",
                     WebkitUserSelect: "none",
@@ -1361,9 +1382,8 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
           <button
             onClick={handleGetStarted}
             disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${
-              isFormValid() && !isLoading ? "" : "cursor-not-allowed"
-            }`}
+            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading ? "" : "cursor-not-allowed"
+              }`}
             style={{
               background:
                 "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
