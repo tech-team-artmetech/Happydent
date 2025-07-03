@@ -2,7 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-const isTablet = /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
+const isTablet =
+  /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 
 // ⚡ ULTRA-FAST Demon Detection - NO AR Slowdown!
 const FastDemonDetection = {
@@ -39,7 +40,11 @@ const FastDemonDetection = {
 
     if (hasRedDemon) {
       this.isDemonDetected = true;
-      console.log("👹 Demon detected in " + this.checkCounter + " checks - DETECTION COMPLETE");
+      console.log(
+        "👹 Demon detected in " +
+          this.checkCounter +
+          " checks - DETECTION COMPLETE"
+      );
       return true;
     }
 
@@ -51,26 +56,42 @@ const FastDemonDetection = {
     if (!this.canvas) return false;
 
     try {
-      console.log("👹 Checking for demon... (Check #" + this.checkCounter + ")");
+      console.log(
+        "👹 Checking for demon... (Check #" + this.checkCounter + ")"
+      );
 
       // Focus on the EXACT area where the red demon appears
       var redCount = 0;
       var samplePoints = [
         // Upper demon area (where the red figure clearly is)
-        { x: 0.15, y: 0.15 }, { x: 0.25, y: 0.15 }, { x: 0.35, y: 0.15 },
-        { x: 0.15, y: 0.20 }, { x: 0.25, y: 0.20 }, { x: 0.35, y: 0.20 },
-        { x: 0.15, y: 0.25 }, { x: 0.25, y: 0.25 }, { x: 0.35, y: 0.25 },
+        { x: 0.15, y: 0.15 },
+        { x: 0.25, y: 0.15 },
+        { x: 0.35, y: 0.15 },
+        { x: 0.15, y: 0.2 },
+        { x: 0.25, y: 0.2 },
+        { x: 0.35, y: 0.2 },
+        { x: 0.15, y: 0.25 },
+        { x: 0.25, y: 0.25 },
+        { x: 0.35, y: 0.25 },
 
         // Middle demon body area
-        { x: 0.15, y: 0.30 }, { x: 0.25, y: 0.30 }, { x: 0.35, y: 0.30 },
-        { x: 0.15, y: 0.35 }, { x: 0.25, y: 0.35 }, { x: 0.35, y: 0.35 },
+        { x: 0.15, y: 0.3 },
+        { x: 0.25, y: 0.3 },
+        { x: 0.35, y: 0.3 },
+        { x: 0.15, y: 0.35 },
+        { x: 0.25, y: 0.35 },
+        { x: 0.35, y: 0.35 },
 
         // Lower demon area
-        { x: 0.15, y: 0.40 }, { x: 0.25, y: 0.40 }, { x: 0.35, y: 0.40 },
+        { x: 0.15, y: 0.4 },
+        { x: 0.25, y: 0.4 },
+        { x: 0.35, y: 0.4 },
 
         // Extra focused samples where demon is most visible
-        { x: 0.20, y: 0.18 }, { x: 0.30, y: 0.18 },
-        { x: 0.20, y: 0.28 }, { x: 0.30, y: 0.28 }
+        { x: 0.2, y: 0.18 },
+        { x: 0.3, y: 0.18 },
+        { x: 0.2, y: 0.28 },
+        { x: 0.3, y: 0.28 },
       ];
 
       // Check each sample point
@@ -80,15 +101,31 @@ const FastDemonDetection = {
         }
       }
 
-      var redPercentage = (redCount / samplePoints.length);
+      var redPercentage = redCount / samplePoints.length;
 
-      console.log("👹 Detection result:", redCount, "of", samplePoints.length, "pixels are red (", (redPercentage * 100).toFixed(1), "%)");
+      console.log(
+        "👹 Detection result:",
+        redCount,
+        "of",
+        samplePoints.length,
+        "pixels are red (",
+        (redPercentage * 100).toFixed(1),
+        "%)"
+      );
 
       // Lower threshold - works perfectly at 8%
-      var demonDetected = redPercentage > 0.08;
+      var demonDetected = redPercentage > 0.06;
 
       if (demonDetected) {
-        console.log("🔥 DEMON DETECTED! Red pixels:", redCount, "of", samplePoints.length, "(", (redPercentage * 100).toFixed(1), "%)");
+        console.log(
+          "🔥 DEMON DETECTED! Red pixels:",
+          redCount,
+          "of",
+          samplePoints.length,
+          "(",
+          (redPercentage * 100).toFixed(1),
+          "%)"
+        );
       } else {
         console.log("👻 No demon detected this check");
       }
@@ -107,19 +144,23 @@ const FastDemonDetection = {
       var color = this.getPixelColor(point.x, point.y);
 
       // Enhanced red detection - more flexible thresholds
-      var isRed = (
-        color.r > 120 &&                    // Red must be strong
-        color.r > color.g + 30 &&          // Red significantly higher than green
-        color.r > color.b + 30 &&          // Red significantly higher than blue
-        (color.g + color.b) < color.r       // Combined G+B less than Red
-      );
+      var isRed =
+        color.r > 120 && // Red must be strong
+        color.r > color.g + 30 && // Red significantly higher than green
+        color.r > color.b + 30 && // Red significantly higher than blue
+        color.g + color.b < color.r; // Combined G+B less than Red
 
       if (isRed) {
-        console.log("🔴 RED DETECTED at", point.x.toFixed(2), point.y.toFixed(2), "→ RGB:", color);
+        console.log(
+          "🔴 RED DETECTED at",
+          point.x.toFixed(2),
+          point.y.toFixed(2),
+          "→ RGB:",
+          color
+        );
       }
 
       return isRed;
-
     } catch (error) {
       return false;
     }
@@ -131,8 +172,8 @@ const FastDemonDetection = {
 
     try {
       // METHOD 1: Convert WebGL canvas to 2D canvas for pixel reading
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d');
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
 
       tempCanvas.width = this.canvas.width;
       tempCanvas.height = this.canvas.height;
@@ -150,9 +191,8 @@ const FastDemonDetection = {
       return {
         r: data[0],
         g: data[1],
-        b: data[2]
+        b: data[2],
       };
-
     } catch (error) {
       console.warn("Canvas pixel read failed:", error);
       return { r: 0, g: 0, b: 0 };
@@ -165,19 +205,19 @@ const FastDemonDetection = {
     this.checkCounter = 0;
     this.lastCheckTime = 0;
     console.log("👹 Demon detection reset");
-  }
+  },
 };
 
 const enhanceCanvas = (canvas) => {
   if (!canvas) return;
 
   try {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // 🚀 MAXIMUM QUALITY SETTINGS
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = "high";
 
     console.log("🎨 Canvas quality enhanced");
   } catch (error) {
@@ -194,16 +234,19 @@ class ARErrorBoundary extends React.Component {
 
   static getDerivedStateFromError(error) {
     // Check if it's the specific DOM manipulation error we expect
-    if (error.message && error.message.includes('removeChild')) {
-      console.log('🛡️ Caught expected DOM manipulation error, suppressing:', error.message);
+    if (error.message && error.message.includes("removeChild")) {
+      console.log(
+        "🛡️ Caught expected DOM manipulation error, suppressing:",
+        error.message
+      );
       return { hasError: false }; // Don't show error UI for this
     }
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    if (!error.message || !error.message.includes('removeChild')) {
-      console.error('❌ Unexpected AR error:', error, errorInfo);
+    if (!error.message || !error.message.includes("removeChild")) {
+      console.error("❌ Unexpected AR error:", error, errorInfo);
     }
   }
 
@@ -212,7 +255,9 @@ class ARErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
           <div className="text-center p-6">
-            <p className="text-red-300 text-sm mb-4">AR experience encountered an error</p>
+            <p className="text-red-300 text-sm mb-4">
+              AR experience encountered an error
+            </p>
             <button
               onClick={this.props.onError}
               className="px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-sm"
@@ -256,7 +301,12 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
   // 📡 SSE Effect - Connect to AR events when sessionId state changes
   useEffect(() => {
-    console.log("📡 SSE useEffect triggered - sessionId:", sessionId, "sseConnected:", sseConnected);
+    console.log(
+      "📡 SSE useEffect triggered - sessionId:",
+      sessionId,
+      "sseConnected:",
+      sseConnected
+    );
 
     if (sessionId && !sseRef.current) {
       console.log("📡 Setting up SSE connection for session:", sessionId);
@@ -275,14 +325,23 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
   // 🎯 Show PROCEED button logic - includes demon detection
   useEffect(() => {
-    console.log("🎯 Button logic - arSessionEnded:", arSessionEnded, "isLoading:", isLoading);
+    console.log(
+      "🎯 Button logic - arSessionEnded:",
+      arSessionEnded,
+      "isLoading:",
+      isLoading
+    );
 
     if (arSessionEnded) {
-      console.log("🎯 AR Session ended via SSE - showing PROCEED button, stopping detection");
+      console.log(
+        "🎯 AR Session ended via SSE - showing PROCEED button, stopping detection"
+      );
       setShowCaptureButton(true);
       stopDemonDetection();
     } else if (!isLoading && !showCaptureButton) {
-      console.log("🎯 AR Session active - hiding button, detection will continue until demon found");
+      console.log(
+        "🎯 AR Session active - hiding button, detection will continue until demon found"
+      );
       setShowCaptureButton(false);
     }
   }, [arSessionEnded, isLoading]);
@@ -312,7 +371,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         const demonDetected = FastDemonDetection.checkForDemonFast();
 
         if (demonDetected) {
-          console.log("👹 DEMON DETECTED! Showing PROCEED button and stopping detection");
+          console.log(
+            "👹 DEMON DETECTED! Showing PROCEED button and stopping detection"
+          );
           setShowCaptureButton(true);
           stopDemonDetection();
         }
@@ -327,7 +388,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     if (demonDetectionIntervalRef.current) {
       clearInterval(demonDetectionIntervalRef.current);
       demonDetectionIntervalRef.current = null;
-      console.log("👹 Demon detection stopped - either demon found or AR ended");
+      console.log(
+        "👹 Demon detection stopped - either demon found or AR ended"
+      );
     }
   };
 
@@ -350,19 +413,22 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           console.log("📡 SSE message received:", data);
 
           switch (data.type) {
-            case 'connected':
+            case "connected":
               console.log("📡 SSE connected confirmation");
               setSseConnected(true);
               break;
 
-            case 'ar_ended':
+            case "ar_ended":
               console.log("🎯 AR End detected via SSE!", data);
-              if (data.sessionId === sessionId || data.phone === userData?.phone) {
+              if (
+                data.sessionId === sessionId ||
+                data.phone === userData?.phone
+              ) {
                 setArSessionEnded(true);
               }
               break;
 
-            case 'heartbeat':
+            case "heartbeat":
               // Silent heartbeat
               break;
 
@@ -383,7 +449,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           sseRef.current = null;
         }
       };
-
     } catch (error) {
       console.error("📡 Failed to setup SSE connection:", error);
     }
@@ -426,7 +491,10 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       if (!retrievedSessionId) {
         retrievedSessionId = localStorage.getItem("snapARSessionId");
         if (retrievedSessionId) {
-          console.log("📝 Got session ID from localStorage (snapARSessionId):", retrievedSessionId);
+          console.log(
+            "📝 Got session ID from localStorage (snapARSessionId):",
+            retrievedSessionId
+          );
         }
       }
 
@@ -434,20 +502,35 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       if (!retrievedSessionId) {
         retrievedSessionId = localStorage.getItem("currentSessionId");
         if (retrievedSessionId) {
-          console.log("📝 Got session ID from localStorage (currentSessionId):", retrievedSessionId);
+          console.log(
+            "📝 Got session ID from localStorage (currentSessionId):",
+            retrievedSessionId
+          );
         }
       }
 
       // Method 4: Try to fetch from phone if available
       if (!retrievedSessionId && userData?.phone) {
-        console.log("📱 No session ID found, checking for existing session by phone:", userData.phone);
+        console.log(
+          "📱 No session ID found, checking for existing session by phone:",
+          userData.phone
+        );
         try {
-          const checkResponse = await fetch(`/api/snap/check-session/${userData.phone}`);
+          const checkResponse = await fetch(
+            `/api/snap/check-session/${userData.phone}`
+          );
           const checkData = await checkResponse.json();
 
-          if (checkResponse.ok && checkData.success && checkData.data.hasExistingSession) {
+          if (
+            checkResponse.ok &&
+            checkData.success &&
+            checkData.data.hasExistingSession
+          ) {
             retrievedSessionId = checkData.data.session.sessionId;
-            console.log("📝 Found existing session ID for phone:", retrievedSessionId);
+            console.log(
+              "📝 Found existing session ID for phone:",
+              retrievedSessionId
+            );
 
             localStorage.setItem("snapARSessionId", retrievedSessionId);
             localStorage.setItem("currentSessionId", retrievedSessionId);
@@ -459,7 +542,10 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
       // Method 5: Create new session if still no ID found
       if (!retrievedSessionId && userData?.phone) {
-        console.log("🆕 No session found, creating new session for phone:", userData.phone);
+        console.log(
+          "🆕 No session found, creating new session for phone:",
+          userData.phone
+        );
         try {
           const createResponse = await fetch("/api/snap/create-session", {
             method: "POST",
@@ -530,12 +616,14 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         hasCache: !!cache,
         sessionReady: cache?.sessionReady,
         hasSession: !!cache?.session,
-        hasCanvas: !!cache?.session?.output?.live
+        hasCanvas: !!cache?.session?.output?.live,
       });
 
       // 🔥 COMPLETE RESTART: Recreate everything from scratch
       if (needsCompleteRestart || (isRetry && cache?.needsCompleteRestart)) {
-        console.log("🔥 Complete restart requested - recreating entire AR session");
+        console.log(
+          "🔥 Complete restart requested - recreating entire AR session"
+        );
         await createCompletelyFreshARSession();
         return;
       }
@@ -557,7 +645,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         console.log("🔧 No preloaded session, creating fresh one...");
         await createCompletelyFreshARSession();
       }
-
     } catch (err) {
       console.error("❌ AR initialization failed:", err);
       setError(`Failed to initialize AR: ${err.message}`);
@@ -585,14 +672,14 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         }
 
         if (cache.mediaStream) {
-          cache.mediaStream.getTracks().forEach(track => {
+          cache.mediaStream.getTracks().forEach((track) => {
             track.stop();
             console.log("🛑 Media track stopped:", track.kind);
           });
         }
 
         // Add a small delay to ensure cleanup is complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       // 🆕 RECREATE ENTIRE CACHE AND SESSION
@@ -609,7 +696,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         preloadProgress: 0,
         error: null,
         sessionReady: false,
-        needsCompleteRestart: false
+        needsCompleteRestart: false,
       };
 
       const cache = window.snapARPreloadCache;
@@ -637,7 +724,9 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             }
 
             console.log("📹 Requesting camera access...");
-            this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
+            this.mediaStream = await navigator.mediaDevices.getUserMedia(
+              this.getConstraints()
+            );
 
             // Verify the stream is active
             if (!this.mediaStream || !this.mediaStream.active) {
@@ -646,7 +735,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
             console.log("✅ Camera stream active:", this.mediaStream.active);
             return this.mediaStream;
-
           } catch (error) {
             console.error("❌ Camera initialization failed:", error);
             throw new Error(`Camera access failed: ${error.message}`);
@@ -657,9 +745,30 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           const settings = {
             camera: {
               constraints: {
-                front: { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
-                back: { video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
-                desktop: { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+                front: {
+                  video: {
+                    facingMode: "user",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                  },
+                  audio: false,
+                },
+                back: {
+                  video: {
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                  },
+                  audio: false,
+                },
+                desktop: {
+                  video: {
+                    facingMode: "user",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                  },
+                  audio: false,
+                },
               },
             },
           };
@@ -675,14 +784,18 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       cache.mediaStream = await cache.cameraManager.initializeCamera();
 
       console.log("🔥 Step 3: Load lenses...");
-      const { lenses } = await cache.cameraKit.lensRepository.loadLensGroups([lensGroupId]);
+      const { lenses } = await cache.cameraKit.lensRepository.loadLensGroups([
+        lensGroupId,
+      ]);
       cache.lenses = lenses;
 
       console.log("🔥 Step 4: Create session...");
       cache.session = await cache.cameraKit.createSession();
 
       console.log("🔥 Step 5: Create and configure source...");
-      const { createMediaStreamSource, Transform2D } = await import("@snap/camera-kit");
+      const { createMediaStreamSource, Transform2D } = await import(
+        "@snap/camera-kit"
+      );
 
       // Verify media stream is still active before creating source
       if (!cache.mediaStream || !cache.mediaStream.active) {
@@ -716,13 +829,14 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       } else {
         throw new Error("No canvas after fresh session creation");
       }
-
     } catch (error) {
       console.error("❌ Fresh AR session creation failed:", error);
 
       // Clean up on error
       if (window.snapARPreloadCache?.mediaStream) {
-        window.snapARPreloadCache.mediaStream.getTracks().forEach(track => track.stop());
+        window.snapARPreloadCache.mediaStream
+          .getTracks()
+          .forEach((track) => track.stop());
       }
 
       throw new Error(`Fresh session creation failed: ${error.message}`);
@@ -734,8 +848,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     try {
       console.log("🎯 Setting up canvas and starting session...");
 
-      if (!arCanvas || arCanvas.tagName !== 'CANVAS') {
-        throw new Error(`Invalid canvas: ${arCanvas?.tagName || 'null'}`);
+      if (!arCanvas || arCanvas.tagName !== "CANVAS") {
+        throw new Error(`Invalid canvas: ${arCanvas?.tagName || "null"}`);
       }
 
       // Store session reference
@@ -773,7 +887,6 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         console.log("👹 Canvas ready, starting demon detection...");
         startDemonDetection();
       }
-
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
     }
@@ -875,10 +988,10 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
     // Method 1: Use the container ref (since canvas was moved there)
     if (containerRef.current) {
-      if (containerRef.current.tagName === 'CANVAS') {
+      if (containerRef.current.tagName === "CANVAS") {
         canvas = containerRef.current;
       } else {
-        canvas = containerRef.current.querySelector('canvas');
+        canvas = containerRef.current.querySelector("canvas");
       }
     }
 
@@ -894,7 +1007,8 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
     // Method 4: Find any canvas with ID
     if (!canvas) {
-      canvas = document.getElementById('canvas') || document.querySelector('#canvas');
+      canvas =
+        document.getElementById("canvas") || document.querySelector("#canvas");
     }
 
     if (!canvas || !userData?.phone || isCapturing) {
@@ -904,7 +1018,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         hasPhone: !!userData?.phone,
         isCapturing: isCapturing,
         containerRefType: containerRef.current?.tagName,
-        containerHasCanvas: !!containerRef.current?.querySelector('canvas')
+        containerHasCanvas: !!containerRef.current?.querySelector("canvas"),
       });
       return;
     }
@@ -918,14 +1032,16 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       enhanceCanvas(canvas);
 
       // Wait a moment for canvas to be stable
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Get canvas dimensions
       const canvasWidth = canvas.width || canvas.clientWidth || 0;
       const canvasHeight = canvas.height || canvas.clientHeight || 0;
 
       if (canvasWidth === 0 || canvasHeight === 0) {
-        throw new Error(`Canvas has invalid dimensions: ${canvasWidth}x${canvasHeight}`);
+        throw new Error(
+          `Canvas has invalid dimensions: ${canvasWidth}x${canvasHeight}`
+        );
       }
 
       let polaroidArea = {
@@ -963,7 +1079,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
 
       // 🚀 ENHANCE TEMPORARY CANVAS TOO
       tempCtx.imageSmoothingEnabled = true;
-      tempCtx.imageSmoothingQuality = 'high';
+      tempCtx.imageSmoothingQuality = "high";
 
       const enlargedWidth = Math.floor(captureArea.width * 1.3);
       const enlargedHeight = Math.floor(captureArea.height * 1.3);
@@ -1131,17 +1247,32 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           )}
 
           {/* 📡 SSE Connection Indicator and Demon Detection Status (optional debug info) */}
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <div className="absolute top-4 right-4 z-10 flex gap-2">
-              <div className={`w-3 h-3 rounded-full ${sseConnected ? 'bg-green-500' : 'bg-red-500'}`}
-                title={`SSE: ${sseConnected ? 'Connected' : 'Disconnected'}`}>
-              </div>
-              <div className={`w-3 h-3 rounded-full ${arSessionEnded ? 'bg-red-500' : 'bg-green-500'}`}
-                title={`AR: ${arSessionEnded ? 'Ended' : 'Active'}`}>
-              </div>
-              <div className={`w-3 h-3 rounded-full ${FastDemonDetection.isDemonDetected ? 'bg-red-500' : 'bg-gray-500'}`}
-                title={`Demon: ${FastDemonDetection.isDemonDetected ? 'Detected' : 'Not Detected'}`}>
-              </div>
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  sseConnected ? "bg-green-500" : "bg-red-500"
+                }`}
+                title={`SSE: ${sseConnected ? "Connected" : "Disconnected"}`}
+              ></div>
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  arSessionEnded ? "bg-red-500" : "bg-green-500"
+                }`}
+                title={`AR: ${arSessionEnded ? "Ended" : "Active"}`}
+              ></div>
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  FastDemonDetection.isDemonDetected
+                    ? "bg-red-500"
+                    : "bg-gray-500"
+                }`}
+                title={`Demon: ${
+                  FastDemonDetection.isDemonDetected
+                    ? "Detected"
+                    : "Not Detected"
+                }`}
+              ></div>
               {/* Debug button */}
               <button
                 onClick={debugSSEConnection}

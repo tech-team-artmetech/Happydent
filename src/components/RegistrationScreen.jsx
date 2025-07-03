@@ -20,7 +20,6 @@
 //   const [phoneTouched, setPhoneTouched] = useState(false);
 //   const [otpTouched, setOtpTouched] = useState(false);
 
-
 //   // ⭐ TESTING MODE - Set to true to bypass OTP
 //   const BYPASS_OTP = true; // Change to false for production
 
@@ -416,8 +415,6 @@
 //           </div>
 //         )} */}
 
-
-
 //         {/* Name Input */}
 //         <div>
 //           <input
@@ -681,11 +678,11 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
     sessionId: null,
     phoneAssociated: false,
     arEnded: false,
-    isMonitoring: false
+    isMonitoring: false,
   });
 
   // ⭐ TESTING MODE - Set to true to bypass OTP
-  const BYPASS_OTP = true; // Change to false for production
+  const BYPASS_OTP = false; // Change to false for production
 
   // API endpoint - change this to your backend URL
   const API_BASE_URL = "";
@@ -693,13 +690,16 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   // NEW: Initialize session data from splash screen
   useEffect(() => {
     // Get session ID from props (passed from splash screen) or localStorage
-    const sessionId = sessionData?.sessionId || localStorage.getItem("snapARSessionId");
+    const sessionId =
+      sessionData?.sessionId || localStorage.getItem("snapARSessionId");
 
     if (sessionId) {
-      setSnapAR(prev => ({ ...prev, sessionId }));
+      setSnapAR((prev) => ({ ...prev, sessionId }));
       console.log(`🆔 Using session ID: ${sessionId}`);
     } else {
-      console.warn("⚠️ No session ID found - this may cause issues with Snap AR integration");
+      console.warn(
+        "⚠️ No session ID found - this may cause issues with Snap AR integration"
+      );
     }
   }, [sessionData]);
 
@@ -934,7 +934,9 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
     }
 
     try {
-      console.log(`📱 Associating phone ${phone} with session ${snapAR.sessionId}`);
+      console.log(
+        `📱 Associating phone ${phone} with session ${snapAR.sessionId}`
+      );
 
       const response = await fetch(`/api/snap/associate-phone`, {
         method: "POST",
@@ -944,17 +946,19 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         body: JSON.stringify({
           sessionId: snapAR.sessionId,
           phone: phone,
-          userInfo: userInfo
+          userInfo: userInfo,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to associate phone with session");
+        throw new Error(
+          data.message || "Failed to associate phone with session"
+        );
       }
 
-      setSnapAR(prev => ({ ...prev, phoneAssociated: true }));
+      setSnapAR((prev) => ({ ...prev, phoneAssociated: true }));
       console.log("✅ Phone associated with session successfully:", data);
 
       return data;
@@ -1011,10 +1015,12 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       const userInfo = {
         name: formData.name.trim(),
         groupSize: formData.groupSize,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
-      console.log(`📱 Step 1: Associating phone ${formData.phone} with session ${snapAR.sessionId}`);
+      console.log(
+        `📱 Step 1: Associating phone ${formData.phone} with session ${snapAR.sessionId}`
+      );
       await associatePhoneWithSession(formData.phone, userInfo);
 
       // 2. START AR SESSION - Set AR state to ongoing (false)
@@ -1066,8 +1072,8 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         // NEW: Session data
         snapAR: {
           sessionId: snapAR.sessionId,
-          phoneAssociated: snapAR.phoneAssociated
-        }
+          phoneAssociated: snapAR.phoneAssociated,
+        },
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -1091,8 +1097,6 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(false);
     }
   };
-
-
 
   const handleTermsClick = () => {
     if (onTerms) {
@@ -1182,36 +1186,39 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                   isLoading ||
                   (otpData.isOtpSent && !otpData.canResend && !BYPASS_OTP)
                 }
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validatePhone(formData.phone) &&
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validatePhone(formData.phone) &&
                   !isLoading &&
                   (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                  ? "text-white hover:opacity-80 border-white"
-                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
-                  }`}
+                    ? "text-white hover:opacity-80 border-white"
+                    : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
+                }`}
                 style={{
-                  backgroundColor: validatePhone(formData.phone) &&
+                  backgroundColor:
+                    validatePhone(formData.phone) &&
                     !isLoading &&
                     (!otpData.isOtpSent || otpData.canResend || BYPASS_OTP)
-                    ? "#041763"
-                    : undefined
+                      ? "#041763"
+                      : undefined,
                 }}
               >
                 {BYPASS_OTP
                   ? "Verify"
                   : otpData.isOtpSent && !otpData.canResend
-                    ? "Sent"
-                    : otpData.isOtpSent
-                      ? "Resend"
-                      : "Send OTP"}
+                  ? "Sent"
+                  : otpData.isOtpSent
+                  ? "Resend"
+                  : "Send OTP"}
               </button>
             )}
           </div>
 
           <p
-            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${phoneTouched && !validatePhone(formData.phone)
-              ? "visible"
-              : "invisible"
-              }`}
+            className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+              phoneTouched && !validatePhone(formData.phone)
+                ? "visible"
+                : "invisible"
+            }`}
           >
             Enter valid 10 digit mobile number
           </p>
@@ -1236,14 +1243,16 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
               <button
                 onClick={handleVerifyOTP}
                 disabled={!validateOTP(otpData.otp) || isLoading}
-                className={`px-4 py-3 rounded font-medium text-sm transition-all ${validateOTP(otpData.otp) && !isLoading
-                  ? "text-white hover:opacity-80 border-white"
-                  : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
-                  }`}
+                className={`px-4 py-3 rounded font-medium text-sm transition-all ${
+                  validateOTP(otpData.otp) && !isLoading
+                    ? "text-white hover:opacity-80 border-white"
+                    : "bg-gray-500/30 text-gray-400 border-white/40 cursor-not-allowed"
+                }`}
                 style={{
-                  backgroundColor: validateOTP(otpData.otp) && !isLoading
-                    ? "#041763"
-                    : undefined
+                  backgroundColor:
+                    validateOTP(otpData.otp) && !isLoading
+                      ? "#041763"
+                      : undefined,
                 }}
               >
                 Verify
@@ -1259,10 +1268,11 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
             {/* OTP Validation Error */}
             <p
-              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${otpTouched && !validateOTP(otpData.otp)
-                ? "visible"
-                : "invisible"
-                }`}
+              className={`text-red-300 text-xs mt-1 transition-all duration-200 ${
+                otpTouched && !validateOTP(otpData.otp)
+                  ? "visible"
+                  : "invisible"
+              }`}
             >
               Enter valid 6-digit OTP
             </p>
@@ -1273,7 +1283,10 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         <div className="text-center">
           <h3 className="text-white text-lg mb-4 text-[20px] flex items-center gap-4">
             <div className="flex-1 h-px bg-white"></div>
-            Select your<span className="font-bold drop-shadow-[0_0_15px_rgba(255,255,255,0.9)] text-white">GROUP SIZE</span>
+            Select your
+            <span className="font-bold drop-shadow-[0_0_15px_rgba(255,255,255,0.9)] text-white">
+              GROUP SIZE
+            </span>
             <div className="flex-1 h-px bg-white"></div>
           </h3>
 
@@ -1282,8 +1295,11 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             <div className="relative flex border-2 border-white rounded-[4px] overflow-hidden bg-transparent">
               {/* Sliding white background */}
               <div
-                className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${formData.groupSize === "more" ? "translate-x-full" : "translate-x-0"
-                  }`}
+                className={`absolute top-0 h-full w-1/2 bg-white transition-transform duration-300 ease-in-out ${
+                  formData.groupSize === "more"
+                    ? "translate-x-full"
+                    : "translate-x-0"
+                }`}
                 style={{
                   margin: "0px",
                   width: "50%",
@@ -1297,16 +1313,17 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 <button
                   onClick={() => handleGroupSizeSelect("less")}
                   disabled={isLoading}
-                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "less"
-                    ? "bg-transparent text-blue-700"    // Selected: transparent bg (white shows from behind), blue text
-                    : "bg-transparent text-white"       // Not selected: transparent bg, white text
-                    }`}
+                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
+                    formData.groupSize === "less"
+                      ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
+                      : "bg-transparent text-white" // Not selected: transparent bg, white text
+                  }`}
                   style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    WebkitUserSelect: 'none',
-                    MozUserSelect: 'none',
-                    msUserSelect: 'none',
-                    userSelect: 'none'
+                    WebkitTapHighlightColor: "transparent",
+                    WebkitUserSelect: "none",
+                    MozUserSelect: "none",
+                    msUserSelect: "none",
+                    userSelect: "none",
                   }}
                 >
                   Less than 3 people
@@ -1314,16 +1331,17 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
                 <button
                   onClick={() => handleGroupSizeSelect("more")}
                   disabled={isLoading}
-                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${formData.groupSize === "more"
-                    ? "bg-transparent text-blue-700"    // Selected: transparent bg (white shows from behind), blue text
-                    : "bg-transparent text-white"       // Not selected: transparent bg, white text
-                    }`}
+                  className={`flex-1 py-[14px] px-6 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative z-10 font-semibold text-[14px] rounded-[4px] select-none focus:outline-none focus:ring-0 ${
+                    formData.groupSize === "more"
+                      ? "bg-transparent text-blue-700" // Selected: transparent bg (white shows from behind), blue text
+                      : "bg-transparent text-white" // Not selected: transparent bg, white text
+                  }`}
                   style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    WebkitUserSelect: 'none',
-                    MozUserSelect: 'none',
-                    msUserSelect: 'none',
-                    userSelect: 'none'
+                    WebkitTapHighlightColor: "transparent",
+                    WebkitUserSelect: "none",
+                    MozUserSelect: "none",
+                    msUserSelect: "none",
+                    userSelect: "none",
                   }}
                 >
                   More than 3 people
@@ -1338,8 +1356,9 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
           <button
             onClick={handleGetStarted}
             disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading ? "" : "cursor-not-allowed"
-              }`}
+            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${
+              isFormValid() && !isLoading ? "" : "cursor-not-allowed"
+            }`}
             style={{
               background:
                 "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
