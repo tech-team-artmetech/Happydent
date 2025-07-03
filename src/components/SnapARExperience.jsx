@@ -399,9 +399,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
     try {
       console.log("📡 Connecting to SSE endpoint for session:", sessionId);
 
-      const eventSource = new EventSource(
-        `https://artmetech.co.in/api/ar-events/${sessionId}`
-      );
+      const eventSource = new EventSource(`/api/ar-events/${sessionId}`);
       sseRef.current = eventSource;
 
       eventSource.onopen = () => {
@@ -459,9 +457,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
   // 🔍 CHECK AR SESSION STATUS FROM BACKEND
   const checkARSessionStatus = async (sessionId) => {
     try {
-      const response = await fetch(
-        `https://artmetech.co.in/api/snap/session-status/${sessionId}`
-      );
+      const response = await fetch(`/api/snap/session-status/${sessionId}`);
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -521,7 +517,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
         );
         try {
           const checkResponse = await fetch(
-            `https://artmetech.co.in/api/snap/check-session/${userData.phone}`
+            `/api/snap/check-session/${userData.phone}`
           );
           const checkData = await checkResponse.json();
 
@@ -551,19 +547,16 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
           userData.phone
         );
         try {
-          const createResponse = await fetch(
-            "https://artmetech.co.in/api/snap/create-session",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                phone: userData.phone,
-                forceNew: false,
-              }),
-            }
-          );
+          const createResponse = await fetch("/api/snap/create-session", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone: userData.phone,
+              forceNew: false,
+            }),
+          });
 
           const createData = await createResponse.json();
 
@@ -577,7 +570,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
             // Associate phone with session
             if (userData.phone) {
               console.log("📱 Associating phone with new session");
-              await fetch("https://artmetech.co.in/api/snap/associate-phone", {
+              await fetch("/api/snap/associate-phone", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -1133,7 +1126,7 @@ const SnapARExperience = ({ onComplete, userData, lensGroupId, apiToken }) => {
       formData.append("phone", userData.phone);
       formData.append("source", "snapchat_polaroid");
 
-      const response = await fetch("https://artmetech.co.in/api/upload-photo", {
+      const response = await fetch("/api/upload-photo", {
         method: "POST",
         body: formData,
       });
