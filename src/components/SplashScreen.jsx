@@ -419,11 +419,15 @@ const SplashScreen = ({ onComplete }) => {
 
         {/* Progress percentage - ALWAYS in DOM, just visibility controlled */}
         <p
-          className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+          className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded && loadingProgress < 100
+            ? "opacity-100"
+            : "opacity-0"
             }`}
           style={{
             visibility:
-              showLoadingContent && imagesLoaded ? "visible" : "hidden",
+              showLoadingContent && imagesLoaded && loadingProgress < 100
+                ? "visible"
+                : "hidden",
           }}
         >
           {Math.round(loadingProgress)}%
