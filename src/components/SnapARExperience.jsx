@@ -157,7 +157,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         arStartTimerRef.current = null;
       }
     }
-  }, [arSessionEnded, isLoading]);
 
   // 🎯 START 7-SECOND TIMER FOR PROCEED BUTTON
   const startProceedButtonTimer = () => {
