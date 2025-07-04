@@ -103,7 +103,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `http://localhost:3001/api/user/${phone}/photo`
+        `https://artmetech.co.in/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -139,7 +139,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `http://localhost:3001/api/download-photo/${userInfo.phone}`,
+        `https://artmetech.co.in/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
@@ -205,7 +205,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
       // Step 1: Check if there's an existing session for this phone
       const sessionCheckResponse = await fetch(
-        `http://localhost:3001/api/snap/check-session/${phone}`,
+        `https://artmetech.co.in/api/snap/check-session/${phone}`,
         {
           method: "GET",
           headers: {
@@ -231,7 +231,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
           // Step 2a: Reset the existing session to ended: false
           const resetResponse = await fetch(
-            "http://localhost:3001/api/snap/reset-session",
+            "https://artmetech.co.in/api/snap/reset-session",
             {
               method: "POST",
               headers: {
@@ -264,7 +264,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       // Step 2b: Create new session if needed
       if (isNewSession) {
         const createSessionResponse = await fetch(
-          "http://localhost:3001/api/snap/create-session",
+          "https://artmetech.co.in/api/snap/create-session",
           {
             method: "POST",
             headers: {
@@ -290,7 +290,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
         // Step 3: Associate phone with the new session
         const associateResponse = await fetch(
-          "http://localhost:3001/api/snap/associate-phone",
+          "https://artmetech.co.in/api/snap/associate-phone",
           {
             method: "POST",
             headers: {
@@ -320,7 +320,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       }
 
       // Step 4: Reset the phone-based AR state to ended: false
-      const arEndResponse = await fetch("http://localhost:3001/api/ar-end", {
+      const arEndResponse = await fetch("https://artmetech.co.in/api/ar-end", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -451,7 +451,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     if (phone) {
       try {
         const arStatus = await fetch(
-          `http://localhost:3001/api/snap/ar-status/${phone}`
+          `https://artmetech.co.in/api/snap/ar-status/${phone}`
         );
         const arData = await arStatus.json();
         console.log("Phone AR Status:", arData);
@@ -463,7 +463,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     if (sessionId) {
       try {
         const sessionStatus = await fetch(
-          `http://localhost:3001/api/snap/session-status/${sessionId}`
+          `https://artmetech.co.in/api/snap/session-status/${sessionId}`
         );
         const sessionData = await sessionStatus.json();
         console.log("Session Status:", sessionData);

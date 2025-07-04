@@ -202,7 +202,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`http://localhost:3001/api/send-otp`, {
+      const response = await fetch(`https://artmetech.co.in/api/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +243,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       setIsLoading(true);
       setError("");
 
-      const response = await fetch(`http://localhost:3001/api/verify-otp`, {
+      const response = await fetch(`https://artmetech.co.in/api/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -321,7 +321,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       );
 
       const response = await fetch(
-        `http://localhost:3001/api/snap/associate-phone`,
+        `https://artmetech.co.in/api/snap/associate-phone`,
         {
           method: "POST",
           headers: {
@@ -357,7 +357,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   // API call to register user
   // const registerUser = async (userData) => {
   //   try {
-  //     const response = await fetch(`http://localhost:3001/api/register`, {
+  //     const response = await fetch(`https://artmetech.co.in/api/register`, {
   //       method: "POST",
   //       headers: {
   //         "Content-Type": "application/json",
@@ -384,7 +384,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
 
   const registerUser = async (userData) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/register`, {
+      const response = await fetch(`https://artmetech.co.in/api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

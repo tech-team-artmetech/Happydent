@@ -403,7 +403,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       console.log("📡 Connecting to SSE endpoint for session:", sessionId);
 
       const eventSource = new EventSource(
-        `http://localhost:3001/api/ar-events/${sessionId}`
+        `https://artmetech.co.in/api/ar-events/${sessionId}`
       );
       sseRef.current = eventSource;
 
@@ -463,7 +463,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   const checkARSessionStatus = async (sessionId) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/snap/session-status/${sessionId}`
+        `https://artmetech.co.in/api/snap/session-status/${sessionId}`
       );
       const data = await response.json();
 
@@ -524,7 +524,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         );
         try {
           const checkResponse = await fetch(
-            `http://localhost:3001/api/snap/check-session/${userData.phone}`
+            `https://artmetech.co.in/api/snap/check-session/${userData.phone}`
           );
           const checkData = await checkResponse.json();
 
@@ -555,7 +555,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         );
         try {
           const createResponse = await fetch(
-            "http://localhost:3001/api/snap/create-session",
+            "https://artmetech.co.in/api/snap/create-session",
             {
               method: "POST",
               headers: {
@@ -580,7 +580,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
             // Associate phone with session
             if (userData.phone) {
               console.log("📱 Associating phone with new session");
-              await fetch("http://localhost:3001/api/snap/associate-phone", {
+              await fetch("https://artmetech.co.in/api/snap/associate-phone", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -1201,7 +1201,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       formData.append("source", "snapchat_polaroid");
       formData.append("counter", newCounter); // 🚨 SEND COUNTER TO BACKEND
 
-      const response = await fetch("http://localhost:3001/api/upload-photo", {
+      const response = await fetch("https://artmetech.co.in/api/upload-photo", {
         method: "POST",
         body: formData,
       });

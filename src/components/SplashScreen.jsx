@@ -191,7 +191,7 @@ const SplashScreen = ({ onComplete }) => {
       setSessionState((prev) => ({ ...prev, isCreating: true, error: null }));
 
       const response = await fetch(
-        `http://localhost:3001/api/snap/create-session`,
+        `https://artmetech.co.in/api/snap/create-session`,
         {
           method: "POST",
           headers: {
