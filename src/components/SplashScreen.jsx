@@ -271,8 +271,8 @@ const SplashScreen = ({ onComplete }) => {
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
       if (!cache.lenses) {
         const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-        const lessLensId = "31000d06-6d26-4b39-8dd0-6e63aeb5901d"; // Less than 3 people
-        const moreLensId = "9187f2ac-af8f-4be0-95e9-cf19261c0082"; // More than 3 people
+        const lessLensId = "bc57c671-4255-423e-9eaf-71daba627ca8"; // Less than 3 people
+        const moreLensId = "c4b85218-50a5-4a71-b719-0a1381b4e73e"; // More than 3 people
 
         // Load both lenses
         console.log("🔥 Loading both lenses...");
@@ -372,7 +372,7 @@ const SplashScreen = ({ onComplete }) => {
       <img className="chamking-smile-logo" src={chamkingSmile} alt="" />
 
       {/* Loading text below logo - ALWAYS in DOM, just visibility controlled */}
-      <div
+      {/* <div
         className={`font-gotham font-light font-[18px] italic mb-2 transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
           }`}
         style={{
@@ -380,10 +380,10 @@ const SplashScreen = ({ onComplete }) => {
         }}
       >
         Loading...
-      </div>
+      </div> */}
 
       {/* Session Status Indicator */}
-      {sessionState.created && (
+      {/* {sessionState.created && (
         <div className="w-full max-w-sm mb-4">
           <div className="bg-green-500/20 border border-green-500/50 rounded p-2 text-center">
             <p className="text-green-300 text-xs">
@@ -391,7 +391,7 @@ const SplashScreen = ({ onComplete }) => {
             </p>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Error Message */}
       {sessionState.error && (
@@ -430,7 +430,7 @@ const SplashScreen = ({ onComplete }) => {
         </p>
 
         {/* Initial loading message - ALWAYS in DOM */}
-        <p
+        {/* <p
           className={`text-center text-lg transition-opacity duration-300 ${!imagesLoaded ? "opacity-100" : "opacity-0"
             }`}
           style={{
@@ -438,7 +438,7 @@ const SplashScreen = ({ onComplete }) => {
           }}
         >
           Loading...
-        </p>
+        </p> */}
       </div>
 
       {/* Button - ALWAYS in DOM, just visibility controlled */}

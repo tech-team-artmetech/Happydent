@@ -498,8 +498,8 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         selectedLens: {
           groupSize: formData.groupSize,
           lensId: formData.groupSize === "less" ?
-            "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
-            "9187f2ac-af8f-4be0-95e9-cf19261c0082"
+            "bc57c671-4255-423e-9eaf-71daba627ca8" :
+            "c4b85218-50a5-4a71-b719-0a1381b4e73e"
         }
       });
     } catch (error) {
@@ -807,50 +807,6 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
           </div>
         </div>
 
-        {/* Get Started Button */}
-        <div className="pt-4">
-          <button
-            onClick={handleGetStarted}
-            disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
-              ? "cursor-pointer hover:opacity-90"
-              : "cursor-not-allowed opacity-60"
-              }`}
-            style={{
-              background: isFormValid() && !isLoading
-                ? "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)"
-                : "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)", // Grey gradient when disabled
-              borderRadius: "4px",
-              // 🚨 FIXED: Use individual border properties instead of shorthand + borderStyle
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: isFormValid() && !isLoading
-                ? "rgba(255, 255, 255, 0.52)"
-                : "rgba(156, 163, 175, 0.4)", // Grey border when disabled
-              boxShadow: isFormValid() && !isLoading
-                ? "2px 2px 4px 0px rgba(0, 0, 0, 0.39)"
-                : "1px 1px 2px 0px rgba(0, 0, 0, 0.2)", // Lighter shadow when disabled
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-            }}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                <span className="italic">REGISTERING...</span>
-              </div>
-            ) : (
-              <span className={`italic ${isFormValid() && !isLoading
-                ? "text-white"
-                : "text-gray-300"
-                }`}>
-                GET STARTED
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Footer Text */}
         <div className="pt-4">
           <div
             className="flex items-start space-x-3 p-3 rounded cursor-pointer transition-all duration-200 "
@@ -906,6 +862,52 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             </p>
           )}
         </div>
+
+        {/* Get Started Button */}
+        <div className="">
+          <button
+            onClick={handleGetStarted}
+            disabled={!isFormValid() || isLoading}
+            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
+              ? "cursor-pointer hover:opacity-90"
+              : "cursor-not-allowed opacity-60"
+              }`}
+            style={{
+              background: isFormValid() && !isLoading
+                ? "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)"
+                : "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)", // Grey gradient when disabled
+              borderRadius: "4px",
+              // 🚨 FIXED: Use individual border properties instead of shorthand + borderStyle
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: isFormValid() && !isLoading
+                ? "rgba(255, 255, 255, 0.52)"
+                : "rgba(156, 163, 175, 0.4)", // Grey border when disabled
+              boxShadow: isFormValid() && !isLoading
+                ? "2px 2px 4px 0px rgba(0, 0, 0, 0.39)"
+                : "1px 1px 2px 0px rgba(0, 0, 0, 0.2)", // Lighter shadow when disabled
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <span className="italic">REGISTERING...</span>
+              </div>
+            ) : (
+              <span className={`italic ${isFormValid() && !isLoading
+                ? "text-white"
+                : "text-gray-300"
+                }`}>
+                GET STARTED
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Footer Text */}
+
       </div>
     </div>
   );
