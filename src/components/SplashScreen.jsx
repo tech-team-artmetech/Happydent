@@ -157,17 +157,15 @@ const SplashScreen = ({ onComplete }) => {
     const interval = setInterval(() => {
       if (step >= totalSteps) {
         setLoadingProgress(100);
-        // NEW: Start the smooth transition sequence
-        setTimeout(() => {
-          // First fade out loading content
-          setShowLoadingContent(false);
 
-          // Then after fade out completes, show final content
-          setTimeout(() => {
-            setShowButton(true);
-            setShowFinalContent(true);
-          }, 300); // Wait for fade out to complete
-        }, 100); // Small delay after reaching 100%
+        // immediately hide loading content
+        setShowLoadingContent(false);
+
+        // after our 300 ms fade, show the button
+        setTimeout(() => {
+          setShowButton(true);
+          setShowFinalContent(true);
+        }, 300);
 
         clearInterval(interval);
         return;
@@ -417,32 +415,17 @@ const SplashScreen = ({ onComplete }) => {
           />
         </div>
 
-        {/* Progress percentage - ALWAYS in DOM, just visibility controlled */}
+        {/* Initial loading message - ALWAYS in DOM */}
         <p
-          className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded && loadingProgress < 100
-            ? "opacity-100"
-            : "opacity-0"
+          className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
             }`}
           style={{
             visibility:
-              showLoadingContent && imagesLoaded && loadingProgress < 100
-                ? "visible"
-                : "hidden",
+              showLoadingContent && imagesLoaded ? "visible" : "hidden",
           }}
         >
           {Math.round(loadingProgress)}%
         </p>
-
-        {/* Initial loading message - ALWAYS in DOM */}
-        {/* <p
-          className={`text-center text-lg transition-opacity duration-300 ${!imagesLoaded ? "opacity-100" : "opacity-0"
-            }`}
-          style={{
-            visibility: !imagesLoaded ? "visible" : "hidden",
-          }}
-        >
-          Loading...
-        </p> */}
       </div>
 
       {/* Button - ALWAYS in DOM, just visibility controlled */}

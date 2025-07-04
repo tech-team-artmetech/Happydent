@@ -617,7 +617,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
           />
 
           {/* Character count indicator */}
-          <div className="flex justify-between items-center mt-1">
+          {/* <div className="flex justify-between items-center mt-1">
             <p
               className={`text-red-300 text-xs transition-all duration-200 ${nameTouched && !validateName(formData.name)
                 ? "visible"
@@ -642,7 +642,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             >
               {formData.name.length}/{NAME_MAX_LENGTH}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* Phone Input with OTP Button */}
