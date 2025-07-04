@@ -104,7 +104,7 @@
 //         console.log("📷 No cached URL, constructing expected URL with counter:", currentCounter);
 
 //         // Construct the expected filename based on current counter
-//         const expectedImageUrl = `http://localhost:3001/uploads/enhanced_polaroid_${phone}_${currentCounter}.png?t=${Date.now()}`;
+//         const expectedImageUrl = `https://artmetech.co.in/api/uploads/enhanced_polaroid_${phone}_${currentCounter}.png?t=${Date.now()}`;
 
 //         console.log("📷 Expected image URL:", expectedImageUrl);
 
@@ -684,7 +684,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         console.log("📷 No cached URL, constructing expected URL with counter:", currentCounter);
 
         // Construct the expected filename based on current counter
-        const expectedImageUrl = `http://localhost:3001/uploads/enhanced_polaroid_${phone}_${currentCounter}.png?t=${Date.now()}`;
+        const expectedImageUrl = `https://artmetech.co.in/api/uploads/enhanced_polaroid_${phone}_${currentCounter}.png?t=${Date.now()}`;
 
         console.log("📷 Expected image URL:", expectedImageUrl);
 
