@@ -90,8 +90,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   const [autoCapturing, setAutoCapturing] = useState(false);
   const sessionRef = useRef(null);
   const captureTimeoutRef = useRef(null);
-
-  // FIX 1: ADD MISSING arStartTimerRef
   const arStartTimerRef = useRef(null);
 
   const [showCaptureButton, setShowCaptureButton] = useState(false);
@@ -105,6 +103,217 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
   const [isUploading, setIsUploading] = useState(false);
   const [showEndScreen, setShowEndScreen] = useState(false);
+
+  // 🔴 RED DEMON DETECTION: Ultra-efficient pixel scanning
+  const [redDemonDetection, setRedDemonDetection] = useState({
+    isScanning: false,
+    redPixelsFound: 0,
+    demonDetected: false,
+    scanCount: 0
+  });
+
+  const redDemonRef = useRef({
+    intervalId: null,
+    isRunning: false,
+    consecutiveDetections: 0,
+    requiredDetections: 3, // Need 3 consecutive detections to confirm
+    startTime: null
+  });
+
+  // Ultra-efficient red demon detection configuration
+  const RED_DEMON_CONFIG = {
+    scanInterval: 200, // Scan every 200ms
+    topAreaPercent: 0.25, // Top 25% of canvas
+    sampleRate: 0.02, // Sample only 2% of pixels in the area (ultra-efficient)
+    redThresholds: {
+      minRed: 180,     // Minimum red value (0-255)
+      maxGreen: 100,   // Maximum green value (to ensure it's red, not orange/yellow)
+      maxBlue: 100,    // Maximum blue value (to ensure it's red, not purple)
+      minIntensity: 200 // Minimum overall intensity to avoid dark reds
+    },
+    minRedPixels: 15,  // Minimum red pixels needed to trigger detection
+    maxScanTime: 30000 // Stop scanning after 30 seconds
+  };
+
+  // Stop red demon detection (defined early)
+  const stopRedDemonDetection = () => {
+    const detection = redDemonRef.current;
+
+    if (!detection.isRunning) return;
+
+    console.log('🔴 Stopping red demon detection');
+
+    if (detection.intervalId) {
+      clearInterval(detection.intervalId);
+      detection.intervalId = null;
+    }
+
+    detection.isRunning = false;
+    detection.consecutiveDetections = 0;
+
+    setRedDemonDetection(prev => ({
+      ...prev,
+      isScanning: false
+    }));
+  };
+
+  // Highly optimized red pixel detection
+  const detectRedDemon = (canvas) => {
+    if (!canvas) return false;
+
+    try {
+      // Create minimal temp canvas for top area only
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d', {
+        willReadFrequently: true,
+        alpha: false,
+        desynchronized: true // Better performance
+      });
+
+      if (!ctx) return false;
+
+      // Calculate top 25% area dimensions
+      const topHeight = Math.floor(canvas.height * RED_DEMON_CONFIG.topAreaPercent);
+      const scanWidth = Math.min(canvas.width, 400); // Cap width for performance
+      const scanHeight = Math.min(topHeight, 100);   // Cap height for performance
+
+      // Set temp canvas to minimal size
+      tempCanvas.width = scanWidth;
+      tempCanvas.height = scanHeight;
+
+      // Draw only the top portion of the AR canvas
+      ctx.drawImage(
+        canvas,
+        0, 0, canvas.width, topHeight,  // Source: full width, top 25%
+        0, 0, scanWidth, scanHeight     // Dest: scaled down for efficiency
+      );
+
+      // Get image data
+      const imageData = ctx.getImageData(0, 0, scanWidth, scanHeight);
+      const data = imageData.data;
+
+      // Ultra-efficient pixel sampling
+      let redPixelCount = 0;
+      const sampleStep = Math.floor(1 / RED_DEMON_CONFIG.sampleRate) * 4; // Skip pixels for efficiency
+      const { minRed, maxGreen, maxBlue, minIntensity } = RED_DEMON_CONFIG.redThresholds;
+
+      // Scan pixels with large steps for maximum efficiency
+      for (let i = 0; i < data.length; i += sampleStep) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // Check if pixel matches red demon criteria
+        if (
+          r >= minRed &&           // Strong red component
+          g <= maxGreen &&         // Low green (not orange/yellow)
+          b <= maxBlue &&          // Low blue (not purple/magenta)
+          (r + g + b) >= minIntensity && // Bright enough (not dark red)
+          r > (g + b) * 1.5        // Red is significantly stronger than other colors
+        ) {
+          redPixelCount++;
+
+          // Early exit if we've found enough red pixels
+          if (redPixelCount >= RED_DEMON_CONFIG.minRedPixels) {
+            break;
+          }
+        }
+      }
+
+      const demonDetected = redPixelCount >= RED_DEMON_CONFIG.minRedPixels;
+
+      // Update detection state
+      setRedDemonDetection(prev => ({
+        ...prev,
+        redPixelsFound: redPixelCount,
+        demonDetected,
+        scanCount: prev.scanCount + 1
+      }));
+
+      console.log(`🔴 Red scan: ${redPixelCount} red pixels found, demon: ${demonDetected}`);
+
+      return demonDetected;
+
+    } catch (error) {
+      console.warn('🔴 Red demon detection failed:', error);
+      return false;
+    }
+  };
+
+  // Main scanning function
+  const scanForRedDemon = () => {
+    const canvas = canvasRef.current ||
+      canvasPlaceholderRef.current?.querySelector('canvas') ||
+      window.snapARPreloadCache?.session?.output?.live;
+
+    if (!canvas) {
+      console.warn('🔴 No canvas available for red demon scanning');
+      return;
+    }
+
+    const currentTime = Date.now();
+    const detection = redDemonRef.current;
+
+    // Stop scanning after max time
+    if (currentTime - detection.startTime > RED_DEMON_CONFIG.maxScanTime) {
+      console.log('🔴 Red demon scan timeout - stopping');
+      stopRedDemonDetection();
+      return;
+    }
+
+    // Perform efficient red detection
+    const demonFound = detectRedDemon(canvas);
+
+    if (demonFound) {
+      detection.consecutiveDetections++;
+      console.log(`🔴 Red demon detected! (${detection.consecutiveDetections}/${RED_DEMON_CONFIG.requiredDetections})`);
+
+      // Require multiple consecutive detections for reliability
+      if (detection.consecutiveDetections >= RED_DEMON_CONFIG.requiredDetections) {
+        console.log('🔴👹 RED DEMON CONFIRMED - showing PROCEED button!');
+        stopRedDemonDetection();
+        setShowCaptureButton(true);
+
+        // Clear the timer since demon was detected
+        if (arStartTimerRef.current) {
+          clearTimeout(arStartTimerRef.current);
+          arStartTimerRef.current = null;
+        }
+      }
+    } else {
+      // Reset consecutive count if no demon found
+      detection.consecutiveDetections = 0;
+    }
+  };
+
+  // Start red demon detection
+  const startRedDemonDetection = () => {
+    const detection = redDemonRef.current;
+
+    if (detection.isRunning) {
+      console.log('🔴 Red demon detection already running');
+      return;
+    }
+
+    console.log('🔴 Starting RED DEMON detection...');
+
+    detection.isRunning = true;
+    detection.startTime = Date.now();
+    detection.consecutiveDetections = 0;
+
+    setRedDemonDetection({
+      isScanning: true,
+      redPixelsFound: 0,
+      demonDetected: false,
+      scanCount: 0
+    });
+
+    // Start scanning at optimized interval
+    detection.intervalId = setInterval(
+      scanForRedDemon,
+      RED_DEMON_CONFIG.scanInterval
+    );
+  };
 
   useEffect(() => {
     initializeARSession();
@@ -137,11 +346,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     };
   }, [sessionId]);
 
-  // 🎯 Show PROCEED button logic - 7 seconds after AR loads OR SSE end
+  // 🎯 Show PROCEED button logic - SSE end OR red demon detection OR timer
   useEffect(() => {
     console.log(
       "🎯 Button logic - arSessionEnded:",
       arSessionEnded,
+      "redDemonDetected:",
+      redDemonDetection.demonDetected,
       "isLoading:",
       isLoading,
       "showCaptureButton:",
@@ -151,6 +362,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     if (arSessionEnded) {
       console.log("🎯 AR Session ended via SSE - showing PROCEED button");
       setShowCaptureButton(true);
+      // Stop red demon detection since SSE ended
+      stopRedDemonDetection();
       // Clear timer since SSE ended the session
       if (arStartTimerRef.current) {
         clearTimeout(arStartTimerRef.current);
@@ -158,21 +371,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }
     }
 
-  // 🎯 START 7-SECOND TIMER FOR PROCEED BUTTON
-  const startProceedButtonTimer = () => {
-    console.log("⏰ Starting 7-second timer for PROCEED button...");
-
-    // Clear any existing timer
-    if (arStartTimerRef.current) {
-      clearTimeout(arStartTimerRef.current);
-    }
-
-    arStartTimerRef.current = setTimeout(() => {
-      console.log("⏰ 7 seconds elapsed - showing PROCEED button");
-      console.log("⏰ Current state:", { showCaptureButton, arSessionEnded, isLoading });
+    // 🔴 Check if red demon was detected
+    if (redDemonDetection.demonDetected && !showCaptureButton) {
+      console.log("🔴👹 Red demon detected - showing PROCEED button");
       setShowCaptureButton(true);
-    }, 5000); // 7 seconds
-  };
+      // Clear timer since demon was detected
+      if (arStartTimerRef.current) {
+        clearTimeout(arStartTimerRef.current);
+        arStartTimerRef.current = null;
+      }
+    }
+  }, [arSessionEnded, redDemonDetection.demonDetected, isLoading, showCaptureButton]);
 
   // 📡 SETUP SSE CONNECTION FOR AR END DETECTION
   const setupSSEConnection = (sessionId) => {
@@ -744,7 +953,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         }
       }
 
-      // FIX 2: Use canvas placeholder - DON'T touch React's DOM structure
+      // Use canvas placeholder - DON'T touch React's DOM structure
       const canvasPlaceholder = canvasPlaceholderRef.current;
       if (canvasPlaceholder) {
         try {
@@ -774,13 +983,20 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       console.log("🎉 AR session started successfully!");
       setIsLoading(false);
 
-      // 🎯 START 7-SECOND TIMER FOR PROCEED BUTTON (force start)
-      console.log("🎯 AR loaded, starting timer. Current state:", {
-        arSessionEnded,
-        showCaptureButton,
-        isLoading: false
-      });
-      startProceedButtonTimer();
+      // 🔴 START RED DEMON DETECTION instead of timer
+      console.log("🔴 AR loaded, starting red demon detection...");
+      setTimeout(() => {
+        startRedDemonDetection();
+      }, 1000); // Wait 1 second for AR to stabilize
+
+      // 🎯 FALLBACK TIMER (longer since we have demon detection)
+      console.log("⏰ Starting fallback timer...");
+      arStartTimerRef.current = setTimeout(() => {
+        console.log("⏰ Fallback timer - showing PROCEED button");
+        stopRedDemonDetection();
+        setShowCaptureButton(true);
+      }, 15000); // 15 seconds fallback
+
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
     }
@@ -807,7 +1023,10 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   };
 
   const cleanup = () => {
-    // FIX 3: Clean up all timer references
+    // Stop red demon detection
+    stopRedDemonDetection();
+
+    // Clean up all timer references
     if (captureTimeoutRef.current) {
       clearTimeout(captureTimeoutRef.current);
       captureTimeoutRef.current = null;
@@ -831,7 +1050,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       setSseConnected(false);
     }
 
-    console.log("🧹 Cleaned up AR component");
+    console.log("🧹 Cleaned up AR component with red demon detection");
   };
 
   const skipToEnd = () => {
@@ -958,7 +1177,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),
         y: Math.floor((canvasHeight * polaroidArea.y) / 100),
         width: Math.floor((canvasWidth * polaroidArea.width) / 100),
-        height: Math.floor((canvasHeight * polaroidArea.height) / 100),
+        height: Math.floor((canvasArea.height * polaroidArea.height) / 100),
       };
 
       const tempCanvas = document.createElement("canvas");
@@ -1149,6 +1368,20 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         <div className="flex-1 relative canvas-container" ref={containerRef}>
           {/* Canvas placeholder - AR canvas gets appended here */}
           <div ref={canvasPlaceholderRef} className="absolute inset-0"></div>
+
+          {/* Red Demon Detection Debug UI */}
+          {/* {process.env.NODE_ENV === 'development' && redDemonDetection.isScanning && (
+            <div className="absolute top-4 left-4 bg-red-900/80 text-white text-xs p-3 rounded z-40 max-w-xs">
+              <div className="font-bold mb-2">🔴 Red Demon Scanner</div>
+              <div>Scanning: {redDemonDetection.isScanning ? 'Yes' : 'No'}</div>
+              <div>Red Pixels: {redDemonDetection.redPixelsFound}</div>
+              <div>Scan Count: {redDemonDetection.scanCount}</div>
+              <div>Detected: {redDemonDetection.demonDetected ? 'YES!' : 'No'}</div>
+              <div className="text-red-300 text-xs mt-1">
+                Scanning top 25% for red demon
+              </div>
+            </div>
+          )} */}
 
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
