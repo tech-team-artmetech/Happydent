@@ -191,7 +191,7 @@ const SplashScreen = ({ onComplete }) => {
       setSessionState((prev) => ({ ...prev, isCreating: true, error: null }));
 
       const response = await fetch(
-        `https://artmetech.co.in/api/snap/create-session`,
+        `http://localhost:3001/api/snap/create-session`,
         {
           method: "POST",
           headers: {
@@ -271,9 +271,22 @@ const SplashScreen = ({ onComplete }) => {
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
       if (!cache.lenses) {
         const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-        const actualLensId = "31000d06-6d26-4b39-8dd0-6e63aeb5901d"
-        const lens = await cache.cameraKit.lensRepository.loadLens(actualLensId, actualLensGroupId);
-        cache.lenses = [lens];
+        const lessLensId = "31000d06-6d26-4b39-8dd0-6e63aeb5901d"; // Less than 3 people
+        const moreLensId = "9187f2ac-af8f-4be0-95e9-cf19261c0082"; // More than 3 people
+
+        // Load both lenses
+        console.log("🔥 Loading both lenses...");
+        const lessLens = await cache.cameraKit.lensRepository.loadLens(lessLensId, actualLensGroupId);
+        const moreLens = await cache.cameraKit.lensRepository.loadLens(moreLensId, actualLensGroupId);
+
+        // Store both lenses with identifiers
+        cache.lenses = {
+          less: lessLens,
+          more: moreLens,
+          loaded: true
+        };
+
+        console.log("✅ Both lenses loaded successfully");
       }
 
       // 🚀 STEP 4: Create session WITHOUT canvas - Let Camera Kit create its own canvas
@@ -293,11 +306,8 @@ const SplashScreen = ({ onComplete }) => {
         await cache.source.setRenderSize(window.innerWidth, window.innerHeight);
         await cache.session.setFPSLimit(60);
 
-        // Apply the lens BEFORE starting to play
-        if (cache.lenses && cache.lenses.length > 0) {
-          await cache.session.applyLens(cache.lenses[0]);
-          cache.appliedLens = cache.lenses[0];
-        }
+        // DON'T APPLY ANY LENS YET - Wait for user selection
+        console.log("🎯 Session ready - waiting for lens selection based on group size");
       }
 
       // 🎯 MARK AS COMPLETELY READY

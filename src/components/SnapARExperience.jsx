@@ -273,7 +273,7 @@ class ARErrorBoundary extends React.Component {
   }
 }
 
-const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken }) => {
+const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -291,6 +291,9 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
   const sseRef = useRef(null);
   const currentSessionId = useRef(null);
   const [sessionId, setSessionId] = useState(null);
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [showEndScreen, setShowEndScreen] = useState(false);
 
   useEffect(() => {
     initializeARSession();
@@ -378,7 +381,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
           stopDemonDetection();
         }
       }
-    }, 3000); // Check every 3 seconds
+    }, 2000); // Check every 3 seconds
 
     console.log("👹 Detection started successfully");
   };
@@ -400,7 +403,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
       console.log("📡 Connecting to SSE endpoint for session:", sessionId);
 
       const eventSource = new EventSource(
-        `https://artmetech.co.in/api/ar-events/${sessionId}`
+        `http://localhost:3001/api/ar-events/${sessionId}`
       );
       sseRef.current = eventSource;
 
@@ -460,7 +463,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
   const checkARSessionStatus = async (sessionId) => {
     try {
       const response = await fetch(
-        `https://artmetech.co.in/api/snap/session-status/${sessionId}`
+        `http://localhost:3001/api/snap/session-status/${sessionId}`
       );
       const data = await response.json();
 
@@ -521,7 +524,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
         );
         try {
           const checkResponse = await fetch(
-            `https://artmetech.co.in/api/snap/check-session/${userData.phone}`
+            `http://localhost:3001/api/snap/check-session/${userData.phone}`
           );
           const checkData = await checkResponse.json();
 
@@ -552,7 +555,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
         );
         try {
           const createResponse = await fetch(
-            "https://artmetech.co.in/api/snap/create-session",
+            "http://localhost:3001/api/snap/create-session",
             {
               method: "POST",
               headers: {
@@ -577,7 +580,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
             // Associate phone with session
             if (userData.phone) {
               console.log("📱 Associating phone with new session");
-              await fetch("https://artmetech.co.in/api/snap/associate-phone", {
+              await fetch("http://localhost:3001/api/snap/associate-phone", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -638,12 +641,33 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
       // 🆕 FRESH INITIALIZATION: Wait for preloaded session or create new
       if (cache?.sessionReady && cache.session?.output?.live) {
         console.log("✅ Using preloaded session");
+
+        // 🚨 NEW: Apply lens if not already applied
+        if (cache && cache.lenses && userData?.groupSize) {
+          const selectedLens = cache.lenses[userData.groupSize];
+          if (selectedLens && !cache.appliedLens) {
+            console.log(`🎯 Applying ${userData.groupSize} lens to preloaded session`);
+            await cache.session.applyLens(selectedLens);
+            cache.appliedLens = selectedLens;
+          }
+        }
+
         await setupCanvasAndStart(cache.session.output.live, cache.session);
       } else if (cache?.isPreloading) {
         console.log("⏳ Waiting for preload to complete...");
         await waitForSessionReady();
 
         if (cache.session?.output?.live) {
+          // 🚨 NEW: Apply lens after preload completes
+          if (cache && cache.lenses && userData?.groupSize) {
+            const selectedLens = cache.lenses[userData.groupSize];
+            if (selectedLens && !cache.appliedLens) {
+              console.log(`🎯 Applying ${userData.groupSize} lens after preload completion`);
+              await cache.session.applyLens(selectedLens);
+              cache.appliedLens = selectedLens;
+            }
+          }
+
           await setupCanvasAndStart(cache.session.output.live, cache.session);
         } else {
           throw new Error("Preload completed but no canvas available");
@@ -790,10 +814,20 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
       cache.cameraManager = new CameraManager();
       cache.mediaStream = await cache.cameraManager.initializeCamera();
 
-      console.log("🔥 Step 3: Load lenses...");
-      const lens = await cache.cameraKit.lensRepository.loadLens(lensId, lensGroupId);
-      cache.lenses = [lens];
+      console.log("🔥 Step 3: Load both lenses...");
+      const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
+      const lessLensId = "31000d06-6d26-4b39-8dd0-6e63aeb5901d";
+      const moreLensId = "9187f2ac-af8f-4be0-95e9-cf19261c0082";
 
+      // Load both lenses
+      const lessLens = await cache.cameraKit.lensRepository.loadLens(lessLensId, actualLensGroupId);
+      const moreLens = await cache.cameraKit.lensRepository.loadLens(moreLensId, actualLensGroupId);
+
+      cache.lenses = {
+        less: lessLens,
+        more: moreLens,
+        loaded: true
+      };
       console.log("🔥 Step 4: Create session...");
       cache.session = await cache.cameraKit.createSession();
 
@@ -818,10 +852,19 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
       await cache.source.setRenderSize(window.innerWidth, window.innerHeight);
       await cache.session.setFPSLimit(60);
 
-      if (cache.lenses && cache.lenses.length > 0) {
-        console.log("🔥 Step 7: Apply lens...");
-        await cache.session.applyLens(cache.lenses[0]);
-        cache.appliedLens = cache.lenses[0];
+      console.log("🔥 Step 7: Apply selected lens based on user choice...");
+      // Get the selected group size from localStorage or userData
+      const selectedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+      const selectedLens = cache.lenses[selectedGroupSize];
+
+      if (selectedLens) {
+        console.log(`🎯 Applying ${selectedGroupSize} lens`);
+        await cache.session.applyLens(selectedLens);
+        cache.appliedLens = selectedLens;
+      } else {
+        console.warn("⚠️ Selected lens not found, using default");
+        await cache.session.applyLens(cache.lenses.less);
+        cache.appliedLens = cache.lenses.less;
       }
 
       cache.isPreloaded = true;
@@ -871,6 +914,17 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
 
       // 👹 INITIALIZE DEMON DETECTION WITH CANVAS
       FastDemonDetection.init(arCanvas);
+
+      // 🚨 ADD THIS: Apply the correct lens based on group size
+      const cache = window.snapARPreloadCache;
+      if (cache && cache.lenses && userData?.groupSize) {
+        const selectedLens = cache.lenses[userData.groupSize];
+        if (selectedLens && !cache.appliedLens) {
+          console.log(`🎯 Applying ${userData.groupSize} lens during canvas setup`);
+          await session.applyLens(selectedLens);
+          cache.appliedLens = selectedLens;
+        }
+      }
 
       // Replace our container with the AR canvas
       const container = containerRef.current;
@@ -940,11 +994,19 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
 
   const skipToEnd = () => {
     cleanup();
+
+    // 🚨 ADD THIS: Get dynamic lens info for test mode too
+    const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+    const appliedLensId = appliedGroupSize === "less" ?
+      "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+      "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
     onComplete({
       ...userData,
       photo: "test-photo-url",
       timestamp: new Date().toISOString(),
-      lensGroupId: lensGroupId,
+      lensId: appliedLensId, // 🚨 CHANGED: Use dynamic lens ID instead of lensGroupId
+      groupSize: appliedGroupSize, // 🚨 ADD: Include group size info
       testMode: true,
     });
   };
@@ -952,6 +1014,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
   const handleManualCapture = () => {
     console.log("🎯 Manual capture button clicked");
     setShowCaptureButton(false);
+    setIsUploading(true);
     captureAndUpload();
   };
 
@@ -988,6 +1051,7 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
   }, [sessionId, sseConnected]);
 
   const captureAndUpload = async () => {
+    setIsUploading(true);
     // Try multiple ways to get the AR canvas
     let canvas = null;
 
@@ -1126,12 +1190,18 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
 
       console.log("✅ Enhanced blob created successfully, size:", blob.size);
 
+      const currentCounter = localStorage.getItem("photoCounter") || "0";
+      const newCounter = currentCounter === "0" ? "1" : "0";
+
+      console.log(`🔄 Photo counter: ${currentCounter} → ${newCounter}`);
+
       const formData = new FormData();
-      formData.append("photo", blob, `enhanced_polaroid_${userData.phone}.png`);
+      formData.append("photo", blob, `enhanced_polaroid_${userData.phone}_${newCounter}.png`); // 🚨 ADD COUNTER
       formData.append("phone", userData.phone);
       formData.append("source", "snapchat_polaroid");
+      formData.append("counter", newCounter); // 🚨 SEND COUNTER TO BACKEND
 
-      const response = await fetch("https://artmetech.co.in/api/upload-photo", {
+      const response = await fetch("http://localhost:3001/api/upload-photo", {
         method: "POST",
         body: formData,
       });
@@ -1144,23 +1214,48 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
 
       if (result.success) {
         console.log("✅ Enhanced upload successful:", result.data.imageUrl);
-        onComplete({
-          ...userData,
-          photo: result.data.imageUrl,
-          timestamp: new Date().toISOString(),
-          lensId: lensId,
-          captureMode: "enhanced_polaroid",
-          uploadSuccess: true,
-          demonDetected: FastDemonDetection.isDemonDetected,
-        });
-      } else {
-        console.error("❌ Upload failed:", result.message);
+
+        // 🚨 UPDATE: Store new counter and clean image URL
+        localStorage.setItem("photoCounter", newCounter);
+        localStorage.setItem("userPhoto", result.data.imageUrl);
+
+        // Get the applied lens ID dynamically
+        const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+        const appliedLensId = appliedGroupSize === "less" ?
+          "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+          "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
         setTimeout(() => {
+          setIsUploading(false);
+          setShowEndScreen(true);
+          onComplete({
+            ...userData,
+            photo: result.data.imageUrl, // 🚨 Clean URL (no cache busting needed)
+            timestamp: new Date().toISOString(),
+            lensId: appliedLensId,
+            groupSize: appliedGroupSize,
+            captureMode: "enhanced_polaroid",
+            uploadSuccess: true,
+            demonDetected: FastDemonDetection.isDemonDetected,
+            photoCounter: newCounter, // 🚨 ADD: Include counter info
+          });
+        }, 2000);
+      } else {
+        // 🚨 ALSO UPDATE ERROR CASES:
+        const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+        const appliedLensId = appliedGroupSize === "less" ?
+          "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+          "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
+        setTimeout(() => {
+          setIsUploading(false);        // hide loader
+          setShowEndScreen(true);
           onComplete({
             ...userData,
             photo: "upload-failed",
             timestamp: new Date().toISOString(),
-            lensId: lensId,
+            lensId: appliedLensId, // 🚨 CHANGED: Use dynamic lens ID
+            groupSize: appliedGroupSize, // 🚨 ADD: Include group size info
             captureMode: "enhanced_polaroid",
             uploadSuccess: false,
             errorMessage: result.message,
@@ -1169,22 +1264,27 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
         }, 2400);
       }
     } catch (error) {
-      console.error("❌ Enhanced capture and upload error:", error);
+      // 🚨 ALSO UPDATE CATCH BLOCK:
+      const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+      const appliedLensId = appliedGroupSize === "less" ?
+        "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+        "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
       setTimeout(() => {
+        setIsUploading(false);        // hide loader
+        setShowEndScreen(true);
         onComplete({
           ...userData,
           photo: "capture-failed",
           timestamp: new Date().toISOString(),
-          lensId: lensId,
+          lensId: appliedLensId, // 🚨 CHANGED: Use dynamic lens ID
+          groupSize: appliedGroupSize, // 🚨 ADD: Include group size info
           captureMode: "enhanced_polaroid",
           uploadSuccess: false,
           errorMessage: error.message,
           demonDetected: FastDemonDetection.isDemonDetected,
         });
       });
-    } finally {
-      setIsCapturing(false);
-      setAutoCapturing(false);
     }
   };
 
@@ -1251,43 +1351,22 @@ const SnapARExperience = ({ onComplete, userData, lensId, lensGroupId, apiToken 
             </div>
           )}
 
-          {/* 📡 SSE Connection Indicator and Demon Detection Status (optional debug info) */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="absolute top-4 right-4 z-10 flex gap-2">
-              <div
-                className={`w-3 h-3 rounded-full ${sseConnected ? "bg-green-500" : "bg-red-500"
-                  }`}
-                title={`SSE: ${sseConnected ? "Connected" : "Disconnected"}`}
-              ></div>
-              <div
-                className={`w-3 h-3 rounded-full ${arSessionEnded ? "bg-red-500" : "bg-green-500"
-                  }`}
-                title={`AR: ${arSessionEnded ? "Ended" : "Active"}`}
-              ></div>
-              <div
-                className={`w-3 h-3 rounded-full ${FastDemonDetection.isDemonDetected
-                  ? "bg-red-500"
-                  : "bg-gray-500"
-                  }`}
-                title={`Demon: ${FastDemonDetection.isDemonDetected
-                  ? "Detected"
-                  : "Not Detected"
-                  }`}
-              ></div>
-              {/* Debug button */}
-              <button
-                onClick={debugSSEConnection}
-                className="text-xs bg-gray-700 px-2 py-1 rounded"
-                title="Debug SSE Connection"
-              >
-                SSE
-              </button>
-            </div>
-          )}
         </div>
 
+
         {/* 🚀 Show PROCEED button when AR has ended OR demon detected */}
-        {showCaptureButton && !isCapturing && (
+        {(autoCapturing || isUploading) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-white mx-auto mb-4 drop-shadow-lg"></div>
+              <div className="animate-pulse text-white text-xl font-bold drop-shadow-lg">
+                Capturing your moment...
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showCaptureButton && !isCapturing && !isUploading && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
             <button
               style={{

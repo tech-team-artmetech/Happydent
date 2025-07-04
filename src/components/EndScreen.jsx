@@ -7,7 +7,63 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // 🚨 NEW: Store lens selection info
+  const [lensInfo, setLensInfo] = useState({
+    groupSize: null,
+    lensId: null,
+  });
+
   const API_BASE_URL = "";
+
+  // useEffect(() => {
+  //   // Get user info from localStorage
+  //   const phone = localStorage.getItem("userPhone");
+  //   const userId = localStorage.getItem("userId");
+  //   const userName = localStorage.getItem("userName");
+
+  //   // 🚨 NEW: Get lens selection info
+  //   const selectedGroupSize = localStorage.getItem("selectedGroupSize");
+  //   const selectedLensId = selectedGroupSize === "less" ?
+  //     "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+  //     "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
+  //   if (phone && userId && userName) {
+  //     setUserInfo({ phone, userId, userName });
+  //     setLensInfo({
+  //       groupSize: selectedGroupSize || "less",
+  //       lensId: selectedLensId,
+  //     });
+  //     fetchUserPhoto(phone);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   // Get user info from localStorage
+  //   const phone = localStorage.getItem("userPhone");
+  //   const userId = localStorage.getItem("userId");
+  //   const userName = localStorage.getItem("userName");
+
+  //   // Get lens selection info
+  //   const selectedGroupSize = localStorage.getItem("selectedGroupSize");
+  //   const selectedLensId = selectedGroupSize === "less"
+  //     ? "31000d06-6d26-4b39-8dd0-6e63aeb5901d"
+  //     : "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
+  //   if (phone && userId && userName) {
+  //     setUserInfo({ phone, userId, userName });
+  //     setLensInfo({
+  //       groupSize: selectedGroupSize || "less",
+  //       lensId: selectedLensId,
+  //     });
+
+  //     // ✅ NEW: Fetch image URL directly from localStorage
+  //     const imageUrl = localStorage.getItem("userPhoto");
+  //     if (imageUrl) {
+  //       setUserPhoto(imageUrl);
+  //       setPhotoInfo({ hasPhoto: true, imageUrl });
+  //     }
+  //   }
+  // }, []);
 
   useEffect(() => {
     // Get user info from localStorage
@@ -15,9 +71,30 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     const userId = localStorage.getItem("userId");
     const userName = localStorage.getItem("userName");
 
+    // Get lens selection info
+    const selectedGroupSize = localStorage.getItem("selectedGroupSize");
+    const selectedLensId = selectedGroupSize === "less"
+      ? "31000d06-6d26-4b39-8dd0-6e63aeb5901d"
+      : "9187f2ac-af8f-4be0-95e9-cf19261c0082";
+
     if (phone && userId && userName) {
       setUserInfo({ phone, userId, userName });
-      fetchUserPhoto(phone);
+      setLensInfo({
+        groupSize: selectedGroupSize || "less",
+        lensId: selectedLensId,
+      });
+
+      // ✅ Get cache-busted image URL from localStorage
+      const imageUrl = localStorage.getItem("userPhoto");
+      if (imageUrl) {
+        console.log("📷 Using cached image URL:", imageUrl);
+        setUserPhoto(imageUrl);
+        setPhotoInfo({ hasPhoto: true, imageUrl });
+      } else {
+        // Fallback: try API if no localStorage image
+        console.log("📷 No cached image, trying API...");
+        fetchUserPhoto(phone);
+      }
     }
   }, []);
 
@@ -26,7 +103,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `https://artmetech.co.in/api/user/${phone}/photo`
+        `http://localhost:3001/api/user/${phone}/photo`
       );
       const data = await response.json();
 
@@ -62,7 +139,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       console.log(`📥 Downloading photo for ${userInfo.phone}`);
 
       const response = await fetch(
-        `https://artmetech.co.in/api/download-photo/${userInfo.phone}`,
+        `http://localhost:3001/api/download-photo/${userInfo.phone}`,
         {
           method: "GET",
         }
@@ -112,7 +189,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     }
   };
 
-  // 🚀 NEW: Smart retry function that checks for existing session
+  // 🚀 UPDATED: Smart retry function with lens info
   const handleSmartRetry = async () => {
     console.log("🔄 Smart retry initiated");
     setIsLoading(true);
@@ -128,7 +205,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
       // Step 1: Check if there's an existing session for this phone
       const sessionCheckResponse = await fetch(
-        `https://artmetech.co.in/api/snap/check-session/${phone}`,
+        `http://localhost:3001/api/snap/check-session/${phone}`,
         {
           method: "GET",
           headers: {
@@ -154,7 +231,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
           // Step 2a: Reset the existing session to ended: false
           const resetResponse = await fetch(
-            "https://artmetech.co.in/api/snap/reset-session",
+            "http://localhost:3001/api/snap/reset-session",
             {
               method: "POST",
               headers: {
@@ -187,7 +264,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       // Step 2b: Create new session if needed
       if (isNewSession) {
         const createSessionResponse = await fetch(
-          "https://artmetech.co.in/api/snap/create-session",
+          "http://localhost:3001/api/snap/create-session",
           {
             method: "POST",
             headers: {
@@ -213,7 +290,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
         // Step 3: Associate phone with the new session
         const associateResponse = await fetch(
-          "https://artmetech.co.in/api/snap/associate-phone",
+          "http://localhost:3001/api/snap/associate-phone",
           {
             method: "POST",
             headers: {
@@ -243,7 +320,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
       }
 
       // Step 4: Reset the phone-based AR state to ended: false
-      const arEndResponse = await fetch("https://artmetech.co.in/api/ar-end", {
+      const arEndResponse = await fetch("http://localhost:3001/api/ar-end", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -265,7 +342,13 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
       // Step 5: Update local storage with session info
       localStorage.setItem("currentSessionId", sessionId);
+      localStorage.setItem("snapARSessionId", sessionId); // 🚨 NEW: Also set this key
       localStorage.setItem("arSessionReady", "true");
+
+      // 🚨 NEW: Ensure lens selection is preserved
+      if (lensInfo.groupSize) {
+        localStorage.setItem("selectedGroupSize", lensInfo.groupSize);
+      }
 
       // Step 6: Check if we can reuse AR session from cache
       const cache = window.snapARPreloadCache;
@@ -277,7 +360,29 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         sessionReady: cache?.sessionReady,
         hasSession: !!cache?.session,
         canReuseAR: hasValidARSession,
+        lensInfo: lensInfo, // 🚨 NEW: Log lens info
       });
+
+      // 🚨 NEW: Force cache to load both lenses if needed
+      if (hasValidARSession && cache && !cache.lenses?.loaded) {
+        console.log("🔄 Cache exists but lenses not loaded, forcing fresh session");
+
+        // Clear cache to force fresh session creation with both lenses
+        if (cache.session) {
+          try {
+            await cache.session.pause();
+          } catch (e) {
+            console.log("Session already stopped");
+          }
+        }
+
+        if (cache.mediaStream) {
+          cache.mediaStream.getTracks().forEach((track) => track.stop());
+        }
+
+        window.snapARPreloadCache = null;
+        hasValidARSession = false;
+      }
 
       // Step 7: Execute the appropriate retry action
       if (hasValidARSession && onRetryAR) {
@@ -289,8 +394,8 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           phone: userInfo.phone,
           userId: userInfo.userId,
           userName: userInfo.userName,
+          groupSize: lensInfo.groupSize, // 🚨 NEW: Pass lens info
           isRetry: true,
-          // CHANGE: if you're passing lens info
         });
       } else {
         // No AR session in cache - do full restart but keep session info
@@ -300,12 +405,14 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         localStorage.removeItem("userPhone");
         localStorage.removeItem("userId");
         localStorage.removeItem("userName");
+        // 🚨 NEW: Keep lens selection
+        // localStorage.removeItem("selectedGroupSize"); // Don't remove this
 
         if (onRetry) {
           onRetry({
             sessionId: sessionId,
             preserveSession: true,
-            // CHANGE: if you're passing lens info
+            lensInfo: lensInfo, // 🚨 NEW: Pass lens info
           });
         }
       }
@@ -329,7 +436,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     handleSmartRetry();
   };
 
-  // 🚀 NEW: Debug function (optional - for development)
+  // 🚀 UPDATED: Debug function with lens info
   const handleDebug = async () => {
     const phone = userInfo?.phone;
     const sessionId = localStorage.getItem("currentSessionId");
@@ -337,12 +444,14 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     console.log("🔍 Debug Session State:");
     console.log("Phone:", phone);
     console.log("Stored Session ID:", sessionId);
+    console.log("Lens Info:", lensInfo); // 🚨 NEW
+    console.log("Selected Group Size:", localStorage.getItem("selectedGroupSize")); // 🚨 NEW
     console.log("AR Cache:", window.snapARPreloadCache);
 
     if (phone) {
       try {
         const arStatus = await fetch(
-          `https://artmetech.co.in/api/snap/ar-status/${phone}`
+          `http://localhost:3001/api/snap/ar-status/${phone}`
         );
         const arData = await arStatus.json();
         console.log("Phone AR Status:", arData);
@@ -354,7 +463,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     if (sessionId) {
       try {
         const sessionStatus = await fetch(
-          `https://artmetech.co.in/api/snap/session-status/${sessionId}`
+          `http://localhost:3001/api/snap/session-status/${sessionId}`
         );
         const sessionData = await sessionStatus.json();
         console.log("Session Status:", sessionData);
@@ -364,28 +473,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     }
   };
 
-  const buttonStyle = {
-    width: "208px",
-    height: "38px",
-    background:
-      "radial-gradient(31% 31% at 50% 50%, #FFFFFF 0%, #0033FF 59%, #000DFF 100%)",
-    borderRadius: "4px",
-    border: "1px solid rgba(255, 255, 255, 0.52)",
-    boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
-    backdropFilter: "blur(20px)",
-    opacity: "100%",
-    zIndex: 10,
-    position: "relative",
-  };
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto relative z-10">
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 bg-red-500/20 border border-red-500/50 rounded p-3 text-center z-20">
-          <p className="text-red-300 text-sm">{error}</p>
-        </div>
-      )}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto relative z-10 overflow-y-hidden">
+
 
       {/* Loading Message */}
       {isLoading && (
@@ -407,17 +497,6 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             e.target.src = "/assets/enddummy.png";
           }}
         />
-
-        {/* Photo Status Indicator */}
-        {/* {userInfo && (
-          <div className="text-center mt-2">
-            {photoInfo?.hasPhoto ? (
-              <p className="text-green-300 text-xs">Your photo is ready!</p>
-            ) : (
-              <p className="text-yellow-300 text-xs">Using default image</p>
-            )}
-          </div>
-        )} */}
       </div>
 
       {/* Buttons Container */}
@@ -477,6 +556,8 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             "RETRY"
           )}
         </button>
+
+
       </div>
     </div>
   );
