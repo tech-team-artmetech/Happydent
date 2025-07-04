@@ -995,7 +995,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         console.log("⏰ Fallback timer - showing PROCEED button");
         stopRedDemonDetection();
         setShowCaptureButton(true);
-      }, 30000); // 15 seconds fallback
+      }, 15000); // 15 seconds fallback
 
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
@@ -1071,11 +1071,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     });
   };
 
-  const handleManualCapture = () => {
-    console.log("🎯 Manual capture button clicked");
+  const handleManualCapture = async () => {
+    console.log("🎯 Manual capture button clicked - starting immediate upload");
     setShowCaptureButton(false);
     setIsUploading(true);
-    captureAndUpload();
+
+    // Immediately start capture and upload
+    await captureAndUpload();
   };
 
   // 🚀 Force SSE connection if sessionId exists but no connection
@@ -1092,7 +1094,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   }, [sessionId, sseConnected]);
 
   const captureAndUpload = async () => {
+    console.log("📸 🚀 PROCEED CLICKED - Starting immediate capture and upload process...");
     setIsUploading(true);
+
+    // 🔧 CRITICAL: Update counter FIRST before any processing
+    const currentCounter = localStorage.getItem("photoCounter") || "0";
+    const newCounter = currentCounter === "0" ? "1" : "0";
+
+    console.log(`🔄 PROCEED: Counter UPDATE ${currentCounter} → ${newCounter}`);
+    localStorage.setItem("photoCounter", newCounter);
+    console.log(`✅ PROCEED: Counter immediately updated to: ${newCounter}`);
+
     // Try multiple ways to get the AR canvas
     let canvas = null;
 
@@ -1177,7 +1189,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),
         y: Math.floor((canvasHeight * polaroidArea.y) / 100),
         width: Math.floor((canvasWidth * polaroidArea.width) / 100),
-        height: Math.floor((canvasArea.height * polaroidArea.height) / 100),
+        height: Math.floor((canvasHeight * polaroidArea.height) / 100),
       };
 
       const tempCanvas = document.createElement("canvas");
@@ -1227,13 +1239,11 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
       console.log("✅ Enhanced blob created successfully, size:", blob.size);
 
-      const currentCounter = localStorage.getItem("photoCounter") || "0";
-      const newCounter = currentCounter === "0" ? "1" : "0";
-
-      console.log(`🔄 Photo counter: ${currentCounter} → ${newCounter}`);
+      // 🔧 Use the counter that was already updated at the start
+      console.log(`📸 PROCEED: Using updated counter for upload: ${newCounter}`);
 
       const formData = new FormData();
-      formData.append("photo", blob, `enhanced_polaroid_${userData.phone}_${newCounter}.png`);
+      formData.append("photo", blob, `${userData.phone}_snapchat_polaroid_${newCounter}.png`);
       formData.append("phone", userData.phone);
       formData.append("source", "snapchat_polaroid");
       formData.append("counter", newCounter);
@@ -1252,9 +1262,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       if (result.success) {
         console.log("✅ Enhanced upload successful:", result.data.imageUrl);
 
-        // Store new counter and clean image URL
-        localStorage.setItem("photoCounter", newCounter);
-        localStorage.setItem("userPhoto", result.data.imageUrl);
+        // 🔧 IMPORTANT: Counter was already updated before upload
+        console.log(`✅ Photo saved with counter: ${newCounter}`);
+        console.log(`📷 Server returned URL: ${result.data.imageUrl}`);
+
+        // 🔧 CRITICAL: Update the stored URL to match the actual filename with counter
+        // The server returns the base URL, but we need to store the URL with the correct counter
+        const baseUrl = result.data.imageUrl.split('_').slice(0, -1).join('_'); // Remove old counter part
+        const updatedImageUrl = `${baseUrl}_${newCounter}.png`;
+
+        localStorage.setItem("userPhoto", updatedImageUrl);
+        console.log(`💾 Stored counter-based image URL: ${updatedImageUrl}`);
 
         // Get the applied lens ID dynamically
         const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
@@ -1277,7 +1295,12 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           });
         }, 2000);
       } else {
-        // Handle upload failure
+        // Handle upload failure - revert counter since upload failed
+        console.log("❌ PROCEED: Upload failed, reverting counter");
+        const revertedCounter = newCounter === "0" ? "1" : "0"; // Revert back
+        localStorage.setItem("photoCounter", revertedCounter);
+        console.log(`🔄 PROCEED: Counter reverted to: ${revertedCounter}`);
+
         const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
         const appliedLensId = appliedGroupSize === "less" ?
           "bc57c671-4255-423e-9eaf-71daba627ca8" :
@@ -1299,7 +1322,12 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         }, 2400);
       }
     } catch (error) {
-      // Handle capture/upload error
+      // Handle capture/upload error - revert counter since upload failed
+      console.log("❌ PROCEED: Capture/upload error, reverting counter");
+      const revertedCounter = newCounter === "0" ? "1" : "0"; // Revert back
+      localStorage.setItem("photoCounter", revertedCounter);
+      console.log(`🔄 PROCEED: Counter reverted to: ${revertedCounter} due to error`);
+
       const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
       const appliedLensId = appliedGroupSize === "less" ?
         "bc57c671-4255-423e-9eaf-71daba627ca8" :
@@ -1370,7 +1398,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           <div ref={canvasPlaceholderRef} className="absolute inset-0"></div>
 
           {/* Red Demon Detection Debug UI */}
-          {/* {process.env.NODE_ENV === 'development' && redDemonDetection.isScanning && (
+          {process.env.NODE_ENV === 'development' && redDemonDetection.isScanning && (
             <div className="absolute top-4 left-4 bg-red-900/80 text-white text-xs p-3 rounded z-40 max-w-xs">
               <div className="font-bold mb-2">🔴 Red Demon Scanner</div>
               <div>Scanning: {redDemonDetection.isScanning ? 'Yes' : 'No'}</div>
@@ -1381,7 +1409,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 Scanning top 25% for red demon
               </div>
             </div>
-          )} */}
+          )}
 
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">

@@ -890,7 +890,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       </div>
 
       {/* Get Started Button */}
-      <div className="w-full">
+      <div className="w-full mb-[8px]">
         <button
           onClick={handleGetStarted}
           disabled={!isFormValid() || isLoading}
