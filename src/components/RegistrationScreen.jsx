@@ -1,24 +1,49 @@
 import React, { useState, useEffect } from "react";
 
 const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    groupSize: "less",
+  // 🔧 FIX: Initialize state with data from localStorage
+  const [formData, setFormData] = useState(() => {
+    const savedFormData = localStorage.getItem("registrationFormData");
+    if (savedFormData) {
+      try {
+        return JSON.parse(savedFormData);
+      } catch (e) {
+        console.warn("Failed to parse saved form data");
+      }
+    }
+    return {
+      name: "",
+      phone: "",
+      groupSize: "less",
+    };
   });
 
-  const [otpData, setOtpData] = useState({
-    otp: "",
-    isOtpSent: false,
-    isOtpVerified: false,
-    timeLeft: 0,
-    canResend: false,
+  const [otpData, setOtpData] = useState(() => {
+    const savedOtpData = localStorage.getItem("registrationOtpData");
+    if (savedOtpData) {
+      try {
+        return JSON.parse(savedOtpData);
+      } catch (e) {
+        console.warn("Failed to parse saved OTP data");
+      }
+    }
+    return {
+      otp: "",
+      isOtpSent: false,
+      isOtpVerified: false,
+      timeLeft: 0,
+      canResend: false,
+    };
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [phoneTouched, setPhoneTouched] = useState(false);
-  const [otpTouched, setOtpTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(() => {
+    return localStorage.getItem("registrationPhoneTouched") === "true";
+  });
+  const [otpTouched, setOtpTouched] = useState(() => {
+    return localStorage.getItem("registrationOtpTouched") === "true";
+  });
 
   // NEW: Session management state
   const [snapAR, setSnapAR] = useState({
@@ -34,15 +59,51 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   // API endpoint - change this to your backend URL
   const API_BASE_URL = "";
 
-  const [nameTouched, setNameTouched] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-
+  const [nameTouched, setNameTouched] = useState(() => {
+    return localStorage.getItem("registrationNameTouched") === "true";
+  });
+  const [termsAccepted, setTermsAccepted] = useState(() => {
+    return localStorage.getItem("registrationTermsAccepted") === "true";
+  });
 
   // Set character limits
   const NAME_MIN_LENGTH = 2;
   const NAME_MAX_LENGTH = 36;
 
+  // 🔧 FIX: Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("registrationFormData", JSON.stringify(formData));
+  }, [formData]);
 
+  useEffect(() => {
+    localStorage.setItem("registrationOtpData", JSON.stringify(otpData));
+  }, [otpData]);
+
+  useEffect(() => {
+    localStorage.setItem("registrationPhoneTouched", phoneTouched.toString());
+  }, [phoneTouched]);
+
+  useEffect(() => {
+    localStorage.setItem("registrationOtpTouched", otpTouched.toString());
+  }, [otpTouched]);
+
+  useEffect(() => {
+    localStorage.setItem("registrationNameTouched", nameTouched.toString());
+  }, [nameTouched]);
+
+  useEffect(() => {
+    localStorage.setItem("registrationTermsAccepted", termsAccepted.toString());
+  }, [termsAccepted]);
+
+  // 🔧 FIX: Clear saved form data when registration is completed
+  const clearSavedFormData = () => {
+    localStorage.removeItem("registrationFormData");
+    localStorage.removeItem("registrationOtpData");
+    localStorage.removeItem("registrationPhoneTouched");
+    localStorage.removeItem("registrationOtpTouched");
+    localStorage.removeItem("registrationNameTouched");
+    localStorage.removeItem("registrationTermsAccepted");
+  };
 
   // NEW: Initialize session data from splash screen
   useEffect(() => {
@@ -354,34 +415,6 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
     }
   };
 
-  // API call to register user
-  // const registerUser = async (userData) => {
-  //   try {
-  //     const response = await fetch(`https://artmetech.co.in/api/register`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         ...userData,
-  //         otpVerified: BYPASS_OTP ? true : otpData.isOtpVerified,
-  //         bypassMode: BYPASS_OTP, // Let backend know this is bypass mode
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.message || "Registration failed");
-  //     }
-
-  //     return data;
-  //   } catch (error) {
-  //     console.error("Registration API error:", error);
-  //     throw error;
-  //   }
-  // };
-
   const registerUser = async (userData) => {
     try {
       const response = await fetch(`https://artmetech.co.in/api/register`, {
@@ -411,7 +444,6 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   };
 
   const handleGetStarted = async () => {
-
     window.scrollTo({
       top: 0,
       behavior: 'smooth' // or 'instant' for immediate scroll
@@ -482,6 +514,9 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
       localStorage.setItem("userName", formData.name.trim());
       localStorage.setItem("selectedGroupSize", formData.groupSize); // Store group size
 
+      // 🔧 FIX: Clear saved form data after successful registration
+      clearSavedFormData();
+
       // 5. COMPLETE REGISTRATION
       onComplete({
         ...formData,
@@ -498,8 +533,8 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
         selectedLens: {
           groupSize: formData.groupSize,
           lensId: formData.groupSize === "less" ?
-            "bc57c671-4255-423e-9eaf-71daba627ca8" :
-            "c4b85218-50a5-4a71-b719-0a1381b4e73e"
+            "31000d06-6d26-4b39-8dd0-6e63aeb5901d" :
+            "9187f2ac-af8f-4be0-95e9-cf19261c0082"
         }
       });
     } catch (error) {
@@ -557,16 +592,6 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             </p>
           </div>
         )}
-
-        {/* NEW: Session Status Indicator */}
-        {/* {snapAR.sessionId && (
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded p-2 text-center">
-            <p className="text-blue-300 text-xs">
-              🆔 Session: {snapAR.sessionId.substring(0, 15)}...
-              {snapAR.phoneAssociated && " | 📱 Phone Associated"}
-            </p>
-          </div>
-        )} */}
       </div>
 
       {/* Form Container */}
@@ -806,109 +831,109 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="pt-4">
-          <div
-            className="flex items-start space-x-3 p-3 rounded cursor-pointer transition-all duration-200 "
-            onClick={handleTermsChange}
-          >
-            {/* Custom Checkbox */}
-            <div className="flex-shrink-0 mt-0.5">
-              <div
-                className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${termsAccepted
-                  ? 'border-white bg-white'
-                  : 'border-white/50 bg-transparent hover:border-white'
-                  }`}
-              >
-                {termsAccepted && (
-                  <svg
-                    className="w-3 h-3 text-blue-700"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </div>
-            </div>
-
-            {/* Terms Text */}
-            {/* Terms Text - FIXED: All on one line to prevent extra spaces */}
-            <div className="flex-1 text-sm text-white/80 leading-relaxed">
-              <p>
-                I confirm that I've read, understood, and agree to the{" "}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent checkbox toggle
-                    handleTermsClick();
-                  }}
-                  className="text-white underline hover:text-white/80 transition-colors bg-transparent border-none cursor-pointer px-0"
+      <div className="pt-4">
+        <div
+          className="flex items-start space-x-3 p-3 rounded cursor-pointer transition-all duration-200 "
+          onClick={handleTermsChange}
+        >
+          {/* Custom Checkbox */}
+          <div className="flex-shrink-0 mt-0.5">
+            <div
+              className={`w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center ${termsAccepted
+                ? 'border-white bg-white'
+                : 'border-white/50 bg-transparent hover:border-white'
+                }`}
+            >
+              {termsAccepted && (
+                <svg
+                  className="w-3 h-3 text-blue-700"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
-                  Terms & Conditions
-                </button>
-              </p>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
             </div>
-
           </div>
 
-          {/* Terms validation error */}
-          {!termsAccepted && error.includes("terms") && (
-            <p className="text-red-300 text-xs mt-2 text-center">
-              Please accept the Terms & Conditions to continue
+          {/* Terms Text */}
+          {/* Terms Text - FIXED: All on one line to prevent extra spaces */}
+          <div className="flex-1 text-sm text-white/80 leading-relaxed">
+            <p>
+              I confirm that I've read, understood, and agree to the{" "}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent checkbox toggle
+                  handleTermsClick();
+                }}
+                className="text-white underline hover:text-white/80 transition-colors bg-transparent border-none cursor-pointer px-0"
+              >
+                Terms & Conditions
+              </button>
             </p>
-          )}
+          </div>
+
         </div>
 
-        {/* Get Started Button */}
-        <div className="">
-          <button
-            onClick={handleGetStarted}
-            disabled={!isFormValid() || isLoading}
-            className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
-              ? "cursor-pointer hover:opacity-90"
-              : "cursor-not-allowed opacity-60"
-              }`}
-            style={{
-              background: isFormValid() && !isLoading
-                ? "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)"
-                : "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)", // Grey gradient when disabled
-              borderRadius: "4px",
-              // 🚨 FIXED: Use individual border properties instead of shorthand + borderStyle
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: isFormValid() && !isLoading
-                ? "rgba(255, 255, 255, 0.52)"
-                : "rgba(156, 163, 175, 0.4)", // Grey border when disabled
-              boxShadow: isFormValid() && !isLoading
-                ? "2px 2px 4px 0px rgba(0, 0, 0, 0.39)"
-                : "1px 1px 2px 0px rgba(0, 0, 0, 0.2)", // Lighter shadow when disabled
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-            }}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                <span className="italic">REGISTERING...</span>
-              </div>
-            ) : (
-              <span className={`italic ${isFormValid() && !isLoading
-                ? "text-white"
-                : "text-gray-300"
-                }`}>
-                GET STARTED
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Footer Text */}
-
+        {/* Terms validation error */}
+        {!termsAccepted && error.includes("terms") && (
+          <p className="text-red-300 text-xs mt-2 text-center">
+            Please accept the Terms & Conditions to continue
+          </p>
+        )}
       </div>
+
+      {/* Get Started Button */}
+      <div className="w-full">
+        <button
+          onClick={handleGetStarted}
+          disabled={!isFormValid() || isLoading}
+          className={`w-full py-4 px-6 rounded font-bold text-lg transition-all relative ${isFormValid() && !isLoading
+            ? "cursor-pointer hover:opacity-90"
+            : "cursor-not-allowed opacity-60"
+            }`}
+          style={{
+            background: isFormValid() && !isLoading
+              ? "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)"
+              : "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)", // Grey gradient when disabled
+            borderRadius: "4px",
+            // 🚨 FIXED: Use individual border properties instead of shorthand + borderStyle
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: isFormValid() && !isLoading
+              ? "rgba(255, 255, 255, 0.52)"
+              : "rgba(156, 163, 175, 0.4)", // Grey border when disabled
+            boxShadow: isFormValid() && !isLoading
+              ? "2px 2px 4px 0px rgba(0, 0, 0, 0.39)"
+              : "1px 1px 2px 0px rgba(0, 0, 0, 0.2)", // Lighter shadow when disabled
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              <span className="italic">REGISTERING...</span>
+            </div>
+          ) : (
+            <span className={`italic ${isFormValid() && !isLoading
+              ? "text-white"
+              : "text-gray-300"
+              }`}>
+              GET STARTED
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Footer Text */}
+
     </div>
   );
 };
