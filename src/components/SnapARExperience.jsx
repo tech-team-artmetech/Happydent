@@ -1179,7 +1179,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       } else {
         polaroidArea = {
           x: 2,
-          y: 12,
+          y: 8,
           width: 96,
           height: 68,
         };
