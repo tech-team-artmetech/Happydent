@@ -274,14 +274,20 @@ const SplashScreen = ({ onComplete }) => {
 
         // Load both lenses
         console.log("🔥 Loading both lenses...");
-        const lessLens = await cache.cameraKit.lensRepository.loadLens(lessLensId, actualLensGroupId);
-        const moreLens = await cache.cameraKit.lensRepository.loadLens(moreLensId, actualLensGroupId);
+        const lessLens = await cache.cameraKit.lensRepository.loadLens(
+          lessLensId,
+          actualLensGroupId
+        );
+        const moreLens = await cache.cameraKit.lensRepository.loadLens(
+          moreLensId,
+          actualLensGroupId
+        );
 
         // Store both lenses with identifiers
         cache.lenses = {
           less: lessLens,
           more: moreLens,
-          loaded: true
+          loaded: true,
         };
 
         console.log("✅ Both lenses loaded successfully");
@@ -305,7 +311,9 @@ const SplashScreen = ({ onComplete }) => {
         await cache.session.setFPSLimit(60);
 
         // DON'T APPLY ANY LENS YET - Wait for user selection
-        console.log("🎯 Session ready - waiting for lens selection based on group size");
+        console.log(
+          "🎯 Session ready - waiting for lens selection based on group size"
+        );
       }
 
       // 🎯 MARK AS COMPLETELY READY
@@ -416,13 +424,25 @@ const SplashScreen = ({ onComplete }) => {
         </div>
 
         {/* Initial loading message - ALWAYS in DOM */}
-        <p
+        {/* <p
           className={`text-center text-xl font-bold transition-opacity duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
             }`}
           style={{
             visibility:
               showLoadingContent && imagesLoaded ? "visible" : "hidden",
           }}
+        >
+          {Math.round(loadingProgress)}%
+        </p> */}
+        <p
+          className={`text-center text-xl font-bold transition-all duration-300 ${
+            showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          // style={{
+          //   transform:
+          //     showLoadingContent && imagesLoaded ? "scale(1)" : "scale(0)",
+          //   transformOrigin: "center",
+          // }}
         >
           {Math.round(loadingProgress)}%
         </p>
@@ -433,8 +453,9 @@ const SplashScreen = ({ onComplete }) => {
         <button
           onClick={handleTapToBegin}
           disabled={sessionState.isCreating}
-          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${showFinalContent ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            showFinalContent ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility: showFinalContent ? "visible" : "hidden",
             background:
