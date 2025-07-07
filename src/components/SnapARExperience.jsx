@@ -1181,7 +1181,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           x: 2,
           y: 8,
           width: 96,
-          height: 68,
+          height: 72,
         };
       }
 
