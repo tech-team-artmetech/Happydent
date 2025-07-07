@@ -4,6 +4,7 @@ import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
+const isSohamDevice = window.innerWidth >= 350 && window.innerWidth <= 414 && !isTablet;
 
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
@@ -1194,27 +1195,35 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         );
       }
 
-      let polaroidArea = {
-        x: 2,
-        y: 2,
-        width: 96,
-        height: 88,
-      };
+      let polaroidArea;
 
       if (isTablet) {
+        // Condition 1: Tablet devices
         polaroidArea = {
           x: 5,
           y: 0,
           width: 90,
           height: 90,
         };
+        console.log("📱 Using TABLET polaroid area");
+      } else if (isSohamDevice) {
+        // Condition 2: Soham's specific device (only applies if NOT tablet)
+        polaroidArea = {
+          x: 0,
+          y: 8,
+          width: 100,
+          height: 70,
+        };
+        console.log("📱 Using SOHAM DEVICE polaroid area");
       } else {
+        // Condition 3: All other devices (default)
         polaroidArea = {
           x: 2,
           y: 8,
           width: 96,
           height: 72,
         };
+        console.log("📱 Using DEFAULT polaroid area");
       }
 
       const captureArea = {
