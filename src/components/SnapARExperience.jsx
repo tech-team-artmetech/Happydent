@@ -1076,8 +1076,40 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     setShowCaptureButton(false);
     setIsUploading(true);
 
-    // Immediately start capture and upload
-    await captureAndUpload();
+    try {
+      // 📜 SCROLL TO TOP FIRST
+      console.log("📜 Scrolling to top before capture...");
+
+      // Method 1: Smooth scroll to top
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+
+      // Method 2: Also scroll the container if it's scrollable
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth'
+        });
+      }
+
+      // Method 3: Ensure any parent containers are also scrolled to top
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+
+      // Wait for scroll to complete (smooth scroll takes time)
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Immediately start capture and upload
+      await captureAndUpload();
+    } catch (error) {
+      console.error("❌ Error during scroll or capture:", error);
+      // Still try to capture even if scroll fails
+      await captureAndUpload();
+    }
   };
 
   // 🚀 Force SSE connection if sessionId exists but no connection
