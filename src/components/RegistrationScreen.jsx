@@ -570,7 +570,7 @@ const RegistrationScreen = ({ onComplete, onTerms, sessionData }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto">
       {/* HAPPYDENT Logo */}
       <img
         src="/assets/happydent-logo.png"

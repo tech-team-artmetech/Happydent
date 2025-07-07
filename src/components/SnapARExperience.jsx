@@ -64,7 +64,7 @@ class ARErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
           <div className="text-center p-6">
             <p className="text-red-300 text-sm mb-4">
               AR experience encountered an error
@@ -1459,7 +1459,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
         <div className="text-center p-6">
           <p className="text-red-300 text-sm mb-4">{error}</p>
           <button

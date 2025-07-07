@@ -512,8 +512,7 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto relative z-10 overflow-y-hidden">
-
+//     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto relative z-10 overflow-y-hidden">
 
 //       {/* Loading Message */}
 //       {isLoading && (
@@ -595,14 +594,12 @@
 //           )}
 //         </button>
 
-
 //       </div>
 //     </div>
 //   );
 // };
 
 // export default EndScreen;
-
 
 import React, { useState, useEffect } from "react";
 
@@ -626,18 +623,18 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     const playEndSound = () => {
       try {
         // Create audio object with your sound file path
-        const audio = new Audio('/assets/twinkle.mp3');
+        const audio = new Audio("/assets/twinkle.mp3");
 
         // Optional: Set volume (0.0 to 1.0)
         audio.volume = 0.7;
 
         // Play the sound
-        audio.play().catch(error => {
-          console.log('Sound play failed:', error);
+        audio.play().catch((error) => {
+          console.log("Sound play failed:", error);
           // This is normal if user hasn't interacted with page yet
         });
       } catch (error) {
-        console.log('Audio creation failed:', error);
+        console.log("Audio creation failed:", error);
       }
     };
 
@@ -653,9 +650,10 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
     // Get lens selection info
     const selectedGroupSize = localStorage.getItem("selectedGroupSize");
-    const selectedLensId = selectedGroupSize === "less"
-      ? "bc57c671-4255-423e-9eaf-71daba627ca8"
-      : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+    const selectedLensId =
+      selectedGroupSize === "less"
+        ? "bc57c671-4255-423e-9eaf-71daba627ca8"
+        : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
     if (phone && userId && userName) {
       setUserInfo({ phone, userId, userName });
@@ -681,7 +679,10 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         setPhotoInfo({ hasPhoto: true, imageUrl: cacheBustedUrl });
       } else {
         // 🔧 FIX: If no cached URL, construct the expected URL based on counter
-        console.log("📷 No cached URL, constructing expected URL with counter:", currentCounter);
+        console.log(
+          "📷 No cached URL, constructing expected URL with counter:",
+          currentCounter
+        );
 
         // Construct the expected filename based on current counter
         const expectedImageUrl = `https://artmetech.co.in/api/uploads/enhanced_polaroid_${phone}_${currentCounter}.png?t=${Date.now()}`;
@@ -695,7 +696,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
           setUserPhoto(expectedImageUrl);
           setPhotoInfo({ hasPhoto: true, imageUrl: expectedImageUrl });
           // Cache it for next time
-          localStorage.setItem("userPhoto", expectedImageUrl.split('?')[0]); // Store without cache busting params
+          localStorage.setItem("userPhoto", expectedImageUrl.split("?")[0]); // Store without cache busting params
         };
         img.onerror = () => {
           console.log("❌ Expected image failed, trying API fallback...");
@@ -722,9 +723,14 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         if (data.data.hasPhoto) {
           // 🔧 FIX: Add cache busting to API response too
           const currentCounter = localStorage.getItem("photoCounter") || "0";
-          const cacheBustedUrl = `${data.data.imageUrl}?counter=${currentCounter}&t=${Date.now()}`;
+          const cacheBustedUrl = `${
+            data.data.imageUrl
+          }?counter=${currentCounter}&t=${Date.now()}`;
 
-          console.log("📷 API returned image, adding cache busting:", cacheBustedUrl);
+          console.log(
+            "📷 API returned image, adding cache busting:",
+            cacheBustedUrl
+          );
 
           setUserPhoto(cacheBustedUrl);
           // Update localStorage with the base URL (without cache busting)
@@ -983,7 +989,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
 
       // 🚨 NEW: Force cache to load both lenses if needed
       if (hasValidARSession && cache && !cache.lenses?.loaded) {
-        console.log("🔄 Cache exists but lenses not loaded, forcing fresh session");
+        console.log(
+          "🔄 Cache exists but lenses not loaded, forcing fresh session"
+        );
 
         // Clear cache to force fresh session creation with both lenses
         if (cache.session) {
@@ -1063,7 +1071,10 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     console.log("Phone:", phone);
     console.log("Stored Session ID:", sessionId);
     console.log("Lens Info:", lensInfo); // 🚨 NEW
-    console.log("Selected Group Size:", localStorage.getItem("selectedGroupSize")); // 🚨 NEW
+    console.log(
+      "Selected Group Size:",
+      localStorage.getItem("selectedGroupSize")
+    ); // 🚨 NEW
     console.log("AR Cache:", window.snapARPreloadCache);
 
     if (phone) {
@@ -1092,8 +1103,7 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto relative z-10 overflow-y-hidden">
-
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto relative z-10 overflow-y-hidden">
       {/* Loading Message */}
       {isLoading && (
         <div className="mb-4 bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center z-20">
@@ -1173,7 +1183,6 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
             "RETRY"
           )}
         </button>
-
       </div>
     </div>
   );

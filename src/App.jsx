@@ -335,7 +335,7 @@ function App() {
     // 🚨 LOADING STATE UI
     if (isLoading) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p className="text-white/60 text-sm mt-2">Please wait a moment</p>
@@ -347,7 +347,7 @@ function App() {
     // 🚨 ERROR STATE UI
     if (error) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
           <div className="text-center">
             <p className="text-red-300 text-lg mb-4">{error}</p>
             <div className="space-y-2">
