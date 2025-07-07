@@ -4,7 +4,8 @@ import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
-const isSohamDevice = window.innerWidth >= 350 && window.innerWidth <= 414 && !isTablet;
+const isSohamDevice =
+  window.innerWidth >= 350 && window.innerWidth <= 414 && !isTablet;
 
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
@@ -12,22 +13,24 @@ const enhanceCanvas = (canvas) => {
 
   try {
     // CRITICAL: Prevent canvas from being transferred to offscreen
-    canvas.style.willChange = 'auto'; // Remove will-change that triggers offscreen
-    canvas.style.transform = 'none'; // Remove transforms that trigger offscreen
+    canvas.style.willChange = "auto"; // Remove will-change that triggers offscreen
+    canvas.style.transform = "none"; // Remove transforms that trigger offscreen
 
     // Set stable styles
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.objectFit = 'cover';
-    canvas.style.zIndex = '1';
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.objectFit = "cover";
+    canvas.style.zIndex = "1";
 
     // DO NOT get context - this was causing OffscreenCanvas errors
     // Just apply styling
 
-    console.log("🎨 Canvas enhanced with offscreen prevention (no context access)");
+    console.log(
+      "🎨 Canvas enhanced with offscreen prevention (no context access)"
+    );
   } catch (error) {
     console.warn("Canvas enhancement failed:", error);
   }
@@ -110,7 +113,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     isScanning: false,
     redPixelsFound: 0,
     demonDetected: false,
-    scanCount: 0
+    scanCount: 0,
   });
 
   const redDemonRef = useRef({
@@ -118,7 +121,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     isRunning: false,
     consecutiveDetections: 0,
     requiredDetections: 3, // Need 3 consecutive detections to confirm
-    startTime: null
+    startTime: null,
   });
 
   // Ultra-efficient red demon detection configuration
@@ -127,13 +130,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     topAreaPercent: 0.25, // Top 25% of canvas
     sampleRate: 0.02, // Sample only 2% of pixels in the area (ultra-efficient)
     redThresholds: {
-      minRed: 180,     // Minimum red value (0-255)
-      maxGreen: 100,   // Maximum green value (to ensure it's red, not orange/yellow)
-      maxBlue: 100,    // Maximum blue value (to ensure it's red, not purple)
-      minIntensity: 200 // Minimum overall intensity to avoid dark reds
+      minRed: 180, // Minimum red value (0-255)
+      maxGreen: 100, // Maximum green value (to ensure it's red, not orange/yellow)
+      maxBlue: 100, // Maximum blue value (to ensure it's red, not purple)
+      minIntensity: 200, // Minimum overall intensity to avoid dark reds
     },
-    minRedPixels: 15,  // Minimum red pixels needed to trigger detection
-    maxScanTime: 30000 // Stop scanning after 30 seconds
+    minRedPixels: 15, // Minimum red pixels needed to trigger detection
+    maxScanTime: 30000, // Stop scanning after 30 seconds
   };
 
   // Stop red demon detection (defined early)
@@ -142,7 +145,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
     if (!detection.isRunning) return;
 
-    console.log('🔴 Stopping red demon detection');
+    console.log("🔴 Stopping red demon detection");
 
     if (detection.intervalId) {
       clearInterval(detection.intervalId);
@@ -152,9 +155,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     detection.isRunning = false;
     detection.consecutiveDetections = 0;
 
-    setRedDemonDetection(prev => ({
+    setRedDemonDetection((prev) => ({
       ...prev,
-      isScanning: false
+      isScanning: false,
     }));
   };
 
@@ -164,19 +167,21 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
     try {
       // Create minimal temp canvas for top area only
-      const tempCanvas = document.createElement('canvas');
-      const ctx = tempCanvas.getContext('2d', {
+      const tempCanvas = document.createElement("canvas");
+      const ctx = tempCanvas.getContext("2d", {
         willReadFrequently: true,
         alpha: false,
-        desynchronized: true // Better performance
+        desynchronized: true, // Better performance
       });
 
       if (!ctx) return false;
 
       // Calculate top 25% area dimensions
-      const topHeight = Math.floor(canvas.height * RED_DEMON_CONFIG.topAreaPercent);
+      const topHeight = Math.floor(
+        canvas.height * RED_DEMON_CONFIG.topAreaPercent
+      );
       const scanWidth = Math.min(canvas.width, 400); // Cap width for performance
-      const scanHeight = Math.min(topHeight, 100);   // Cap height for performance
+      const scanHeight = Math.min(topHeight, 100); // Cap height for performance
 
       // Set temp canvas to minimal size
       tempCanvas.width = scanWidth;
@@ -185,8 +190,14 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       // Draw only the top portion of the AR canvas
       ctx.drawImage(
         canvas,
-        0, 0, canvas.width, topHeight,  // Source: full width, top 25%
-        0, 0, scanWidth, scanHeight     // Dest: scaled down for efficiency
+        0,
+        0,
+        canvas.width,
+        topHeight, // Source: full width, top 25%
+        0,
+        0,
+        scanWidth,
+        scanHeight // Dest: scaled down for efficiency
       );
 
       // Get image data
@@ -196,7 +207,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       // Ultra-efficient pixel sampling
       let redPixelCount = 0;
       const sampleStep = Math.floor(1 / RED_DEMON_CONFIG.sampleRate) * 4; // Skip pixels for efficiency
-      const { minRed, maxGreen, maxBlue, minIntensity } = RED_DEMON_CONFIG.redThresholds;
+      const { minRed, maxGreen, maxBlue, minIntensity } =
+        RED_DEMON_CONFIG.redThresholds;
 
       // Scan pixels with large steps for maximum efficiency
       for (let i = 0; i < data.length; i += sampleStep) {
@@ -206,11 +218,11 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
         // Check if pixel matches red demon criteria
         if (
-          r >= minRed &&           // Strong red component
-          g <= maxGreen &&         // Low green (not orange/yellow)
-          b <= maxBlue &&          // Low blue (not purple/magenta)
-          (r + g + b) >= minIntensity && // Bright enough (not dark red)
-          r > (g + b) * 1.5        // Red is significantly stronger than other colors
+          r >= minRed && // Strong red component
+          g <= maxGreen && // Low green (not orange/yellow)
+          b <= maxBlue && // Low blue (not purple/magenta)
+          r + g + b >= minIntensity && // Bright enough (not dark red)
+          r > (g + b) * 1.5 // Red is significantly stronger than other colors
         ) {
           redPixelCount++;
 
@@ -224,31 +236,33 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const demonDetected = redPixelCount >= RED_DEMON_CONFIG.minRedPixels;
 
       // Update detection state
-      setRedDemonDetection(prev => ({
+      setRedDemonDetection((prev) => ({
         ...prev,
         redPixelsFound: redPixelCount,
         demonDetected,
-        scanCount: prev.scanCount + 1
+        scanCount: prev.scanCount + 1,
       }));
 
-      console.log(`🔴 Red scan: ${redPixelCount} red pixels found, demon: ${demonDetected}`);
+      console.log(
+        `🔴 Red scan: ${redPixelCount} red pixels found, demon: ${demonDetected}`
+      );
 
       return demonDetected;
-
     } catch (error) {
-      console.warn('🔴 Red demon detection failed:', error);
+      console.warn("🔴 Red demon detection failed:", error);
       return false;
     }
   };
 
   // Main scanning function
   const scanForRedDemon = () => {
-    const canvas = canvasRef.current ||
-      canvasPlaceholderRef.current?.querySelector('canvas') ||
+    const canvas =
+      canvasRef.current ||
+      canvasPlaceholderRef.current?.querySelector("canvas") ||
       window.snapARPreloadCache?.session?.output?.live;
 
     if (!canvas) {
-      console.warn('🔴 No canvas available for red demon scanning');
+      console.warn("🔴 No canvas available for red demon scanning");
       return;
     }
 
@@ -257,7 +271,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
     // Stop scanning after max time
     if (currentTime - detection.startTime > RED_DEMON_CONFIG.maxScanTime) {
-      console.log('🔴 Red demon scan timeout - stopping');
+      console.log("🔴 Red demon scan timeout - stopping");
       stopRedDemonDetection();
       return;
     }
@@ -267,11 +281,15 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
     if (demonFound) {
       detection.consecutiveDetections++;
-      console.log(`🔴 Red demon detected! (${detection.consecutiveDetections}/${RED_DEMON_CONFIG.requiredDetections})`);
+      console.log(
+        `🔴 Red demon detected! (${detection.consecutiveDetections}/${RED_DEMON_CONFIG.requiredDetections})`
+      );
 
       // Require multiple consecutive detections for reliability
-      if (detection.consecutiveDetections >= RED_DEMON_CONFIG.requiredDetections) {
-        console.log('🔴👹 RED DEMON CONFIRMED - showing PROCEED button!');
+      if (
+        detection.consecutiveDetections >= RED_DEMON_CONFIG.requiredDetections
+      ) {
+        console.log("🔴👹 RED DEMON CONFIRMED - showing PROCEED button!");
         stopRedDemonDetection();
         setShowCaptureButton(true);
 
@@ -292,11 +310,11 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     const detection = redDemonRef.current;
 
     if (detection.isRunning) {
-      console.log('🔴 Red demon detection already running');
+      console.log("🔴 Red demon detection already running");
       return;
     }
 
-    console.log('🔴 Starting RED DEMON detection...');
+    console.log("🔴 Starting RED DEMON detection...");
 
     detection.isRunning = true;
     detection.startTime = Date.now();
@@ -306,7 +324,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       isScanning: true,
       redPixelsFound: 0,
       demonDetected: false,
-      scanCount: 0
+      scanCount: 0,
     });
 
     // Start scanning at optimized interval
@@ -382,7 +400,12 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         arStartTimerRef.current = null;
       }
     }
-  }, [arSessionEnded, redDemonDetection.demonDetected, isLoading, showCaptureButton]);
+  }, [
+    arSessionEnded,
+    redDemonDetection.demonDetected,
+    isLoading,
+    showCaptureButton,
+  ]);
 
   // 📡 SETUP SSE CONNECTION FOR AR END DETECTION
   const setupSSEConnection = (sessionId) => {
@@ -633,7 +656,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         if (cache && cache.lenses && userData?.groupSize) {
           const selectedLens = cache.lenses[userData.groupSize];
           if (selectedLens && !cache.appliedLens) {
-            console.log(`🎯 Applying ${userData.groupSize} lens to preloaded session`);
+            console.log(
+              `🎯 Applying ${userData.groupSize} lens to preloaded session`
+            );
             await cache.session.applyLens(selectedLens);
             cache.appliedLens = selectedLens;
           }
@@ -649,7 +674,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           if (cache && cache.lenses && userData?.groupSize) {
             const selectedLens = cache.lenses[userData.groupSize];
             if (selectedLens && !cache.appliedLens) {
-              console.log(`🎯 Applying ${userData.groupSize} lens after preload completion`);
+              console.log(
+                `🎯 Applying ${userData.groupSize} lens after preload completion`
+              );
               await cache.session.applyLens(selectedLens);
               cache.appliedLens = selectedLens;
             }
@@ -807,13 +834,19 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const moreLensId = "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
       // Load both lenses
-      const lessLens = await cache.cameraKit.lensRepository.loadLens(lessLensId, actualLensGroupId);
-      const moreLens = await cache.cameraKit.lensRepository.loadLens(moreLensId, actualLensGroupId);
+      const lessLens = await cache.cameraKit.lensRepository.loadLens(
+        lessLensId,
+        actualLensGroupId
+      );
+      const moreLens = await cache.cameraKit.lensRepository.loadLens(
+        moreLensId,
+        actualLensGroupId
+      );
 
       cache.lenses = {
         less: lessLens,
         more: moreLens,
-        loaded: true
+        loaded: true,
       };
       console.log("🔥 Step 4: Create session...");
       cache.session = await cache.cameraKit.createSession();
@@ -838,7 +871,10 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
       console.log("🔥 Step 7: Apply selected lens based on user choice...");
       // Get the selected group size from localStorage or userData
-      const selectedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
+      const selectedGroupSize =
+        userData?.groupSize ||
+        localStorage.getItem("selectedGroupSize") ||
+        "less";
       const selectedLens = cache.lenses[selectedGroupSize];
 
       if (selectedLens) {
@@ -881,7 +917,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     // Monitor canvas visibility every 2 seconds - NO CONTEXT ACCESS
     const monitorInterval = setInterval(() => {
       if (!canvas.parentNode) {
-        console.warn('🚨 Canvas detached from DOM!');
+        console.warn("🚨 Canvas detached from DOM!");
         clearInterval(monitorInterval);
         return;
       }
@@ -891,17 +927,16 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const isVisible = rect.width > 0 && rect.height > 0;
 
       if (!isVisible) {
-        console.warn('🚨 Canvas not visible, attempting recovery...');
+        console.warn("🚨 Canvas not visible, attempting recovery...");
 
         // Try to make canvas visible again
-        canvas.style.display = 'block';
-        canvas.style.visibility = 'visible';
-        canvas.style.opacity = '1';
+        canvas.style.display = "block";
+        canvas.style.visibility = "visible";
+        canvas.style.opacity = "1";
 
         // Force reflow
         canvas.offsetHeight;
       }
-
     }, 2000);
 
     // Store interval reference for cleanup
@@ -948,7 +983,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       if (cache && cache.lenses && userData?.groupSize) {
         const selectedLens = cache.lenses[userData.groupSize];
         if (selectedLens && !cache.appliedLens) {
-          console.log(`🎯 Applying ${userData.groupSize} lens during canvas setup`);
+          console.log(
+            `🎯 Applying ${userData.groupSize} lens during canvas setup`
+          );
           await session.applyLens(selectedLens);
           cache.appliedLens = selectedLens;
         }
@@ -965,10 +1002,14 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           // Force a reflow to ensure canvas is properly rendered
           arCanvas.offsetHeight; // Trigger reflow
 
-          console.log("✅ Canvas appended to placeholder, React DOM tree preserved");
+          console.log(
+            "✅ Canvas appended to placeholder, React DOM tree preserved"
+          );
         } catch (domError) {
           console.warn("Canvas append to placeholder failed:", domError);
-          throw new Error(`Failed to append canvas to placeholder: ${domError.message}`);
+          throw new Error(
+            `Failed to append canvas to placeholder: ${domError.message}`
+          );
         }
       } else {
         throw new Error("Canvas placeholder ref is null, cannot append canvas");
@@ -997,7 +1038,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         stopRedDemonDetection();
         setShowCaptureButton(true);
       }, 15000); // 15 seconds fallback
-
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
     }
@@ -1057,10 +1097,14 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   const skipToEnd = () => {
     cleanup();
 
-    const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
-    const appliedLensId = appliedGroupSize === "less" ?
-      "bc57c671-4255-423e-9eaf-71daba627ca8" :
-      "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+    const appliedGroupSize =
+      userData?.groupSize ||
+      localStorage.getItem("selectedGroupSize") ||
+      "less";
+    const appliedLensId =
+      appliedGroupSize === "less"
+        ? "bc57c671-4255-423e-9eaf-71daba627ca8"
+        : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
     onComplete({
       ...userData,
@@ -1085,7 +1129,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
 
       // Method 2: Also scroll the container if it's scrollable
@@ -1093,7 +1137,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         containerRef.current.scrollTo({
           top: 0,
           left: 0,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
 
@@ -1102,7 +1146,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 
       // Wait for scroll to complete (smooth scroll takes time)
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Immediately start capture and upload
       await captureAndUpload();
@@ -1127,7 +1171,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
   }, [sessionId, sseConnected]);
 
   const captureAndUpload = async () => {
-    console.log("📸 🚀 PROCEED CLICKED - Starting immediate capture and upload process...");
+    console.log(
+      "📸 🚀 PROCEED CLICKED - Starting immediate capture and upload process..."
+    );
     setIsUploading(true);
 
     // 🔧 CRITICAL: Update counter FIRST before any processing
@@ -1210,7 +1256,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         // Condition 2: Soham's specific device (only applies if NOT tablet)
         polaroidArea = {
           x: 0,
-          y: 8,
+          y: 10,
           width: 100,
           height: 70,
         };
@@ -1219,7 +1265,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         // Condition 3: All other devices (default)
         polaroidArea = {
           x: 2,
-          y: 8,
+          y: 10,
           width: 96,
           height: 72,
         };
@@ -1281,10 +1327,16 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       console.log("✅ Enhanced blob created successfully, size:", blob.size);
 
       // 🔧 Use the counter that was already updated at the start
-      console.log(`📸 PROCEED: Using updated counter for upload: ${newCounter}`);
+      console.log(
+        `📸 PROCEED: Using updated counter for upload: ${newCounter}`
+      );
 
       const formData = new FormData();
-      formData.append("photo", blob, `${userData.phone}_snapchat_polaroid_${newCounter}.png`);
+      formData.append(
+        "photo",
+        blob,
+        `${userData.phone}_snapchat_polaroid_${newCounter}.png`
+      );
       formData.append("phone", userData.phone);
       formData.append("source", "snapchat_polaroid");
       formData.append("counter", newCounter);
@@ -1309,17 +1361,21 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
         // 🔧 CRITICAL: Update the stored URL to match the actual filename with counter
         // The server returns the base URL, but we need to store the URL with the correct counter
-        const baseUrl = result.data.imageUrl.split('_').slice(0, -1).join('_'); // Remove old counter part
+        const baseUrl = result.data.imageUrl.split("_").slice(0, -1).join("_"); // Remove old counter part
         const updatedImageUrl = `${baseUrl}_${newCounter}.png`;
 
         localStorage.setItem("userPhoto", updatedImageUrl);
         console.log(`💾 Stored counter-based image URL: ${updatedImageUrl}`);
 
         // Get the applied lens ID dynamically
-        const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
-        const appliedLensId = appliedGroupSize === "less" ?
-          "bc57c671-4255-423e-9eaf-71daba627ca8" :
-          "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+        const appliedGroupSize =
+          userData?.groupSize ||
+          localStorage.getItem("selectedGroupSize") ||
+          "less";
+        const appliedLensId =
+          appliedGroupSize === "less"
+            ? "bc57c671-4255-423e-9eaf-71daba627ca8"
+            : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1342,10 +1398,14 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         localStorage.setItem("photoCounter", revertedCounter);
         console.log(`🔄 PROCEED: Counter reverted to: ${revertedCounter}`);
 
-        const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
-        const appliedLensId = appliedGroupSize === "less" ?
-          "bc57c671-4255-423e-9eaf-71daba627ca8" :
-          "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+        const appliedGroupSize =
+          userData?.groupSize ||
+          localStorage.getItem("selectedGroupSize") ||
+          "less";
+        const appliedLensId =
+          appliedGroupSize === "less"
+            ? "bc57c671-4255-423e-9eaf-71daba627ca8"
+            : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1367,12 +1427,18 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       console.log("❌ PROCEED: Capture/upload error, reverting counter");
       const revertedCounter = newCounter === "0" ? "1" : "0"; // Revert back
       localStorage.setItem("photoCounter", revertedCounter);
-      console.log(`🔄 PROCEED: Counter reverted to: ${revertedCounter} due to error`);
+      console.log(
+        `🔄 PROCEED: Counter reverted to: ${revertedCounter} due to error`
+      );
 
-      const appliedGroupSize = userData?.groupSize || localStorage.getItem("selectedGroupSize") || "less";
-      const appliedLensId = appliedGroupSize === "less" ?
-        "bc57c671-4255-423e-9eaf-71daba627ca8" :
-        "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+      const appliedGroupSize =
+        userData?.groupSize ||
+        localStorage.getItem("selectedGroupSize") ||
+        "less";
+      const appliedLensId =
+        appliedGroupSize === "less"
+          ? "bc57c671-4255-423e-9eaf-71daba627ca8"
+          : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
 
       setTimeout(() => {
         setIsUploading(false);
@@ -1433,24 +1499,29 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         }
       `}</style>
 
-      <div className="min-h-screen flex flex-col bg-black text-white max-w-[768px] mx-auto">
+      <div className="min-h-screen flex flex-col bg-black text-white max-w-[991px] mx-auto">
         <div className="flex-1 relative canvas-container" ref={containerRef}>
           {/* Canvas placeholder - AR canvas gets appended here */}
           <div ref={canvasPlaceholderRef} className="absolute inset-0"></div>
 
           {/* Red Demon Detection Debug UI */}
-          {process.env.NODE_ENV === 'development' && redDemonDetection.isScanning && (
-            <div className="absolute top-4 left-4 bg-red-900/80 text-white text-xs p-3 rounded z-40 max-w-xs">
-              <div className="font-bold mb-2">🔴 Red Demon Scanner</div>
-              <div>Scanning: {redDemonDetection.isScanning ? 'Yes' : 'No'}</div>
-              <div>Red Pixels: {redDemonDetection.redPixelsFound}</div>
-              <div>Scan Count: {redDemonDetection.scanCount}</div>
-              <div>Detected: {redDemonDetection.demonDetected ? 'YES!' : 'No'}</div>
-              <div className="text-red-300 text-xs mt-1">
-                Scanning top 25% for red demon
+          {process.env.NODE_ENV === "development" &&
+            redDemonDetection.isScanning && (
+              <div className="absolute top-4 left-4 bg-red-900/80 text-white text-xs p-3 rounded z-40 max-w-xs">
+                <div className="font-bold mb-2">🔴 Red Demon Scanner</div>
+                <div>
+                  Scanning: {redDemonDetection.isScanning ? "Yes" : "No"}
+                </div>
+                <div>Red Pixels: {redDemonDetection.redPixelsFound}</div>
+                <div>Scan Count: {redDemonDetection.scanCount}</div>
+                <div>
+                  Detected: {redDemonDetection.demonDetected ? "YES!" : "No"}
+                </div>
+                <div className="text-red-300 text-xs mt-1">
+                  Scanning top 25% for red demon
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
