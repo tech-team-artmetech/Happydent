@@ -723,9 +723,8 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         if (data.data.hasPhoto) {
           // 🔧 FIX: Add cache busting to API response too
           const currentCounter = localStorage.getItem("photoCounter") || "0";
-          const cacheBustedUrl = `${
-            data.data.imageUrl
-          }?counter=${currentCounter}&t=${Date.now()}`;
+          const cacheBustedUrl = `${data.data.imageUrl
+            }?counter=${currentCounter}&t=${Date.now()}`;
 
           console.log(
             "📷 API returned image, adding cache busting:",

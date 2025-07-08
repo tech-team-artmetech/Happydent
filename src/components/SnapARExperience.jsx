@@ -1282,9 +1282,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         // Condition 3: All other devices (default)
         polaroidArea = {
           x: 2,
-          y: 10,
+          y: 13,
           width: 96,
-          height: 72,
+          height: 65,
         };
         console.log("📱 Using DEFAULT polaroid area");
       }
