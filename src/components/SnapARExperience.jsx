@@ -1281,9 +1281,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       } else if (isMobile) {
         // Condition 2: Soham's specific device (only applies if NOT tablet)
         polaroidArea = {
-          x: 80,
+          x: 4,
           y: 13,
-          width: 100,
+          width: 93,
           height: 65,
         };
         console.log("📱 Using MOBILE polaroid area");
