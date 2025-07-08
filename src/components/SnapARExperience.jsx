@@ -1049,12 +1049,12 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }, 1000); // Wait 1 second for AR to stabilize
 
       // 🎯 FALLBACK TIMER (longer since we have demon detection)
-      console.log("⏰ Starting fallback timer...");
-      arStartTimerRef.current = setTimeout(() => {
-        console.log("⏰ Fallback timer - showing PROCEED button");
-        stopRedDemonDetection();
-        setShowCaptureButton(true);
-      }, 15000); // 15 seconds fallback
+      // console.log("⏰ Starting fallback timer...");
+      // arStartTimerRef.current = setTimeout(() => {
+      //   console.log("⏰ Fallback timer - showing PROCEED button");
+      //   stopRedDemonDetection();
+      //   setShowCaptureButton(true);
+      // }, 15000); // 15 seconds fallback
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
     }
