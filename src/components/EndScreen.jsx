@@ -723,8 +723,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         if (data.data.hasPhoto) {
           // 🔧 FIX: Add cache busting to API response too
           const currentCounter = localStorage.getItem("photoCounter") || "0";
-          const cacheBustedUrl = `${data.data.imageUrl
-            }?counter=${currentCounter}&t=${Date.now()}`;
+          const cacheBustedUrl = `${
+            data.data.imageUrl
+          }?counter=${currentCounter}&t=${Date.now()}`;
 
           console.log(
             "📷 API returned image, adding cache busting:",
@@ -1104,13 +1105,13 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto relative z-10 overflow-y-hidden">
       {/* Loading Message */}
-      {isLoading && (
+      {/* {isLoading && (
         <div className="mb-4 bg-blue-500/20 border border-blue-500/50 rounded p-3 text-center z-20">
           <p className="text-blue-300 text-sm">
             {userPhoto ? "Processing retry..." : "Loading your photo..."}
           </p>
         </div>
-      )}
+      )} */}
 
       {/* Image */}
       <div className="mb-8 z-10">
