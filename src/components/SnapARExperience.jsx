@@ -289,15 +289,26 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       if (
         detection.consecutiveDetections >= RED_DEMON_CONFIG.requiredDetections
       ) {
-        console.log("🔴👹 RED DEMON CONFIRMED - showing PROCEED button!");
+        console.log("🔴👹 RED DEMON CONFIRMED - stopping scan and showing PROCEED button!");
+
         stopRedDemonDetection();
+
+        // 🛑 Reset detection state so useEffect doesn't trigger again
+        setRedDemonDetection({
+          demonDetected: false, // don't trigger effect again
+          isScanning: false,
+          consecutiveDetections: 0,
+        });
+
         setShowCaptureButton(true);
 
-        // Clear the timer since demon was detected
+
         if (arStartTimerRef.current) {
           clearTimeout(arStartTimerRef.current);
           arStartTimerRef.current = null;
         }
+
+        return; // ✅ exit early
       }
     } else {
       // Reset consecutive count if no demon found
@@ -393,12 +404,18 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     // 🔴 Check if red demon was detected
     if (redDemonDetection.demonDetected && !showCaptureButton) {
       console.log("🔴👹 Red demon detected - showing PROCEED button");
+
       setShowCaptureButton(true);
-      // Clear timer since demon was detected
-      if (arStartTimerRef.current) {
-        clearTimeout(arStartTimerRef.current);
-        arStartTimerRef.current = null;
-      }
+
+
+      stopRedDemonDetection();
+
+      // Reset detection state to avoid future effect triggers
+      setRedDemonDetection({
+        demonDetected: false,
+        isScanning: false,
+        consecutiveDetections: 0,
+      });
     }
   }, [
     arSessionEnded,
