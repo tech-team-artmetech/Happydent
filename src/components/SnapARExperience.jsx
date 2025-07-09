@@ -828,8 +828,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 front: {
                   video: {
                     facingMode: "user",
-                    width: { ideal: 1920, min: 1280 }, // Increased resolution
-                    height: { ideal: 1080, min: 720 },
+                    width: { ideal: 2560, min: 1440 },
+                    height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
                     aspectRatio: { ideal: 16 / 9 }
                   },
@@ -838,8 +838,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 back: {
                   video: {
                     facingMode: "environment",
-                    width: { ideal: 1920, min: 1280 }, // Increased resolution
-                    height: { ideal: 1080, min: 720 },
+                    width: { ideal: 2560, min: 1440 }, // Increased resolution
+                    height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
                     aspectRatio: { ideal: 16 / 9 }
                   },
@@ -848,8 +848,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 desktop: {
                   video: {
                     facingMode: "user",
-                    width: { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720 },
+                    width: { ideal: 2560, min: 1440 },
+                    height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 }
                   },
                   audio: false,
