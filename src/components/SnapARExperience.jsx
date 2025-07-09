@@ -5,18 +5,20 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 const isSohamDevice =
-  window.innerWidth >= 350 && window.innerWidth <= 414 && !isTablet;
+  window.innerWidth >= 340 && window.innerWidth <= 414;
 
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
   if (!canvas) return;
 
   try {
-    // CRITICAL: Prevent canvas from being transferred to offscreen
-    canvas.style.willChange = "auto"; // Remove will-change that triggers offscreen
-    canvas.style.transform = "none"; // Remove transforms that trigger offscreen
+    const isAndroid = /Android/i.test(navigator.userAgent);
 
-    // Set stable styles
+    // CRITICAL: Prevent canvas from being transferred to offscreen
+    canvas.style.willChange = "auto";
+    canvas.style.transform = "none";
+
+    // Set stable styles with Android optimizations
     canvas.style.position = "absolute";
     canvas.style.top = "0";
     canvas.style.left = "0";
@@ -25,11 +27,18 @@ const enhanceCanvas = (canvas) => {
     canvas.style.objectFit = "cover";
     canvas.style.zIndex = "1";
 
-    // DO NOT get context - this was causing OffscreenCanvas errors
-    // Just apply styling
+    // Android-specific enhancements
+    if (isAndroid) {
+      canvas.style.imageRendering = "high-quality";
+      canvas.style.imageRendering = "-webkit-optimize-contrast";
+      canvas.style.filter = "contrast(1.1) saturate(1.05) brightness(1.02)";
+      canvas.style.transform = "translateZ(0)"; // Hardware acceleration
+      canvas.style.backfaceVisibility = "hidden";
+      canvas.style.perspective = "1000px";
+    }
 
     console.log(
-      "🎨 Canvas enhanced with offscreen prevention (no context access)"
+      `🎨 Canvas enhanced for ${isAndroid ? 'Android' : 'other'} with quality optimizations`
     );
   } catch (error) {
     console.warn("Canvas enhancement failed:", error);
@@ -130,13 +139,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
     topAreaPercent: 0.25, // Top 25% of canvas
     sampleRate: 0.02, // Sample only 2% of pixels in the area (ultra-efficient)
     redThresholds: {
-      minRed: 180, // Minimum red value (0-255)
+      minRed: 150, // Minimum red value (0-255)
       maxGreen: 100, // Maximum green value (to ensure it's red, not orange/yellow)
       maxBlue: 100, // Maximum blue value (to ensure it's red, not purple)
       minIntensity: 200, // Minimum overall intensity to avoid dark reds
     },
-    minRedPixels: 15, // Minimum red pixels needed to trigger detection
-    maxScanTime: 30000, // Stop scanning after 30 seconds
+    minRedPixels: 7, // Minimum red pixels needed to trigger detection
+    maxScanTime: 40000, // Stop scanning after 30 seconds
   };
 
   // Stop red demon detection (defined early)
@@ -768,6 +777,14 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const { bootstrapCameraKit } = await import("@snap/camera-kit");
       cache.cameraKit = await bootstrapCameraKit({
         apiToken: apiToken,
+        cameraConfig: {
+          resolution: {
+            width: 1920,
+            height: 1080
+          },
+          // Or use predefined high quality
+          preset: 'high-quality'
+        }
       });
 
       console.log("🔥 Step 2: Get camera stream...");
@@ -803,6 +820,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           }
         }
 
+        // In your CameraManager class, update getConstraints():
         getConstraints() {
           const settings = {
             camera: {
@@ -810,30 +828,36 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 front: {
                   video: {
                     facingMode: "user",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
+                    width: { ideal: 1920, min: 1280 }, // Increased resolution
+                    height: { ideal: 1080, min: 720 },
+                    frameRate: { ideal: 30, min: 15 },
+                    aspectRatio: { ideal: 16 / 9 }
                   },
                   audio: false,
                 },
                 back: {
                   video: {
                     facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
+                    width: { ideal: 1920, min: 1280 }, // Increased resolution
+                    height: { ideal: 1080, min: 720 },
+                    frameRate: { ideal: 30, min: 15 },
+                    aspectRatio: { ideal: 16 / 9 }
                   },
                   audio: false,
                 },
                 desktop: {
                   video: {
                     facingMode: "user",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
+                    frameRate: { ideal: 30, min: 15 }
                   },
                   audio: false,
                 },
               },
             },
           };
+
           return this.isMobile
             ? this.isBackFacing
               ? settings.camera.constraints.back
@@ -1049,12 +1073,12 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }, 1000); // Wait 1 second for AR to stabilize
 
       // 🎯 FALLBACK TIMER (longer since we have demon detection)
-      // console.log("⏰ Starting fallback timer...");
-      // arStartTimerRef.current = setTimeout(() => {
-      //   console.log("⏰ Fallback timer - showing PROCEED button");
-      //   stopRedDemonDetection();
-      //   setShowCaptureButton(true);
-      // }, 15000); // 15 seconds fallback
+      console.log("⏰ Starting fallback timer...");
+      arStartTimerRef.current = setTimeout(() => {
+        console.log("⏰ Fallback timer - showing PROCEED button");
+        stopRedDemonDetection();
+        setShowCaptureButton(true);
+      }, 15000); // 15 seconds fallback
     } catch (err) {
       throw new Error(`Canvas setup failed: ${err.message}`);
     }
@@ -1273,9 +1297,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         // Condition 2: Soham's specific device (only applies if NOT tablet)
         polaroidArea = {
           x: 0,
-          y: 10,
+          y: 14,
           width: 100,
-          height: 70,
+          height: 69,
         };
         console.log("📱 Using SOHAM DEVICE polaroid area");
       } else if (isMobile) {

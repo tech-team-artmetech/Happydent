@@ -26,19 +26,35 @@ class CameraManager {
   }
 
   getConstraints() {
+    // 🚨 UPDATED: Higher quality constraints
     const settings = {
       camera: {
         constraints: {
           front: {
-            video: { facingMode: "user" },
+            video: {
+              facingMode: "user",
+              width: { ideal: 1920, min: 1280 },
+              height: { ideal: 1080, min: 720 },
+              frameRate: { ideal: 30, min: 24 }
+            },
             audio: true,
           },
           back: {
-            video: { facingMode: "environment" },
+            video: {
+              facingMode: "environment",
+              width: { ideal: 1920, min: 1280 },
+              height: { ideal: 1080, min: 720 },
+              frameRate: { ideal: 30, min: 24 }
+            },
             audio: true,
           },
           desktop: {
-            video: { facingMode: "user" },
+            video: {
+              facingMode: "user",
+              width: { ideal: 1920, min: 1280 },
+              height: { ideal: 1080, min: 720 },
+              frameRate: { ideal: 30, min: 24 }
+            },
             audio: true,
           },
         },
@@ -262,6 +278,10 @@ const SplashScreen = ({ onComplete }) => {
 
         cache.cameraKit = await bootstrapCameraKit({
           apiToken: actualApiToken,
+          lensConfig: {
+            renderQuality: 'high',
+            performanceHint: 'quality' // Prioritize quality over performance
+          }
         });
       }
 
@@ -269,6 +289,11 @@ const SplashScreen = ({ onComplete }) => {
       if (!cache.mediaStream) {
         cache.cameraManager = new CameraManager();
         cache.mediaStream = await cache.cameraManager.initializeCamera();
+
+        const videoTrack = cache.mediaStream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+        console.log(`📹 Camera stream quality: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`);
+
       }
 
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
