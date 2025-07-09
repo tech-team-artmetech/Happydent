@@ -37,8 +37,7 @@ const enhanceCanvas = (canvas) => {
     }
 
     console.log(
-      `🎨 Canvas enhanced for ${
-        isAndroid ? "Android" : "other"
+      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
       } with quality optimizations`
     );
   } catch (error) {
@@ -849,15 +848,9 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                 desktop: {
                   video: {
                     facingMode: "user",
-<<<<<<< HEAD
-                    width: { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720 },
-                    frameRate: { ideal: 30, min: 15 },
-=======
                     width: { ideal: 2560, min: 1440 },
                     height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 }
->>>>>>> abc24c830eb754306b56e799c3e81baa802265b3
                   },
                   audio: false,
                 },
