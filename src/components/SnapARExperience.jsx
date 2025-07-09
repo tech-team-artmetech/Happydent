@@ -37,7 +37,8 @@ const enhanceCanvas = (canvas) => {
     }
 
     console.log(
-      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
+      `🎨 Canvas enhanced for ${
+        isAndroid ? "Android" : "other"
       } with quality optimizations`
     );
   } catch (error) {
@@ -832,17 +833,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
                     aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: false },
-                      { sharpness: { ideal: 7, max: 10 } },
-                      { saturation: { ideal: 110 } },
-                      { contrast: { ideal: 110 } },
-                      { brightness: { ideal: 105 } }
-                    ]
+                    // advanced: [
+                    //   { focusMode: "continuous" },
+                    //   { exposureMode: "continuous" },
+                    //   { whiteBalanceMode: "continuous" },
+                    //   { imageStabilization: true },
+                    //   { noiseSuppression: false },
+                    //   { sharpness: { ideal: 7, max: 10 } },
+                    //   { saturation: { ideal: 110 } },
+                    //   { contrast: { ideal: 110 } },
+                    //   { brightness: { ideal: 105 } }
+                    // ]
                   },
                   audio: false,
                 },
@@ -853,17 +854,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
                     aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: false },
-                      { sharpness: { ideal: 7, max: 10 } },
-                      { saturation: { ideal: 110 } },
-                      { contrast: { ideal: 110 } },
-                      { brightness: { ideal: 105 } }
-                    ]
+                    // advanced: [
+                    //   { focusMode: "continuous" },
+                    //   { exposureMode: "continuous" },
+                    //   { whiteBalanceMode: "continuous" },
+                    //   { imageStabilization: true },
+                    //   { noiseSuppression: false },
+                    //   { sharpness: { ideal: 7, max: 10 } },
+                    //   { saturation: { ideal: 110 } },
+                    //   { contrast: { ideal: 110 } },
+                    //   { brightness: { ideal: 105 } }
+                    // ]
                   },
                   audio: false,
                 },
@@ -874,17 +875,17 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     height: { ideal: 1440, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
                     aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: false },
-                      { sharpness: { ideal: 7, max: 10 } },
-                      { saturation: { ideal: 110 } },
-                      { contrast: { ideal: 110 } },
-                      { brightness: { ideal: 105 } }
-                    ]
+                    // advanced: [
+                    //   { focusMode: "continuous" },
+                    //   { exposureMode: "continuous" },
+                    //   { whiteBalanceMode: "continuous" },
+                    //   { imageStabilization: true },
+                    //   { noiseSuppression: false },
+                    //   { sharpness: { ideal: 7, max: 10 } },
+                    //   { saturation: { ideal: 110 } },
+                    //   { contrast: { ideal: 110 } },
+                    //   { brightness: { ideal: 105 } }
+                    // ]
                   },
                   audio: false,
                 },
