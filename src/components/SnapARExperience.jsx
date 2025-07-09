@@ -11,48 +11,35 @@ const enhanceCanvas = (canvas) => {
   if (!canvas) return;
 
   try {
-    // 🚨 MATCH SNAP'S OFFICIAL SETTINGS
-    canvas.style.cssText = `
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
-      z-index: 1 !important;
-      
-      /* SNAP'S OFFICIAL QUALITY SETTINGS */
-      image-rendering: auto !important;
-      image-rendering: -webkit-optimize-contrast !important;
-      -webkit-transform: translateZ(0) !important;
-      transform: translateZ(0) !important;
-      -webkit-backface-visibility: hidden !important;
-      backface-visibility: hidden !important;
-      
-      /* DISABLE BROWSER OPTIMIZATIONS THAT REDUCE QUALITY */
-      will-change: auto !important;
-      contain: none !important;
-      
-      /* ENSURE FULL PIXEL FIDELITY */
-      -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      user-select: none !important;
-      pointer-events: none !important;
-    `;
+    const isAndroid = /Android/i.test(navigator.userAgent);
 
-    // Force canvas to use device pixel ratio properly
-    const rect = canvas.getBoundingClientRect();
-    const pixelRatio = window.devicePixelRatio || 1;
+    // CRITICAL: Prevent canvas from being transferred to offscreen
+    canvas.style.willChange = "auto";
+    canvas.style.transform = "none";
 
-    // Set actual canvas size to match display size * pixel ratio
-    canvas.width = rect.width * pixelRatio;
-    canvas.height = rect.height * pixelRatio;
+    // Set stable styles with Android optimizations
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.objectFit = "cover";
+    canvas.style.zIndex = "1";
 
-    // Scale back down using CSS
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
+    // Android-specific enhancements
+    if (isAndroid) {
+      canvas.style.imageRendering = "high-quality";
+      canvas.style.imageRendering = "-webkit-optimize-contrast";
+      canvas.style.filter = "contrast(1.1) saturate(1.05) brightness(1.02)";
+      canvas.style.transform = "translateZ(0)"; // Hardware acceleration
+      canvas.style.backfaceVisibility = "hidden";
+      canvas.style.perspective = "1000px";
+    }
 
-    console.log(`🎨 Canvas configured to match Snap's official quality settings`);
+    console.log(
+      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
+      } with quality optimizations`
+    );
   } catch (error) {
     console.warn("Canvas enhancement failed:", error);
   }
@@ -790,9 +777,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const { bootstrapCameraKit } = await import("@snap/camera-kit");
       cache.cameraKit = await bootstrapCameraKit({
         apiToken: apiToken,
-        lensCore: {
-          enableProfiling: false,
-          enableDebugMode: false,
+        cameraConfig: {
+          resolution: {
+            width: 1920,
+            height: 1080,
+          },
+          // Or use predefined high quality
+          preset: "high-quality",
         },
       });
 
@@ -981,29 +972,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       } else {
         throw new Error("No canvas after fresh session creation");
       }
-
-      // Debug function to compare your settings with Snap's
-      const debugQualitySettings = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        console.log("🔍 Quality Debug Info:");
-        console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
-        console.log("Canvas style size:", canvas.style.width, "x", canvas.style.height);
-        console.log("Device pixel ratio:", window.devicePixelRatio);
-        console.log("Canvas computed style:", window.getComputedStyle(canvas));
-
-        // Check if canvas matches Snap's official test page
-        const videoTrack = cache.mediaStream?.getVideoTracks()[0];
-        if (videoTrack) {
-          const settings = videoTrack.getSettings();
-          console.log("Video track settings:", settings);
-          console.log("Video track capabilities:", videoTrack.getCapabilities());
-        }
-      };
-
-      // Call this after canvas setup
-      debugQualitySettings();
     } catch (error) {
       console.error("❌ Fresh AR session creation failed:", error);
 
