@@ -37,7 +37,8 @@ const enhanceCanvas = (canvas) => {
     }
 
     console.log(
-      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
+      `🎨 Canvas enhanced for ${
+        isAndroid ? "Android" : "other"
       } with quality optimizations`
     );
   } catch (error) {
@@ -1330,7 +1331,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           height: 90,
         };
         console.log("📱 Using TABLET polaroid area");
-
       } else if (screenWidth >= 300 && screenWidth < 350) {
         // b) Mobile: 300-349px (Soham's device)
         polaroidArea = {
@@ -1340,7 +1340,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           height: 64,
         };
         console.log("📱 Using SOHAM DEVICE (300-349px) polaroid area");
-
       } else if (screenWidth >= 350 && screenWidth < 390) {
         // c) Mobile: 350-389px
         polaroidArea = {
@@ -1350,17 +1349,15 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           height: 67,
         };
         console.log("📱 Using MOBILE SMALL (350-389px) polaroid area");
-
       } else if (screenWidth >= 390 && screenWidth < 430) {
         // d) Mobile: 390-429px
         polaroidArea = {
           x: 4,
-          y: 13,
+          y: 9,
           width: 93,
-          height: 65,
+          height: 70,
         };
         console.log("📱 Using MOBILE MEDIUM (390-429px) polaroid area");
-
       } else if (screenWidth >= 430 && screenWidth < 768) {
         // e) Mobile: 430-767px
         polaroidArea = {
@@ -1370,7 +1367,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           height: 68,
         };
         console.log("📱 Using MOBILE LARGE (430-767px) polaroid area");
-
       } else {
         // Desktop and fallback (< 300px or >= 768px non-tablet)
         polaroidArea = {
@@ -1382,7 +1378,11 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         console.log("📱 Using DESKTOP/DEFAULT polaroid area");
       }
 
-      console.log(`📱 Device: ${screenWidth}px width, detected as: ${isTablet ? 'Tablet' : 'Mobile/Desktop'}`);
+      console.log(
+        `📱 Device: ${screenWidth}px width, detected as: ${
+          isTablet ? "Tablet" : "Mobile/Desktop"
+        }`
+      );
 
       const captureArea = {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),

@@ -41,12 +41,12 @@ class CameraManager {
                 { exposureMode: "continuous" },
                 { whiteBalanceMode: "continuous" },
                 { imageStabilization: true },
-                { noiseSuppression: false },
+                { noiseSuppression: true },
                 { sharpness: { ideal: 7, max: 10 } },
                 { saturation: { ideal: 110 } },
                 { contrast: { ideal: 110 } },
-                { brightness: { ideal: 105 } }
-              ]
+                { brightness: { ideal: 105 } },
+              ],
             },
             audio: true,
           },
@@ -61,12 +61,12 @@ class CameraManager {
                 { exposureMode: "continuous" },
                 { whiteBalanceMode: "continuous" },
                 { imageStabilization: true },
-                { noiseSuppression: false },
+                { noiseSuppression: true },
                 { sharpness: { ideal: 7, max: 10 } },
                 { saturation: { ideal: 110 } },
                 { contrast: { ideal: 110 } },
-                { brightness: { ideal: 105 } }
-              ]
+                { brightness: { ideal: 105 } },
+              ],
             },
             audio: true,
           },
@@ -81,12 +81,12 @@ class CameraManager {
                 { exposureMode: "continuous" },
                 { whiteBalanceMode: "continuous" },
                 { imageStabilization: true },
-                { noiseSuppression: false },
+                { noiseSuppression: true },
                 { sharpness: { ideal: 7, max: 10 } },
                 { saturation: { ideal: 110 } },
                 { contrast: { ideal: 110 } },
-                { brightness: { ideal: 105 } }
-              ]
+                { brightness: { ideal: 105 } },
+              ],
             },
             audio: true,
           },
@@ -312,9 +312,9 @@ const SplashScreen = ({ onComplete }) => {
         cache.cameraKit = await bootstrapCameraKit({
           apiToken: actualApiToken,
           lensConfig: {
-            renderQuality: 'high',
-            performanceHint: 'quality' // Prioritize quality over performance
-          }
+            renderQuality: "high",
+            performanceHint: "quality", // Prioritize quality over performance
+          },
         });
       }
 
@@ -325,8 +325,9 @@ const SplashScreen = ({ onComplete }) => {
 
         const videoTrack = cache.mediaStream.getVideoTracks()[0];
         const settings = videoTrack.getSettings();
-        console.log(`📹 Camera stream quality: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`);
-
+        console.log(
+          `📹 Camera stream quality: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`
+        );
       }
 
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
@@ -498,13 +499,14 @@ const SplashScreen = ({ onComplete }) => {
           {Math.round(loadingProgress)}%
         </p> */}
         <p
-          className={`text-center text-xl font-bold transition-all duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
-            }`}
-        // style={{
-        //   transform:
-        //     showLoadingContent && imagesLoaded ? "scale(1)" : "scale(0)",
-        //   transformOrigin: "center",
-        // }}
+          className={`text-center text-xl font-bold transition-all duration-300 ${
+            showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          // style={{
+          //   transform:
+          //     showLoadingContent && imagesLoaded ? "scale(1)" : "scale(0)",
+          //   transformOrigin: "center",
+          // }}
         >
           {Math.round(loadingProgress)}%
         </p>
@@ -515,8 +517,9 @@ const SplashScreen = ({ onComplete }) => {
         <button
           onClick={handleTapToBegin}
           disabled={sessionState.isCreating}
-          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${showFinalContent ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            showFinalContent ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility: showFinalContent ? "visible" : "hidden",
             background:
