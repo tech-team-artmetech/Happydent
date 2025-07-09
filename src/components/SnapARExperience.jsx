@@ -4,8 +4,7 @@ import { createMediaStreamSource, Transform2D } from "@snap/camera-kit";
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
-const isSohamDevice =
-  window.innerWidth >= 340 && window.innerWidth <= 414;
+const isSohamDevice = window.innerWidth >= 340 && window.innerWidth <= 414;
 
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
@@ -38,7 +37,9 @@ const enhanceCanvas = (canvas) => {
     }
 
     console.log(
-      `🎨 Canvas enhanced for ${isAndroid ? 'Android' : 'other'} with quality optimizations`
+      `🎨 Canvas enhanced for ${
+        isAndroid ? "Android" : "other"
+      } with quality optimizations`
     );
   } catch (error) {
     console.warn("Canvas enhancement failed:", error);
@@ -780,11 +781,11 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         cameraConfig: {
           resolution: {
             width: 1920,
-            height: 1080
+            height: 1080,
           },
           // Or use predefined high quality
-          preset: 'high-quality'
-        }
+          preset: "high-quality",
+        },
       });
 
       console.log("🔥 Step 2: Get camera stream...");
@@ -831,7 +832,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     width: { ideal: 1920, min: 1280 }, // Increased resolution
                     height: { ideal: 1080, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
-                    aspectRatio: { ideal: 16 / 9 }
+                    aspectRatio: { ideal: 16 / 9 },
                   },
                   audio: false,
                 },
@@ -841,7 +842,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     width: { ideal: 1920, min: 1280 }, // Increased resolution
                     height: { ideal: 1080, min: 720 },
                     frameRate: { ideal: 30, min: 15 },
-                    aspectRatio: { ideal: 16 / 9 }
+                    aspectRatio: { ideal: 16 / 9 },
                   },
                   audio: false,
                 },
@@ -850,7 +851,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                     facingMode: "user",
                     width: { ideal: 1920, min: 1280 },
                     height: { ideal: 1080, min: 720 },
-                    frameRate: { ideal: 30, min: 15 }
+                    frameRate: { ideal: 30, min: 15 },
                   },
                   audio: false,
                 },
@@ -1144,8 +1145,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       "less";
     const appliedLensId =
       appliedGroupSize === "less"
-        ? "bc57c671-4255-423e-9eaf-71daba627ca8"
-        : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+        ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
+        : "500207c1-2b25-4382-83a4-d519ec4765f9";
 
     onComplete({
       ...userData,
@@ -1424,8 +1425,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "bc57c671-4255-423e-9eaf-71daba627ca8"
-            : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+            ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
+            : "500207c1-2b25-4382-83a4-d519ec4765f9";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1454,8 +1455,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "bc57c671-4255-423e-9eaf-71daba627ca8"
-            : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+            ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
+            : "500207c1-2b25-4382-83a4-d519ec4765f9";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1487,8 +1488,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         "less";
       const appliedLensId =
         appliedGroupSize === "less"
-          ? "bc57c671-4255-423e-9eaf-71daba627ca8"
-          : "c4b85218-50a5-4a71-b719-0a1381b4e73e";
+          ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
+          : "500207c1-2b25-4382-83a4-d519ec4765f9";
 
       setTimeout(() => {
         setIsUploading(false);
