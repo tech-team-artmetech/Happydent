@@ -35,7 +35,18 @@ class CameraManager {
               facingMode: "user",
               width: { ideal: 2560, min: 1440 },
               height: { ideal: 1440, min: 720 },
-              frameRate: { ideal: 30, min: 24 }
+              frameRate: { ideal: 30, min: 24 },
+              advanced: [
+                { focusMode: "continuous" },
+                { exposureMode: "continuous" },
+                { whiteBalanceMode: "continuous" },
+                { imageStabilization: true },
+                { noiseSuppression: false },
+                { sharpness: { ideal: 7, max: 10 } },
+                { saturation: { ideal: 110 } },
+                { contrast: { ideal: 110 } },
+                { brightness: { ideal: 105 } }
+              ]
             },
             audio: true,
           },
@@ -44,7 +55,18 @@ class CameraManager {
               facingMode: "environment",
               width: { ideal: 2560, min: 1440 },
               height: { ideal: 1440, min: 720 },
-              frameRate: { ideal: 30, min: 24 }
+              frameRate: { ideal: 30, min: 24 },
+              advanced: [
+                { focusMode: "continuous" },
+                { exposureMode: "continuous" },
+                { whiteBalanceMode: "continuous" },
+                { imageStabilization: true },
+                { noiseSuppression: false },
+                { sharpness: { ideal: 7, max: 10 } },
+                { saturation: { ideal: 110 } },
+                { contrast: { ideal: 110 } },
+                { brightness: { ideal: 105 } }
+              ]
             },
             audio: true,
           },
@@ -53,7 +75,18 @@ class CameraManager {
               facingMode: "user",
               width: { ideal: 2560, min: 1440 },
               height: { ideal: 1440, min: 720 },
-              frameRate: { ideal: 30, min: 24 }
+              frameRate: { ideal: 30, min: 24 },
+              advanced: [
+                { focusMode: "continuous" },
+                { exposureMode: "continuous" },
+                { whiteBalanceMode: "continuous" },
+                { imageStabilization: true },
+                { noiseSuppression: false },
+                { sharpness: { ideal: 7, max: 10 } },
+                { saturation: { ideal: 110 } },
+                { contrast: { ideal: 110 } },
+                { brightness: { ideal: 105 } }
+              ]
             },
             audio: true,
           },
