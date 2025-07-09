@@ -6,6 +6,7 @@ const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 const isSohamDevice = window.innerWidth >= 340 && window.innerWidth <= 414;
 
+
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
   if (!canvas) return;
@@ -26,19 +27,11 @@ const enhanceCanvas = (canvas) => {
     canvas.style.objectFit = "cover";
     canvas.style.zIndex = "1";
 
-    // Android-specific enhancements
-    if (isAndroid) {
-      canvas.style.imageRendering = "high-quality";
-      canvas.style.imageRendering = "-webkit-optimize-contrast";
-      canvas.style.filter = "contrast(1.1) saturate(1.05) brightness(1.02)";
-      canvas.style.transform = "translateZ(0)"; // Hardware acceleration
-      canvas.style.backfaceVisibility = "hidden";
-      canvas.style.perspective = "1000px";
-    }
+    // DO NOT get context - this was causing OffscreenCanvas errors
+    // Just apply styling
 
     console.log(
-      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
-      } with quality optimizations`
+      "🎨 Canvas enhanced with offscreen prevention (no context access)"
     );
   } catch (error) {
     console.warn("Canvas enhancement failed:", error);
@@ -73,7 +66,7 @@ class ARErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
           <div className="text-center p-6">
             <p className="text-red-300 text-sm mb-4">
               AR experience encountered an error
@@ -301,7 +294,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         console.log(
           "🔴👹 RED DEMON CONFIRMED - stopping scan and showing PROCEED button!"
         );
-
         stopRedDemonDetection();
 
         // 🛑 Reset detection state so useEffect doesn't trigger again
@@ -313,12 +305,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
         setShowCaptureButton(true);
 
+        // ✅ Ensure fallback timer stops too
         if (arStartTimerRef.current) {
           clearTimeout(arStartTimerRef.current);
           arStartTimerRef.current = null;
         }
 
-        return; // ✅ exit early
+        return; // ✅ Exit early to stop further processing
       }
     } else {
       // Reset consecutive count if no demon found
@@ -777,14 +770,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const { bootstrapCameraKit } = await import("@snap/camera-kit");
       cache.cameraKit = await bootstrapCameraKit({
         apiToken: apiToken,
-        cameraConfig: {
-          resolution: {
-            width: 1920,
-            height: 1080,
-          },
-          // Or use predefined high quality
-          preset: "high-quality",
-        },
       });
 
       console.log("🔥 Step 2: Get camera stream...");
@@ -820,7 +805,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           }
         }
 
-        // In your CameraManager class, update getConstraints():
         getConstraints() {
           const settings = {
             camera: {
@@ -852,7 +836,6 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
               },
             },
           };
-
           return this.isMobile
             ? this.isBackFacing
               ? settings.camera.constraints.back
@@ -866,8 +849,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
       console.log("🔥 Step 3: Load both lenses...");
       const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-      const lessLensId = "522218f6-7200-4d66-9f05-ddd56c81a8e5";
-      const moreLensId = "500207c1-2b25-4382-83a4-d519ec4765f9";
+      const lessLensId = "c9b9a62d-0a61-4e26-9db1-67133ff07b99";
+      const moreLensId = "3d4c5e55-255e-4e92-8c93-24530158d072";
 
       // Load both lenses
       const lessLens = await cache.cameraKit.lensRepository.loadLens(
@@ -963,7 +946,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       const isVisible = rect.width > 0 && rect.height > 0;
 
       if (!isVisible) {
-        console.warn("🚨 Canvas not visible, attempting recovery...");
+        // console.warn("🚨 Canvas not visible, attempting recovery...");
 
         // Try to make canvas visible again
         canvas.style.display = "block";
@@ -1139,8 +1122,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       "less";
     const appliedLensId =
       appliedGroupSize === "less"
-        ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
-        : "500207c1-2b25-4382-83a4-d519ec4765f9";
+        ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
+        : "3d4c5e55-255e-4e92-8c93-24530158d072";
 
     onComplete({
       ...userData,
@@ -1445,8 +1428,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
-            : "500207c1-2b25-4382-83a4-d519ec4765f9";
+            ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
+            : "3d4c5e55-255e-4e92-8c93-24530158d072";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1475,8 +1458,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
-            : "500207c1-2b25-4382-83a4-d519ec4765f9";
+            ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
+            : "3d4c5e55-255e-4e92-8c93-24530158d072";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1508,8 +1491,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         "less";
       const appliedLensId =
         appliedGroupSize === "less"
-          ? "522218f6-7200-4d66-9f05-ddd56c81a8e5"
-          : "500207c1-2b25-4382-83a4-d519ec4765f9";
+          ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
+          : "3d4c5e55-255e-4e92-8c93-24530158d072";
 
       setTimeout(() => {
         setIsUploading(false);
@@ -1530,7 +1513,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto bg-black">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto bg-black">
         <div className="text-center p-6">
           <p className="text-red-300 text-sm mb-4">{error}</p>
           <button

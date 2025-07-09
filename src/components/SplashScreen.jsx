@@ -26,33 +26,20 @@ class CameraManager {
   }
 
   getConstraints() {
-    // 🚨 UPDATED: Higher quality constraints
     const settings = {
       camera: {
         constraints: {
           front: {
-            video: {
-              facingMode: "user",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
+            video: { facingMode: "user" },
+            audio: true,
           },
           back: {
-            video: {
-              facingMode: "environment",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
+            video: { facingMode: "environment" },
+            audio: true,
           },
           desktop: {
-            video: {
-              facingMode: "user",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
+            video: { facingMode: "user" },
+            audio: true,
           },
         },
       },
@@ -275,10 +262,6 @@ const SplashScreen = ({ onComplete }) => {
 
         cache.cameraKit = await bootstrapCameraKit({
           apiToken: actualApiToken,
-          lensConfig: {
-            renderQuality: "high",
-            performanceHint: "quality", // Prioritize quality over performance
-          },
         });
       }
 
@@ -286,19 +269,13 @@ const SplashScreen = ({ onComplete }) => {
       if (!cache.mediaStream) {
         cache.cameraManager = new CameraManager();
         cache.mediaStream = await cache.cameraManager.initializeCamera();
-
-        const videoTrack = cache.mediaStream.getVideoTracks()[0];
-        const settings = videoTrack.getSettings();
-        console.log(
-          `📹 Camera stream quality: ${settings.width}x${settings.height} @ ${settings.frameRate}fps`
-        );
       }
 
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
       if (!cache.lenses) {
         const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-        const lessLensId = "522218f6-7200-4d66-9f05-ddd56c81a8e5"; // Less than 3 people
-        const moreLensId = "500207c1-2b25-4382-83a4-d519ec4765f9"; // More than 3 people
+        const lessLensId = "c9b9a62d-0a61-4e26-9db1-67133ff07b99"; // Less than 3 people
+        const moreLensId = "3d4c5e55-255e-4e92-8c93-24530158d072"; // More than 3 people
 
         // Load both lenses
         console.log("🔥 Loading both lenses...");
@@ -395,7 +372,7 @@ const SplashScreen = ({ onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[991px] mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto">
       {/* HAPPYDENT Logo */}
       <img
         src="/assets/happydent-logo.png"
