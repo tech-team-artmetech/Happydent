@@ -37,8 +37,7 @@ const enhanceCanvas = (canvas) => {
     }
 
     console.log(
-      `🎨 Canvas enhanced for ${
-        isAndroid ? "Android" : "other"
+      `🎨 Canvas enhanced for ${isAndroid ? "Android" : "other"
       } with quality optimizations`
     );
   } catch (error) {
@@ -1317,10 +1316,13 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         );
       }
 
+      const screenWidth = window.innerWidth;
+      const userAgent = navigator.userAgent;
+      const isTablet = /iPad|Android/i.test(userAgent) && screenWidth >= 768;
       let polaroidArea;
 
       if (isTablet) {
-        // Condition 1: Tablet devices
+        // a) Tablet devices (>= 768px)
         polaroidArea = {
           x: 5,
           y: 0,
@@ -1328,34 +1330,59 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           height: 90,
         };
         console.log("📱 Using TABLET polaroid area");
-      } else if (isSohamDevice) {
-        // Condition 2: Soham's specific device (only applies if NOT tablet)
+
+      } else if (screenWidth >= 300 && screenWidth < 350) {
+        // b) Mobile: 300-349px (Soham's device)
         polaroidArea = {
           x: 0,
-          y: 14,
+          y: 13,
           width: 100,
-          height: 69,
+          height: 64,
         };
-        console.log("📱 Using SOHAM DEVICE polaroid area");
-      } else if (isMobile) {
-        // Condition 2: Soham's specific device (only applies if NOT tablet)
+        console.log("📱 Using SOHAM DEVICE (300-349px) polaroid area");
+
+      } else if (screenWidth >= 350 && screenWidth < 390) {
+        // c) Mobile: 350-389px
+        polaroidArea = {
+          x: 4,
+          y: 13,
+          width: 92,
+          height: 67,
+        };
+        console.log("📱 Using MOBILE SMALL (350-389px) polaroid area");
+
+      } else if (screenWidth >= 390 && screenWidth < 430) {
+        // d) Mobile: 390-429px
         polaroidArea = {
           x: 4,
           y: 13,
           width: 93,
           height: 65,
         };
-        console.log("📱 Using MOBILE polaroid area");
+        console.log("📱 Using MOBILE MEDIUM (390-429px) polaroid area");
+
+      } else if (screenWidth >= 430 && screenWidth < 768) {
+        // e) Mobile: 430-767px
+        polaroidArea = {
+          x: 6,
+          y: 11,
+          width: 88,
+          height: 68,
+        };
+        console.log("📱 Using MOBILE LARGE (430-767px) polaroid area");
+
       } else {
-        // Condition 3: All other devices (default)
+        // Desktop and fallback (< 300px or >= 768px non-tablet)
         polaroidArea = {
           x: 4,
           y: 13,
           width: 93,
           height: 65,
         };
-        console.log("📱 Using DEFAULT polaroid area");
+        console.log("📱 Using DESKTOP/DEFAULT polaroid area");
       }
+
+      console.log(`📱 Device: ${screenWidth}px width, detected as: ${isTablet ? 'Tablet' : 'Mobile/Desktop'}`);
 
       const captureArea = {
         x: Math.floor((canvasWidth * polaroidArea.x) / 100),
