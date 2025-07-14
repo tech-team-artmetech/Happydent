@@ -805,11 +805,29 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         }
 
         getConstraints() {
+          // Check if device is Android
+          const isAndroid = /Android/i.test(navigator.userAgent);
+
           const settings = {
             camera: {
               constraints: {
                 front: {
-                  video: {
+                  video: isAndroid ? {
+                    // Android: Advanced settings
+                    facingMode: "user",
+                    width: { ideal: 1280, min: 720 },
+                    height: { ideal: 720, min: 720 },
+                    frameRate: { ideal: 30, min: 15 },
+                    aspectRatio: { ideal: 16 / 9 },
+                    advanced: [
+                      { focusMode: "continuous" },
+                      { exposureMode: "continuous" },
+                      { whiteBalanceMode: "continuous" },
+                      { imageStabilization: true },
+                      { noiseSuppression: true }
+                    ]
+                  } : {
+                    // Non-Android: Perfect basic settings
                     facingMode: "user",
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
@@ -817,7 +835,22 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                   audio: false,
                 },
                 back: {
-                  video: {
+                  video: isAndroid ? {
+                    // Android: Advanced settings
+                    facingMode: "environment",
+                    width: { ideal: 1280, min: 720 },
+                    height: { ideal: 720, min: 720 },
+                    frameRate: { ideal: 30, min: 15 },
+                    aspectRatio: { ideal: 16 / 9 },
+                    advanced: [
+                      { focusMode: "continuous" },
+                      { exposureMode: "continuous" },
+                      { whiteBalanceMode: "continuous" },
+                      { imageStabilization: true },
+                      { noiseSuppression: true }
+                    ]
+                  } : {
+                    // Non-Android: Perfect basic settings
                     facingMode: "environment",
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
@@ -825,7 +858,22 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
                   audio: false,
                 },
                 desktop: {
-                  video: {
+                  video: isAndroid ? {
+                    // Android: Advanced settings (if running Android on desktop/tablet)
+                    facingMode: "user",
+                    width: { ideal: 1280, min: 720 },
+                    height: { ideal: 720, min: 720 },
+                    frameRate: { ideal: 30, min: 15 },
+                    aspectRatio: { ideal: 16 / 9 },
+                    advanced: [
+                      { focusMode: "continuous" },
+                      { exposureMode: "continuous" },
+                      { whiteBalanceMode: "continuous" },
+                      { imageStabilization: true },
+                      { noiseSuppression: true }
+                    ]
+                  } : {
+                    // Non-Android: Perfect basic settings
                     facingMode: "user",
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
@@ -835,6 +883,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
               },
             },
           };
+
           return this.isMobile
             ? this.isBackFacing
               ? settings.camera.constraints.back
@@ -1321,8 +1370,7 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }
 
       console.log(
-        `📱 Device: ${screenWidth}px width, detected as: ${
-          isTablet ? "Tablet" : "Mobile/Desktop"
+        `📱 Device: ${screenWidth}px width, detected as: ${isTablet ? "Tablet" : "Mobile/Desktop"
         }`
       );
 
