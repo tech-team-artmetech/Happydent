@@ -6,7 +6,6 @@ const isTablet =
   /iPad|Android/i.test(navigator.userAgent) && window.innerWidth >= 768;
 const isSohamDevice = window.innerWidth >= 340 && window.innerWidth <= 414;
 
-
 // Enhanced Canvas Management - NO CONTEXT ACCESS
 const enhanceCanvas = (canvas) => {
   if (!canvas) return;
@@ -1322,7 +1321,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }
 
       console.log(
-        `📱 Device: ${screenWidth}px width, detected as: ${isTablet ? "Tablet" : "Mobile/Desktop"
+        `📱 Device: ${screenWidth}px width, detected as: ${
+          isTablet ? "Tablet" : "Mobile/Desktop"
         }`
       );
 
