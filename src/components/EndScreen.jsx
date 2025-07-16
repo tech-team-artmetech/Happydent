@@ -652,8 +652,8 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
     const selectedGroupSize = localStorage.getItem("selectedGroupSize");
     const selectedLensId =
       selectedGroupSize === "less"
-        ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
-        : "3d4c5e55-255e-4e92-8c93-24530158d072";
+        ? "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"
+        : "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
     if (phone && userId && userName) {
       setUserInfo({ phone, userId, userName });
@@ -723,8 +723,9 @@ const EndScreen = ({ onRetry, onRetryAR }) => {
         if (data.data.hasPhoto) {
           // 🔧 FIX: Add cache busting to API response too
           const currentCounter = localStorage.getItem("photoCounter") || "0";
-          const cacheBustedUrl = `${data.data.imageUrl
-            }?counter=${currentCounter}&t=${Date.now()}`;
+          const cacheBustedUrl = `${
+            data.data.imageUrl
+          }?counter=${currentCounter}&t=${Date.now()}`;
 
           console.log(
             "📷 API returned image, adding cache busting:",

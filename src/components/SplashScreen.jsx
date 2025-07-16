@@ -1,137 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import smileLoaded from "../../src/assets/smile_loaded.png";
-// import chamkingSmile from "../../src/assets/chamking-smile-logo.png";
-
-// const SplashScreen = ({ onComplete }) => {
-//   const [loadingProgress, setLoadingProgress] = useState(0);
-//   const [showButton, setShowButton] = useState(false);
-//   const [imagesLoaded, setImagesLoaded] = useState(false);
-//   const [preloadedImages, setPreloadedImages] = useState({});
-
-//   // Preload all images
-//   useEffect(() => {
-//     const images = {};
-//     let loadedCount = 0;
-//     const totalImages = 31; // 0 to 40 = 31 images
-
-//     for (let i = 0; i <= 30; i++) {
-//       const img = new Image();
-//       const fileName = `Comp 1_${i.toString().padStart(5, "0")}.png`;
-//       const src = `/assets/smile/${fileName}`;
-
-//       img.onload = () => {
-//         loadedCount++;
-//         if (loadedCount === totalImages) {
-//           setImagesLoaded(true);
-//         }
-//       };
-
-//       img.src = src;
-//       images[i] = src;
-//     }
-
-//     setPreloadedImages(images);
-//   }, []);
-
-//   // Start progress animation after images are loaded
-//   useEffect(() => {
-//     if (!imagesLoaded) return;
-
-//     let step = 0;
-//     const totalSteps = 31; // One step per frame
-
-//     const interval = setInterval(() => {
-//       if (step >= totalSteps) {
-//         setLoadingProgress(100);
-//         setShowButton(true);
-//         clearInterval(interval);
-//         return;
-//       }
-
-//       const progress = (step / (totalSteps - 1)) * 100; // precise 0–100%
-//       setLoadingProgress(progress);
-//       step++;
-//     }, 50); // ~2 seconds total
-
-//     return () => clearInterval(interval);
-//   }, [imagesLoaded]);
-
-//   // Calculate which image to show based on progress
-//   const getCurrentImageIndex = () => {
-//     return Math.min(Math.floor((loadingProgress / 100) * 30), 30);
-//   };
-
-//   const handleTapToBegin = () => {
-//     if (onComplete) {
-//       onComplete();
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col items-center justify-center px-4 text-white max-w-[768px] mx-auto">
-//       {/* Image */}
-
-//       <img
-//         src="/assets/happydent-logo.png"
-//         alt="HAPPYDENT"
-//         className="w-64 h-32 object-contain mb-8"
-//       />
-
-//       <img className="chamking-smile-logo" src={chamkingSmile} alt="" />
-//       {/* Image Sequence Loader */}
-//       {!showButton && imagesLoaded && (
-//         <div className="mb-8 flex flex-col items-center">
-//           <div className="font-gotham font-light italic">Loading...</div>
-//           <div className="mb-4">
-//             <img
-//               src={preloadedImages[getCurrentImageIndex()]}
-//               alt="Loading animation"
-//               className="w-42 h-42 object-contain"
-//             />
-//           </div>
-//           <p className="text-center text-xl font-bold">
-//             {Math.round(loadingProgress)}%
-//           </p>
-//         </div>
-//       )}
-
-//       {/* Loading message while preloading images */}
-//       {!imagesLoaded && (
-//         <div className="mb-8">
-//           <p className="text-center text-lg">Loading...</p>
-//         </div>
-//       )}
-
-//       {/* Button */}
-
-//       {showButton && (
-//         <div className="flex flex-col items-center space-y-4">
-//           <img src={smileLoaded} alt="Final Smile Frame" />
-//           <button
-//             onClick={handleTapToBegin}
-//             className="text-white text-[18px] ctaBtn font-gotham font-medium italic"
-//             style={{
-//               background:
-//                 "radial-gradient(40% 40% at 80% 100%, rgb(255 255 255 / 31%) 0%, rgb(0 51 255 / 31%) 59%, rgb(0 13 255 / 31%) 100%)",
-//               borderRadius: "4px",
-//               border: "1px solid rgba(255, 255, 255, 0.52)",
-//               borderStyle: "inside",
-//               boxShadow: "2px 2px 4px 0px rgba(0, 0, 0, 0.39)",
-//               backdropFilter: "blur(20px)",
-//               WebkitBackdropFilter: "blur(20px)",
-//               opacity: "100%",
-//             }}
-//           >
-//             TAP TO BEGIN!
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default SplashScreen;
-
 import React, { useState, useEffect } from "react";
 import {
   bootstrapCameraKit,
@@ -167,72 +33,78 @@ class CameraManager {
       camera: {
         constraints: {
           front: {
-            video: isAndroid ? {
-              // Android: Advanced settings
-              facingMode: "user",
-              width: { ideal: 1280, min: 720 },
-              height: { ideal: 720, min: 720 },
-              frameRate: { ideal: 30, min: 15 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [
-                { focusMode: "continuous" },
-                { exposureMode: "continuous" },
-                { whiteBalanceMode: "continuous" },
-                { imageStabilization: true },
-                { noiseSuppression: true }
-              ]
-            } : {
-              // Non-Android: Perfect basic settings
-              facingMode: "user",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
+            video: isAndroid
+              ? {
+                  // Android: Advanced settings
+                  facingMode: "user",
+                  width: { ideal: 1280, min: 720 },
+                  height: { ideal: 720, min: 720 },
+                  frameRate: { ideal: 30, min: 15 },
+                  aspectRatio: { ideal: 16 / 9 },
+                  advanced: [
+                    { focusMode: "continuous" },
+                    { exposureMode: "continuous" },
+                    { whiteBalanceMode: "continuous" },
+                    { imageStabilization: true },
+                    { noiseSuppression: true },
+                  ],
+                }
+              : {
+                  // Non-Android: Perfect basic settings
+                  facingMode: "user",
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 },
+                },
             audio: false,
           },
           back: {
-            video: isAndroid ? {
-              // Android: Advanced settings
-              facingMode: "environment",
-              width: { ideal: 1280, min: 720 },
-              height: { ideal: 720, min: 720 },
-              frameRate: { ideal: 30, min: 15 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [
-                { focusMode: "continuous" },
-                { exposureMode: "continuous" },
-                { whiteBalanceMode: "continuous" },
-                { imageStabilization: true },
-                { noiseSuppression: true }
-              ]
-            } : {
-              // Non-Android: Perfect basic settings
-              facingMode: "environment",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
+            video: isAndroid
+              ? {
+                  // Android: Advanced settings
+                  facingMode: "environment",
+                  width: { ideal: 1280, min: 720 },
+                  height: { ideal: 720, min: 720 },
+                  frameRate: { ideal: 30, min: 15 },
+                  aspectRatio: { ideal: 16 / 9 },
+                  advanced: [
+                    { focusMode: "continuous" },
+                    { exposureMode: "continuous" },
+                    { whiteBalanceMode: "continuous" },
+                    { imageStabilization: true },
+                    { noiseSuppression: true },
+                  ],
+                }
+              : {
+                  // Non-Android: Perfect basic settings
+                  facingMode: "environment",
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 },
+                },
             audio: false,
           },
           desktop: {
-            video: isAndroid ? {
-              // Android: Advanced settings (if running Android on desktop/tablet)
-              facingMode: "user",
-              width: { ideal: 1280, min: 720 },
-              height: { ideal: 720, min: 720 },
-              frameRate: { ideal: 30, min: 15 },
-              aspectRatio: { ideal: 16 / 9 },
-              advanced: [
-                { focusMode: "continuous" },
-                { exposureMode: "continuous" },
-                { whiteBalanceMode: "continuous" },
-                { imageStabilization: true },
-                { noiseSuppression: true }
-              ]
-            } : {
-              // Non-Android: Perfect basic settings
-              facingMode: "user",
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
+            video: isAndroid
+              ? {
+                  // Android: Advanced settings (if running Android on desktop/tablet)
+                  facingMode: "user",
+                  width: { ideal: 1280, min: 720 },
+                  height: { ideal: 720, min: 720 },
+                  frameRate: { ideal: 30, min: 15 },
+                  aspectRatio: { ideal: 16 / 9 },
+                  advanced: [
+                    { focusMode: "continuous" },
+                    { exposureMode: "continuous" },
+                    { whiteBalanceMode: "continuous" },
+                    { imageStabilization: true },
+                    { noiseSuppression: true },
+                  ],
+                }
+              : {
+                  // Non-Android: Perfect basic settings
+                  facingMode: "user",
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 },
+                },
             audio: false,
           },
         },
@@ -468,8 +340,8 @@ const SplashScreen = ({ onComplete }) => {
       // 🔥 STEP 3: Load lens assets (ALL API calls happen here)
       if (!cache.lenses) {
         const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-        const lessLensId = "c9b9a62d-0a61-4e26-9db1-67133ff07b99"; // Less than 3 people
-        const moreLensId = "3d4c5e55-255e-4e92-8c93-24530158d072"; // More than 3 people
+        const lessLensId = "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"; // Less than 3 people
+        const moreLensId = "f60131ce-4f77-46b6-ac1a-3d5c839c4035"; // More than 3 people
 
         // Load both lenses
         console.log("🔥 Loading both lenses...");
@@ -634,13 +506,14 @@ const SplashScreen = ({ onComplete }) => {
           {Math.round(loadingProgress)}%
         </p> */}
         <p
-          className={`text-center text-xl font-bold transition-all duration-300 ${showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
-            }`}
-        // style={{
-        //   transform:
-        //     showLoadingContent && imagesLoaded ? "scale(1)" : "scale(0)",
-        //   transformOrigin: "center",
-        // }}
+          className={`text-center text-xl font-bold transition-all duration-300 ${
+            showLoadingContent && imagesLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          // style={{
+          //   transform:
+          //     showLoadingContent && imagesLoaded ? "scale(1)" : "scale(0)",
+          //   transformOrigin: "center",
+          // }}
         >
           {Math.round(loadingProgress)}%
         </p>
@@ -651,8 +524,9 @@ const SplashScreen = ({ onComplete }) => {
         <button
           onClick={handleTapToBegin}
           disabled={sessionState.isCreating}
-          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${showFinalContent ? "opacity-100" : "opacity-0"
-            }`}
+          className={`text-white text-[18px] ctaBtn font-gotham font-medium italic transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            showFinalContent ? "opacity-100" : "opacity-0"
+          }`}
           style={{
             visibility: showFinalContent ? "visible" : "hidden",
             background:

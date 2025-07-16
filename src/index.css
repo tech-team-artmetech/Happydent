@@ -193,3 +193,64 @@ button:focus-visible {
     min-width: auto !important;
   }
 }
+
+/* Hide browser UI in fullscreen */
+:fullscreen {
+  background: black;
+}
+
+:-webkit-full-screen {
+  background: black;
+}
+
+:-moz-full-screen {
+  background: black;
+}
+
+/* Hide scrollbars in fullscreen */
+:fullscreen::-webkit-scrollbar {
+  display: none;
+}
+
+:fullscreen {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Global fullscreen styles */
+:fullscreen {
+  background: black;
+}
+
+:-webkit-full-screen {
+  background: black;
+}
+
+:-moz-full-screen {
+  background: black;
+}
+
+/* Hide scrollbars in fullscreen */
+:fullscreen::-webkit-scrollbar {
+  display: none;
+}
+
+:fullscreen {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Ensure fullscreen covers everything */
+:fullscreen * {
+  box-sizing: border-box;
+}
+
+/* Optional: Hide fullscreen button on very small screens */
+@media (max-width: 480px) {
+  .fullscreen-button {
+    font-size: 10px;
+    padding: 6px 8px;
+    top: 10px;
+    right: 10px;
+  }
+}

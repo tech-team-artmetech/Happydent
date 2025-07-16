@@ -812,72 +812,78 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
             camera: {
               constraints: {
                 front: {
-                  video: isAndroid ? {
-                    // Android: Advanced settings
-                    facingMode: "user",
-                    width: { ideal: 1280, min: 720 },
-                    height: { ideal: 720, min: 720 },
-                    frameRate: { ideal: 30, min: 15 },
-                    aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: true }
-                    ]
-                  } : {
-                    // Non-Android: Perfect basic settings
-                    facingMode: "user",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                  },
+                  video: isAndroid
+                    ? {
+                        // Android: Advanced settings
+                        facingMode: "user",
+                        width: { ideal: 1280, min: 720 },
+                        height: { ideal: 720, min: 720 },
+                        frameRate: { ideal: 30, min: 15 },
+                        aspectRatio: { ideal: 16 / 9 },
+                        advanced: [
+                          { focusMode: "continuous" },
+                          { exposureMode: "continuous" },
+                          { whiteBalanceMode: "continuous" },
+                          { imageStabilization: true },
+                          { noiseSuppression: true },
+                        ],
+                      }
+                    : {
+                        // Non-Android: Perfect basic settings
+                        facingMode: "user",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                      },
                   audio: false,
                 },
                 back: {
-                  video: isAndroid ? {
-                    // Android: Advanced settings
-                    facingMode: "environment",
-                    width: { ideal: 1280, min: 720 },
-                    height: { ideal: 720, min: 720 },
-                    frameRate: { ideal: 30, min: 15 },
-                    aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: true }
-                    ]
-                  } : {
-                    // Non-Android: Perfect basic settings
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                  },
+                  video: isAndroid
+                    ? {
+                        // Android: Advanced settings
+                        facingMode: "environment",
+                        width: { ideal: 1280, min: 720 },
+                        height: { ideal: 720, min: 720 },
+                        frameRate: { ideal: 30, min: 15 },
+                        aspectRatio: { ideal: 16 / 9 },
+                        advanced: [
+                          { focusMode: "continuous" },
+                          { exposureMode: "continuous" },
+                          { whiteBalanceMode: "continuous" },
+                          { imageStabilization: true },
+                          { noiseSuppression: true },
+                        ],
+                      }
+                    : {
+                        // Non-Android: Perfect basic settings
+                        facingMode: "environment",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                      },
                   audio: false,
                 },
                 desktop: {
-                  video: isAndroid ? {
-                    // Android: Advanced settings (if running Android on desktop/tablet)
-                    facingMode: "user",
-                    width: { ideal: 1280, min: 720 },
-                    height: { ideal: 720, min: 720 },
-                    frameRate: { ideal: 30, min: 15 },
-                    aspectRatio: { ideal: 16 / 9 },
-                    advanced: [
-                      { focusMode: "continuous" },
-                      { exposureMode: "continuous" },
-                      { whiteBalanceMode: "continuous" },
-                      { imageStabilization: true },
-                      { noiseSuppression: true }
-                    ]
-                  } : {
-                    // Non-Android: Perfect basic settings
-                    facingMode: "user",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                  },
+                  video: isAndroid
+                    ? {
+                        // Android: Advanced settings (if running Android on desktop/tablet)
+                        facingMode: "user",
+                        width: { ideal: 1280, min: 720 },
+                        height: { ideal: 720, min: 720 },
+                        frameRate: { ideal: 30, min: 15 },
+                        aspectRatio: { ideal: 16 / 9 },
+                        advanced: [
+                          { focusMode: "continuous" },
+                          { exposureMode: "continuous" },
+                          { whiteBalanceMode: "continuous" },
+                          { imageStabilization: true },
+                          { noiseSuppression: true },
+                        ],
+                      }
+                    : {
+                        // Non-Android: Perfect basic settings
+                        facingMode: "user",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                      },
                   audio: false,
                 },
               },
@@ -897,8 +903,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
 
       console.log("🔥 Step 3: Load both lenses...");
       const actualLensGroupId = "b2aafdd8-cb11-4817-9df9-835b36d9d5a7";
-      const lessLensId = "c9b9a62d-0a61-4e26-9db1-67133ff07b99";
-      const moreLensId = "3d4c5e55-255e-4e92-8c93-24530158d072";
+      const lessLensId = "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d";
+      const moreLensId = "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
       // Load both lenses
       const lessLens = await cache.cameraKit.lensRepository.loadLens(
@@ -1170,8 +1176,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       "less";
     const appliedLensId =
       appliedGroupSize === "less"
-        ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
-        : "3d4c5e55-255e-4e92-8c93-24530158d072";
+        ? "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"
+        : "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
     onComplete({
       ...userData,
@@ -1370,7 +1376,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
       }
 
       console.log(
-        `📱 Device: ${screenWidth}px width, detected as: ${isTablet ? "Tablet" : "Mobile/Desktop"
+        `📱 Device: ${screenWidth}px width, detected as: ${
+          isTablet ? "Tablet" : "Mobile/Desktop"
         }`
       );
 
@@ -1476,8 +1483,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
-            : "3d4c5e55-255e-4e92-8c93-24530158d072";
+            ? "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"
+            : "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1506,8 +1513,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
           "less";
         const appliedLensId =
           appliedGroupSize === "less"
-            ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
-            : "3d4c5e55-255e-4e92-8c93-24530158d072";
+            ? "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"
+            : "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
         setTimeout(() => {
           setIsUploading(false);
@@ -1539,8 +1546,8 @@ const SnapARExperience = ({ onComplete, userData, apiToken }) => {
         "less";
       const appliedLensId =
         appliedGroupSize === "less"
-          ? "c9b9a62d-0a61-4e26-9db1-67133ff07b99"
-          : "3d4c5e55-255e-4e92-8c93-24530158d072";
+          ? "0e1363f7-bf5c-43ce-8527-ebf8fa31ef9d"
+          : "f60131ce-4f77-46b6-ac1a-3d5c839c4035";
 
       setTimeout(() => {
         setIsUploading(false);

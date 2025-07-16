@@ -4,7 +4,8 @@ import RegistrationScreen from "./components/RegistrationScreen";
 import SnapARExperience from "./components/SnapARExperience";
 import EndScreen from "./components/EndScreen";
 import Terms from "./components/terms";
-import LandscapeBlocker from "./components/LandscapeBlocker"; // 🆕 Add this import
+import LandscapeBlocker from "./components/LandscapeBlocker";
+import FullscreenButton from "./components/FullscreenButton";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("splash");
@@ -419,7 +420,11 @@ function App() {
   };
 
   // 🆕 WRAP EVERYTHING IN LANDSCAPE BLOCKER
-  return <LandscapeBlocker>{renderCurrentScreen()}</LandscapeBlocker>;
+  return (
+    <LandscapeBlocker>
+      {renderCurrentScreen()} <FullscreenButton currentScreen={currentScreen} />
+    </LandscapeBlocker>
+  );
 }
 
 export default App;
